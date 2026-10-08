@@ -1947,7 +1947,8 @@ function redrawDrawings(){
    ctx.strokeStyle='rgba(160,170,190,.55)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
    ctx.beginPath();ctx.moveTo(0,L2.y);ctx.lineTo(w,L2.y);ctx.moveTo(L2.x,0);ctx.lineTo(L2.x,h);ctx.stroke();ctx.setLineDash([]);
    axisTag(ctx,w,L2.y,pxf(L2.pr,dg),'#4D8DFF','#fff');
-   var txt=pxf(L2.pr,dg)+' · '+fmtDT(L2.t);ctx.font='11px IBM Plex Mono';var bw=ctx.measureText(txt).width+14,bx=Math.max(4,Math.min(w-bw-66,L2.x-bw/2)),by=Math.max(4,L2.y-(PT()?78:40));
+    var measure='',active=DT.cur;if(active&&active.p2&&active.type!=='hline'&&active.type!=='vline'){var a1=toXY(active.p1),a2=toXY(active.p2);if(a1&&a2){var bars=Math.abs(Math.round((active.p2.t-active.p1.t)/Math.max(1,tfSec()))),angle=(Math.atan2(a1.y-a2.y,a2.x-a1.x)*180/Math.PI+360)%360;measure=' · '+bars+' bars · '+angle.toFixed(1)+'°'}}
+    var txt=pxf(L2.pr,dg)+' · '+fmtDT(L2.t)+measure;ctx.font='11px IBM Plex Mono';var bw=ctx.measureText(txt).width+14,bx=Math.max(4,Math.min(w-bw-66,L2.x-bw/2)),by=Math.max(4,L2.y-(PT()?78:40));
    ctx.fillStyle='rgba(30,34,44,.94)';ctx.fillRect(bx,by,bw,22);ctx.fillStyle='#E8ECF6';ctx.fillText(txt,bx+7,by+15)}}
 var redrawT=0;
 function scheduleDrawRedraw(){
@@ -3405,7 +3406,7 @@ function feedPaint(){
   if(ob)ob.classList.toggle('closed',!marketOpen(s2));
   var mc2=$('#mktChip');
   if(mc2)mc2.style.display=marketOpen(s2)?'none':'';
-  syncLivePriceLines();scheduleDrawRedraw();paintCmeta();
+   syncLivePriceLines();scheduleDrawRedraw();paintCmeta();paintMarketNote();
   var acc=myAcc();
   if(acc)accPositions(acc).forEach(function(p){
    var se=document.querySelector('[data-spnl="'+p.id+'"]');
