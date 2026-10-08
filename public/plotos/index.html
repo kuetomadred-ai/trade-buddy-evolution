@@ -405,6 +405,7 @@ html[data-theme="light"] .dtb{background:rgba(255,255,255,.92)}
 .dselbar button svg{width:20px;height:20px}.dselbar button.del{color:#EF5350}.dselbar button:active{background:rgba(255,255,255,.1)}
 .dselbar .grip{color:#7A8194;padding:0 4px 0 8px;font-size:12px;letter-spacing:-2px}
 .dselbar b{font-size:10px;color:#C9CED8;max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:2px;font-weight:500}
+.market-note{position:absolute;top:32px;left:7px;z-index:6;display:none;align-items:center;gap:6px;padding:4px 7px;border-radius:4px;background:rgba(20,22,28,.86);color:#AAB2C0;font-size:9px;font-family:var(--mono);pointer-events:none}.market-note.on{display:flex}.market-note i{width:6px;height:6px;border-radius:50%;background:#E3B34C}
 .dundo{position:absolute;left:10px;bottom:44px;z-index:10;display:flex;align-items:center;gap:12px;padding:9px 13px;border-radius:8px;background:#2F7DE1;color:#fff;font-size:11.5px;opacity:0;pointer-events:none;transition:opacity .16s}
 .dundo.on{opacity:1;pointer-events:auto}.dundo button{color:#fff;font-weight:700;letter-spacing:.5px}
 .dsw{display:flex;gap:9px;flex-wrap:wrap}.dsw button{width:34px;height:34px;border-radius:50%;border:2px solid transparent;outline:1px solid var(--ln2)}.dsw button.on{border-color:var(--tx)}
@@ -806,7 +807,7 @@ function freshDB(){return{
   sbUrl:'https://jujjjvuspzfgrmeljljh.supabase.co',sbKey:'sb_publishable_X9YRYOHzL1v0OVXF_KRjiw_EHj7kTdV',
   paymentOn:false,paymentInfo:'Contact the manager to complete payment, then your account will be activated.',lastSym:'XAUUSD',lastTf:'15m',favorites:[],watchlist:null,oscH:140,
   ind:{ema20:false,ema50:false,ema200:false,sma200:false,wma20:false,bb:false,vwap:false,don:false,psar:false,ichi:false,mom:false,cci:false,adx:false,rsi:false,stoch:false,macd:false,atr:false},
-  drawings:{},priceMargins:null,chart:{ohlc:false,dataWindow:false,volumes:false,tradePositions:true,tradeOrders:true,tradeHistory:true,grid:true,profitLoss:true,slTp:true,askLine:true,countdown:true,freeMove:false}}
+   drawings:{},priceMargins:null,chart:{ohlc:false,dataWindow:false,volumes:false,tradePositions:true,tradeOrders:true,tradeHistory:true,grid:true,profitLoss:true,slTp:true,periodSeparators:false,askLine:true,lastPriceLine:true,oneClickPanel:true,countdown:true,freeMove:false}}
 }}
 function loadDB(){
  DB=freshDB();
@@ -816,7 +817,7 @@ function loadDB(){
   DB.settings.lastSym=p.lastSym||DB.settings.lastSym;DB.settings.lastTf=p.lastTf||DB.settings.lastTf;
   DB.settings.favorites=Array.isArray(p.favorites)?p.favorites:DB.settings.favorites;DB.settings.watchlist=Array.isArray(p.watchlist)?p.watchlist:DB.settings.watchlist;
   DB.settings.ind=Object.assign({},DB.settings.ind,p.ind||{});DB.settings.oscH=p.oscH||DB.settings.oscH;
-  DB.settings.drawings=p.drawings||DB.settings.drawings;DB.settings.priceMargins=p.priceMargins||DB.settings.priceMargins;
+  DB.settings.drawings=p.drawings||DB.settings.drawings;DB.settings.priceMargins=p.priceMargins||DB.settings.priceMargins;DB.settings.chart=Object.assign({},DB.settings.chart,p.chart||{});
  }catch(e){}
 }
 var svT=null,clT=null;
@@ -1016,7 +1017,7 @@ function quoteFromBiquote(tick,fromStream){
  var bid=+tick.bid,ask=+tick.ask,mid=+tick.mid||((bid+ask)/2),at=Date.parse(tick.timestamp||'')||Date.now();
  var prior=Q[String(tick.symbol||'').toUpperCase()]||{},state=tick.marketState||prior.marketState||(fromStream?'open':'unknown');
  var stale=tick.stale===undefined?false:!!tick.stale;
- var status=stale?'STALE':((fromStream||state==='open')?'LIVE':'LAST');
+ var status=stale?'STALE':(state==='open'?'LIVE':(state==='closed'?'LAST':(fromStream?'LIVE':'LAST')));
  return{status:status,bid:bid,ask:ask,last:mid,open:tick.dayOpen||prior.open||0,high:+(tick.high||tick.dayHigh||prior.high||0),low:+(tick.low||tick.dayLow||prior.low||0),dayDiffPercent:tick.dayDiffPercent===undefined?prior.dayDiffPercent:tick.dayDiffPercent,marketState:state,stale:stale,quoteAgeSeconds:+tick.quoteAgeSeconds||0,src:'Biquote',t:at,dirTrend:tick.direction==='DOWN'?-1:1}
 }
 function applyBiquoteQuote(tick,fromStream){
@@ -1041,6 +1042,13 @@ function markStaleQuotes(){
  SYIDS.forEach(function(sym){var q=Q[sym];if(q&&q.status==='LIVE'&&now-q.t>45000){q.status='STALE';q.stale=true;q.quoteAgeSeconds=Math.floor((now-q.t)/1000);changed=true}});
  if(changed)feedPaint()
 }
+function refreshClosedMarketQuotes(){
+ if(!window.BiquoteAdapter||!SYIDS.length)return Promise.resolve();
+ var queue=SYIDS.slice(),workers=[],count=Math.min(6,queue.length);
+ function next(){var sym=queue.shift();if(!sym)return Promise.resolve();return BiquoteAdapter.getQuote(sym,true).then(function(q){if(q){if(!q.symbol)q.symbol=sym;applyBiquoteQuote(q,false)}}).catch(function(){}).then(next)}
+ for(var i=0;i<count;i++)workers.push(next());
+ return Promise.all(workers).then(function(){feedPaint();if(view==='charts'){paintCmeta();syncLivePriceLines()}})
+}
 function globalStatus(){
  var c={LIVE:0,STALE:0,LAST:0,OFFLINE:0};
  SYIDS.forEach(function(s){c[(Q[s]||{}).status]=(c[(Q[s]||{}).status]||0)+1});
@@ -1052,12 +1060,13 @@ function globalStatus(){
 function startFeeds(){
  if(marketInitialized)return;marketInitialized=true;
  if(!window.BiquoteAdapter){FEEDS.biquote.state='error';FEEDS.biquote.error='Biquote adapter unavailable';return}
- BiquoteAdapter.getSymbols().then(function(items){
+  BiquoteAdapter.getSymbols().then(function(items){
   if(!Array.isArray(items)||!items.length)items=cachedBiquoteSymbols();
   if(items.length)cacheBiquoteSymbols(items);
   installBiquoteSymbols(items);return BiquoteAdapter.getQuotes(SYIDS)
  }).then(function(quotes){
-  Object.keys(quotes||{}).forEach(function(sym){applyBiquoteQuote(quotes[sym])});
+   Object.keys(quotes||{}).forEach(function(sym){applyBiquoteQuote(quotes[sym])});
+   refreshClosedMarketQuotes();
   BiquoteAdapter.subscribeTicks(SYIDS,applyBiquoteTick,handleBiquoteStream);
   if(user())renderView();feedPaint()
  }).catch(function(error){
@@ -1604,14 +1613,15 @@ function oscRefresh(force){
  try{applyIndicators()}catch(e){}}
 function chartSettings(){
  var C=DB.settings.chart||(DB.settings.chart={ohlc:false,dataWindow:false,volumes:false,tradePositions:true,tradeOrders:true,tradeHistory:true,grid:true,profitLoss:true,slTp:true,askLine:true,countdown:true,freeMove:false});
- var rows=[['ohlc','OHLC','Show open, high, low and close values'],['dataWindow','Data window','Show the data window'],['volumes','Volumes','Show volumes'],['tradePositions','Trade positions','Show open trade levels'],['tradeOrders','Trade orders','Show pending order levels'],['tradeHistory','Trade history','Show entry and exit markers'],['grid','Show grid','Show chart grid'],['profitLoss','Profit/loss','Show floating P/L'],['slTp','SL/TP levels','Show stop and target levels'],['askLine','Ask price line','Show Ask price'],['countdown','Countdown to bar close','Show remaining bar time'],['freeMove','Free chart movement','Allow free chart movement']];
+ var rows=[['ohlc','OHLC','Show open, high, low and close values'],['dataWindow','Data window','Show the data window'],['volumes','Volumes','Show volumes'],['tradePositions','Trade positions','Show open trade levels'],['tradeOrders','Trade orders','Show pending order levels'],['tradeHistory','Trade history','Show entry and exit markers'],['grid','Show grid','Show chart grid'],['profitLoss','Profit/loss','Show floating P/L'],['slTp','SL/TP levels','Show stop and target levels'],['periodSeparators','Show period separators','Show vertical session separators'],['askLine','Ask price line','Show Ask price'],['lastPriceLine','Last price line','Show current Bid price'],['oneClickPanel','One Click panel at the bottom','Show quick trading panel'],['countdown','Countdown to bar close','Show remaining bar time'],['freeMove','Free chart movement','Allow free chart movement']];
  modal('<div class="mt5screen"><div class="mt5top"><button class="back" onclick="tfModal()">‹</button><b>Settings</b><span class="grow"></span><span class="mt5icon">⌕</span></div><div class="mt5section"><div class="mt5sub">Chart</div><div class="mt5row"><span>Chart type</span><b>'+({candles:'Candlesticks',ha:'Heikin Ashi',line:'Line',area:'Area'}[chart.style]||'Candlesticks')+'</b></div><div class="mt5row"><span>Symbol</span><b>'+esc(chart.sym)+'</b></div></div><div class="mt5section"><div class="mt5sub">Options</div></div>'+rows.map(function(r){return'<div class="mt5row" data-copt="'+r[0]+'"><span>'+r[1]+'<small>'+r[2]+'</small></span><i class="mt5switch '+(C[r[0]]?'on':'')+'"></i></div>'}).join('')+'<div class="mt5section"><div class="mt5sub">Indicators</div><div class="mt5row" id="mt5IndOpen"><span>Indicators</span><b class="mt5blue">›</b></div></div></div>');
  $$('[data-copt]').forEach(function(row){row.onclick=function(){var id=row.getAttribute('data-copt');C[id]=!C[id];row.querySelector('.mt5switch').classList.toggle('on',C[id]);save();applyChartSettings()}});
  var ib=$('#mt5IndOpen');if(ib)ib.onclick=function(){indicatorsModal()};
 }
 function applyChartSettings(){
  var C=DB.settings.chart||{};
- if(chart.c)chart.c.applyOptions({grid:{vertLines:{visible:C.grid!==false},horzLines:{visible:C.grid!==false}}});
+ if(chart.c)chart.c.applyOptions({grid:{vertLines:{visible:C.grid!==false,color:C.periodSeparators?'#182033':'#0F1522'},horzLines:{visible:C.grid!==false}}});
+ var od=$('.odbar');if(od)od.style.display=C.oneClickPanel===false?'none':'';
  chartDrawLines();chartDrawMarkers();paintCmeta();
 }
 function indicatorCatalog(){
@@ -1937,7 +1947,8 @@ function redrawDrawings(){
    ctx.strokeStyle='rgba(160,170,190,.55)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
    ctx.beginPath();ctx.moveTo(0,L2.y);ctx.lineTo(w,L2.y);ctx.moveTo(L2.x,0);ctx.lineTo(L2.x,h);ctx.stroke();ctx.setLineDash([]);
    axisTag(ctx,w,L2.y,pxf(L2.pr,dg),'#4D8DFF','#fff');
-   var txt=pxf(L2.pr,dg)+' · '+fmtDT(L2.t);ctx.font='11px IBM Plex Mono';var bw=ctx.measureText(txt).width+14,bx=Math.max(4,Math.min(w-bw-66,L2.x-bw/2)),by=Math.max(4,L2.y-(PT()?78:40));
+    var measure='',active=DT.cur;if(active&&active.p2&&active.type!=='hline'&&active.type!=='vline'){var a1=toXY(active.p1),a2=toXY(active.p2);if(a1&&a2){var bars=Math.abs(Math.round((active.p2.t-active.p1.t)/Math.max(1,tfSec()))),angle=(Math.atan2(a1.y-a2.y,a2.x-a1.x)*180/Math.PI+360)%360;measure=' · '+bars+' bars · '+angle.toFixed(1)+'°'}}
+    var txt=pxf(L2.pr,dg)+' · '+fmtDT(L2.t)+measure;ctx.font='11px IBM Plex Mono';var bw=ctx.measureText(txt).width+14,bx=Math.max(4,Math.min(w-bw-66,L2.x-bw/2)),by=Math.max(4,L2.y-(PT()?78:40));
    ctx.fillStyle='rgba(30,34,44,.94)';ctx.fillRect(bx,by,bw,22);ctx.fillStyle='#E8ECF6';ctx.fillText(txt,bx+7,by+15)}}
 var redrawT=0;
 function scheduleDrawRedraw(){
@@ -1956,8 +1967,7 @@ function chartDrawMarkers(){if(!chart.cs)return;var C=DB.settings.chart||{};try{
 function chartDrawLines(){if(!chart.cs)return;var C=DB.settings.chart||{};
  chart.lines.forEach(function(l){try{chart.cs.removePriceLine(l)}catch(e){}});chart.lines=[];chart.plRefs=[];
  chart.ordLines.forEach(function(l){try{chart.cs.removePriceLine(l)}catch(e){}});chart.ordLines=[];
- if(chart.spreadLines)chart.spreadLines.forEach(function(l){try{chart.cs.removePriceLine(l)}catch(e){}});chart.spreadLines=[];
- var sq=Q[chart.sym],ss=SYMBOLS[chart.sym];if(sq&&ss&&sq.bid>0&&sq.ask>0){try{chart.liveLines.bid=chart.cs.createPriceLine({price:sq.bid,color:'#4D8DFF',lineWidth:1,lineStyle:0,axisLabelVisible:true,title:'BID'});chart.spreadLines=[chart.liveLines.bid];if(C.askLine!==false){chart.liveLines.ask=chart.cs.createPriceLine({price:sq.ask,color:'#E85B61',lineWidth:1,lineStyle:0,axisLabelVisible:true,title:'ASK'});chart.spreadLines.push(chart.liveLines.ask)}}catch(e){}}
+ syncLivePriceLines();
  var a=myAcc();if(!a)return;
  if(C.tradePositions!==false)accPositions(a).filter(function(p){return p.symbol===chart.sym}).forEach(function(p){
   try{var entry=chart.cs.createPriceLine({price:p.entry,color:'#4D8DFF',lineWidth:1,lineStyle:0,title:p.side.toUpperCase()+' '+p.lots});
@@ -2033,7 +2043,13 @@ function frameChartWindow(){
 }
 function barCountdown(){var sec=TFSEC[chart.tf]||60,rem=Math.max(0,Math.ceil(sec-(Date.now()/1e3)%sec)),h=Math.floor(rem/3600),m=Math.floor(rem%3600/60),s=rem%60;function z(n){return(n<10?'0':'')+n}return(h?h+':'+z(m):z(m))+':'+z(s)}
 function syncLivePriceLines(){if(!chart.cs)return;var q=Q[chart.sym],C=DB.settings.chart||{};if(!q||!(q.bid>0))return;
-  try{if(chart.liveLines.bid)chart.liveLines.bid.applyOptions({price:q.bid,title:C.countdown!==false?barCountdown():'BID'});if(chart.liveLines.ask&&C.askLine!==false&&q.ask>0)chart.liveLines.ask.applyOptions({price:q.ask,title:'ASK'})}catch(e){}}
+   try{
+    if(C.lastPriceLine===false){if(chart.liveLines.bid){chart.cs.removePriceLine(chart.liveLines.bid);chart.liveLines.bid=null}}
+    else if(!chart.liveLines.bid)chart.liveLines.bid=chart.cs.createPriceLine({price:q.bid,color:'#4D8DFF',lineWidth:1,lineStyle:0,axisLabelVisible:true,title:'BID'});
+    if(chart.liveLines.bid)chart.liveLines.bid.applyOptions({price:q.bid,title:C.countdown!==false&&q.status==='LIVE'?barCountdown():(q.status==='LIVE'?'BID':'LAST')});
+    if(C.askLine!==false&&q.ask>0){if(!chart.liveLines.ask)chart.liveLines.ask=chart.cs.createPriceLine({price:q.ask,color:'#E85B61',lineWidth:1,lineStyle:0,axisLabelVisible:true,title:'ASK'});chart.liveLines.ask.applyOptions({price:q.ask,title:q.status==='LIVE'?'ASK':'LAST ASK'})}
+    else if(chart.liveLines.ask){chart.cs.removePriceLine(chart.liveLines.ask);chart.liveLines.ask=null}
+   }catch(e){}}
 setInterval(function(){if(view==='charts')syncLivePriceLines()},1000);
 var lastMeta='';
 function paintCmeta(){var m=$('#cmeta');if(!m)return;
@@ -2043,6 +2059,7 @@ function paintCmeta(){var m=$('#cmeta');if(!m)return;
  '<div class="l2">'+esc(S.desc)+'</div>'+
  (stat?'<div class="l3">'+esc(stat)+'</div>':'');
  if(s===lastMeta)return;lastMeta=s;m.innerHTML=s}
+function paintMarketNote(){var n=$('#marketNote'),q=Q[termSym];if(!n||!q)return;var closed=q.status!=='LIVE';n.classList.toggle('on',closed);n.innerHTML='<i></i>'+(q.status==='STALE'?'Last known price · feed delayed':q.status==='LAST'?'Market closed · last available price':'Price unavailable')}
 function chartTick(sym,tick){if(!chart.cs||!chart.cur||sym!==chart.sym)return;var q=qt(sym);if(!q)return;
  try{var price=q.last||((q.bid+q.ask)/2),sec=TFSEC[chart.tf],tickAt=Date.parse(tick&&tick.timestamp||'')||Date.now(),t=Math.floor(tickAt/1e3/sec)*sec;
   var raw=chart.candleArr[chart.candleArr.length-1];if(!raw)return;
@@ -2157,12 +2174,12 @@ function renderAuth(notice){var setup=false;
  var pre=PORTAL_ADMIN?'':'<div class="lp">'+
   '<nav class="lp-nav"><div class="lp-brand"><span class="lp-logo">P</span>PLOTOS<b>FUND</b></div><div class="lp-links"><a data-go="programs">Programs</a><a data-go="how">How it works</a><a data-go="platform">Platform</a><a data-go="faq">FAQ</a></div><button class="lp-ghost" id="preDemo">Free demo</button><button class="lp-cta lp-go">Get funded</button></nav>'+
   '<div class="lp-ticker"><div class="lp-track" id="lpTrack"></div></div>'+
-  '<header class="lp-hero"><div class="lp-copy"><span class="lp-pill"><i></i>Trusted by traders in 140+ countries</span><h2>Trade our capital.<br><span>Keep up to 90%</span> of the profits.</h2><p>Pass a transparent two-step evaluation on a MetaTrader 5–style terminal and get access to a funded account of up to $200,000. Raw spreads, instant execution, no hidden rules.</p><div class="lp-actions"><button class="lp-cta big lp-go">Start the challenge</button><button class="lp-ghost big" id="preLearn">How it works →</button></div><div class="lp-stats"><div><b>$48M+</b><small>Rewards paid</small></div><div><b>210K+</b><small>Active traders</small></div><div><b>&lt;24h</b><small>Payout processing</small></div><div><b>4.8★</b><small>Trustpilot rating</small></div></div></div><div class="lp-auth" id="heroAuth"><div class="lp-auth-h"><b>Client area</b><span>Secure login · 256-bit SSL</span></div></div></header>'+
-  '<div class="lp-trust"><span>Featured in</span><b>Bloomberg</b><b>Forbes</b><b>Yahoo Finance</b><b>FXStreet</b><b>Benzinga</b></div>'+
-  '<section class="lp-sec" id="lp-programs"><span class="lp-kicker">FUNDING PROGRAMS</span><h3>Choose your account size</h3><p class="lp-lead">One-time fee, refundable with your first payout. Same rules for every size.</p><div class="lp-plans">'+DB.templates.map(function(t,i){return'<div class="lp-plan'+(i==1?' hot':'')+'">'+(i==1?'<em>MOST POPULAR</em>':'')+'<small>ACCOUNT SIZE</small><b>$'+(t.size/1000)+',000</b><ul><li><span>Profit target</span><i>'+t.profitPct+'%</i></li><li><span>Max drawdown</span><i>'+t.maxDDPct+'%</i></li><li><span>Min. trading days</span><i>'+t.minDays+'</i></li><li><span>Leverage</span><i>1:100</i></li><li><span>Profit split</span><i>up to 90%</i></li></ul><button class="lp-cta lp-go">Start challenge</button></div>'}).join('')+'</div></section>'+
-  '<section class="lp-sec" id="lp-how"><span class="lp-kicker">HOW IT WORKS</span><h3>Three steps to a funded account</h3><div class="lp-steps"><div><i>1</i><b>Challenge</b><p>Reach the profit target while respecting daily loss and max drawdown limits.</p></div><div><i>2</i><b>Verification</b><p>Confirm your consistency with a lower target and the same risk rules.</p></div><div><i>3</i><b>Funded trader</b><p>Trade our capital, request bi-weekly payouts and scale up to $2M.</p></div></div></section>'+
+  '<header class="lp-hero"><div class="lp-copy"><span class="lp-pill"><i></i>Live platform figures</span><h2>Trade our capital.<br><span>Keep up to 90%</span> of the profits.</h2><p>Pass a transparent two-step evaluation on a MetaTrader 5–style terminal and get access to a funded account of up to $200,000. Raw spreads, instant execution, no hidden rules.</p><div class="lp-actions"><button class="lp-cta big lp-go">Start the challenge</button><button class="lp-ghost big" id="preLearn">How it works →</button></div><div class="lp-stats"><div><b>'+DB.users.filter(function(u){return u.id!=='demo-trader-local'}).length+'</b><small>Registered profiles</small></div><div><b>'+DB.accounts.filter(function(a){return a.kind!=='PAPER'}).length+'</b><small>Trading accounts</small></div><div><b>'+SYIDS.length+'</b><small>Market instruments</small></div><div><b>'+(FEEDS.biquote.state==='live'?'LIVE':'—')+'</b><small>Biquote feed</small></div></div></div><div class="lp-auth" id="heroAuth"><div class="lp-auth-h"><b>Client area</b><span>Secure login · encrypted connection</span></div></div></header>'+
+  '<div class="lp-trust"><span>Market data</span><b>Biquote</b><span>Live Bid / Ask</span><span>Historical OHLC</span><span>Streaming ticks</span></div>'+
+  '<section class="lp-sec" id="lp-programs"><span class="lp-kicker">FUNDING PROGRAMS</span><h3>Choose your account size</h3><p class="lp-lead">Current simulated evaluation plans and their configured risk rules.</p><div class="lp-plans">'+DB.templates.map(function(t,i){return'<div class="lp-plan'+(i==1?' hot':'')+'">'+(i==1?'<em>FEATURED PLAN</em>':'')+'<small>ACCOUNT SIZE</small><b>$'+(t.size/1000)+',000</b><ul><li><span>Profit target</span><i>'+t.profitPct+'%</i></li><li><span>Max drawdown</span><i>'+t.maxDDPct+'%</i></li><li><span>Min. trading days</span><i>'+t.minDays+'</i></li><li><span>Leverage</span><i>1:'+t.lev+'</i></li><li><span>Configured fee</span><i>$'+t.fee+'</i></li></ul><button class="lp-cta lp-go">Start challenge</button></div>'}).join('')+'</div></section>'+
+  '<section class="lp-sec" id="lp-how"><span class="lp-kicker">HOW IT WORKS</span><h3>Three steps to a funded account</h3><div class="lp-steps"><div><i>1</i><b>Challenge</b><p>Reach the configured profit target while respecting daily loss and maximum drawdown limits.</p></div><div><i>2</i><b>Review</b><p>Your simulated account results and risk-rule compliance are recorded for review.</p></div><div><i>3</i><b>Account status</b><p>The manager updates account access and status from the staff portal.</p></div></div></section>'+
   '<section class="lp-sec lp-platform" id="lp-platform"><div><span class="lp-kicker">PLATFORM</span><h3>A true MT5 mobile experience</h3><p class="lp-lead">Market Watch, one-click trading, pending orders, SL/TP drag on chart, 30+ indicators, 9 timeframes and full trade history — wherever you are.</p><ul class="lp-feat"><li>Live Bid/Ask quotes with tick-by-tick updates</li><li>Candlestick, bar and line charts</li><li>Market, Limit and Stop orders</li><li>Real-time margin and risk monitoring</li></ul></div><div class="lp-phone"><div class="lp-screen"><div class="lp-qh"><span>Quotes</span></div><div id="lpQuotes"></div></div></div></section>'+
-  '<section class="lp-sec" id="lp-faq"><span class="lp-kicker">FAQ</span><h3>Frequently asked questions</h3><div class="lp-faq"><details><summary>What is a prop trading challenge?</summary><p>An evaluation where you trade a demo account under fixed risk rules. Pass it to qualify for a funded account.</p></details><details><summary>Which instruments can I trade?</summary><p>Forex majors and minors, gold, indices and crypto with leverage up to 1:100.</p></details><details><summary>How fast are payouts?</summary><p>Payout requests are processed within 24 hours on business days.</p></details><details><summary>Is there a time limit?</summary><p>No. Take as long as you need to reach the target.</p></details></div></section>'+
+  '<section class="lp-sec" id="lp-faq"><span class="lp-kicker">FAQ</span><h3>Frequently asked questions</h3><div class="lp-faq"><details><summary>What is a prop trading challenge?</summary><p>An evaluation where you trade a simulated account under configured risk rules.</p></details><details><summary>Where do prices come from?</summary><p>Symbols, Bid/Ask prices and historical candles are supplied by Biquote.</p></details><details><summary>Are funds and payouts real?</summary><p>No. PLOTOS FUND is currently a prop-trading simulator. Deposits, withdrawals and broker execution are not enabled.</p></details><details><summary>What happens when a market closes?</summary><p>The last available Biquote price remains visible, clearly marked as closed, while new market orders stay disabled.</p></details></div></section>'+
   '<footer class="lp-foot"><div class="lp-brand"><span class="lp-logo">P</span>PLOTOS<b>FUND</b></div><p>Risk warning: Trading leveraged products carries a high level of risk. PLOTOS FUND is currently a prop trading simulator — all accounts are simulated and no deposits, withdrawals or real broker execution are enabled in this phase.</p><small>© 2026 PLOTOS FUND. All rights reserved.</small></footer></div>';
  var html='<div class="auth-box">'+
   '<div class="logo"><span class="pmark">P</span><h1>'+(PORTAL_ADMIN?'PLOTOS ADMIN':'PLOTOS')+'</h1></div>'+
@@ -2200,8 +2217,7 @@ function renderAuth(notice){var setup=false;
  (function(){var ha=document.getElementById('heroAuth');if(!ha)return;var box=document.querySelector('#auth .auth-box');box.classList.add('lp-mode');Array.prototype.slice.call(box.children).forEach(function(c){if(!c.classList.contains('lp')&&!c.classList.contains('logo')&&!c.classList.contains('auth-sub'))ha.appendChild(c)});
   document.querySelectorAll('#auth [data-go]').forEach(function(x){x.onclick=function(){var t=document.getElementById('lp-'+x.dataset.go);if(t)t.scrollIntoView({behavior:'smooth'})}});
   document.querySelectorAll('#auth .lp-go').forEach(function(x){x.onclick=function(){var t=document.getElementById('tabUp');if(t)t.click();ha.scrollIntoView({behavior:'smooth',block:'center'})}});
-  var syms=[['EURUSD',1.08452,5],['GBPUSD',1.27311,5],['USDJPY',149.512,3],['XAUUSD',2365.42,2],['BTCUSD',67250.5,2],['US30',39120.4,1],['AUDUSD',0.65874,5],['USDCAD',1.36122,5]];
-  function draw(){var tr=document.getElementById('lpTrack'),q=document.getElementById('lpQuotes');if(!tr){clearInterval(window.__lpT);return}var h='',qq='';syms.forEach(function(s){var d=(Math.random()-.5)*s[1]*0.0004;s[1]+=d;var c=d>=0?'u':'d';h+='<span>'+s[0]+' <b class="'+c+'">'+s[1].toFixed(s[2])+'</b></span>';if(qq.split('lp-q ').length<7)qq+='<div class="lp-q '+c+'"><b>'+s[0]+'</b><span>'+s[1].toFixed(s[2])+'</span><span>'+(s[1]*1.00012).toFixed(s[2])+'</span></div>'});tr.innerHTML=h+h;if(q)q.innerHTML=qq}
+   function draw(){var tr=document.getElementById('lpTrack'),q=document.getElementById('lpQuotes');if(!tr){clearInterval(window.__lpT);return}var h='',qq='';SYIDS.slice(0,8).forEach(function(sym){var s=SYMBOLS[sym]||{digits:5},v=Q[sym]||{},c=v.dirTrend>=0?'u':'d',bid=v.bid>0?v.bid:0,ask=v.ask>0?v.ask:0;h+='<span>'+sym+' <b class="'+c+'">'+(bid?bid.toFixed(s.digits):'—')+'</b></span>';qq+='<div class="lp-q '+c+'"><b>'+sym+'</b><span>'+(bid?bid.toFixed(s.digits):'—')+'</span><span>'+(ask?ask.toFixed(s.digits):'—')+'</span></div>'});tr.innerHTML=h+h;if(q)q.innerHTML=qq}
   draw();clearInterval(window.__lpT);window.__lpT=setInterval(draw,1200)})();
  if(notice){var ne=$('#authErr');if(ne){ne.innerHTML=esc(notice)+(AUTH_PENDING_EMAIL?'<br><button class="mbtn" id="resendVerify" style="margin-top:8px;color:var(--ac);border-color:var(--ac)">Resend verification email</button>':'');ne.style.display='block';var rb=$('#resendVerify');if(rb)rb.onclick=function(){rb.disabled=true;resendVerification(AUTH_PENDING_EMAIL).then(function(m){rb.disabled=false;toast(m?'Resend failed: '+m:'Verification email sent','up')})}}}
  function err(m){var e=$('#authErr');if(e){e.innerHTML=esc(m);if(AUTH_PENDING_EMAIL&&/verify|confirm|not confirmed/i.test(m)){e.innerHTML+='<br><button class="mbtn" id="resendVerify" style="margin-top:8px;color:var(--ac);border-color:var(--ac)">Resend verification email</button>';var rb=$('#resendVerify');rb.onclick=function(){rb.disabled=true;resendVerification(AUTH_PENDING_EMAIL).then(function(x){rb.disabled=false;toast(x?'Resend failed: '+x:'Verification email sent','up')})}}e.style.display='block'}}
@@ -2261,7 +2277,7 @@ function openCharts(){var el=$('#v-charts');
  '</div>'+ 
  (chart.sessOn?'<div class="sessrow" id="sessRow"></div>':'')+
  '<div id="chartBox"><span id="mBid" style="display:none"></span><span id="mAsk" style="display:none"></span><span id="mSymName" style="display:none"></span><span id="mSymState" style="display:none"></span><span id="mSymStatus" style="display:none"></span><div class="charttitle"><b id="chartTitleSym">'+termSym+'</b><span>›</span><b id="chartTitleTf">'+(TFLBL[chart.tf]||chart.tf)+'</b><small id="chartTitleDesc">'+esc((SYMBOLS[termSym]||{}).desc||'')+'</small></div>'+ 
-   '<div id="mainWrap"><div id="chartEl"></div><canvas id="drawCv"></canvas><button class="chart-live-btn" id="chartLive" aria-label="Return to current price" title="Current price">›</button>'+
+   '<div id="mainWrap"><div id="chartEl"></div><canvas id="drawCv"></canvas><div id="marketNote" class="market-note"></div><button class="chart-live-btn" id="chartLive" aria-label="Return to current price" title="Current price">›</button>'+ 
     '<div id="dSelBar" class="dselbar"><span class="grip">⋮⋮</span><b id="dSelName"></b>'+
      '<button id="dsEdit" aria-label="Edit object"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg></button>'+
      '<button id="dsCopy" aria-label="Copy object"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="8" y="8" width="12" height="13" rx="1.5"/><path d="M16 8V4H4v13h4"/></svg></button>'+
@@ -2289,7 +2305,7 @@ function openCharts(){var el=$('#v-charts');
  $('#qBuy').onclick=function(){quickTrade('buy')};
  $('#chartLive').onclick=followLive;
  if(chart.sessOn)paintSessions();
- chart.sym=termSym;chartLoad();renderStrip();
+  chart.sym=termSym;chartLoad();renderStrip();paintMarketNote();
   $('#dsEdit').onclick=editSelected;$('#dsCopy').onclick=copySelected;$('#dsDel').onclick=deleteSelected;$('#dsClose').onclick=function(){selectDrawing(-1)};$('#dsUndo').onclick=undoDelete;
   try{var mw=$('#mainWrap');if(window.ResizeObserver&&mw){new ResizeObserver(function(){scheduleDrawRedraw()}).observe(mw)}}catch(e){}
   paintDtBar();bindDrawEvents();bindTargetGestures();bindPriceScaleGesture();bindChartWheelZoom();bindOscHandle();syncCvCapture();paintSelBar()}
@@ -3390,7 +3406,7 @@ function feedPaint(){
   if(ob)ob.classList.toggle('closed',!marketOpen(s2));
   var mc2=$('#mktChip');
   if(mc2)mc2.style.display=marketOpen(s2)?'none':'';
-  syncLivePriceLines();scheduleDrawRedraw();paintCmeta();
+   syncLivePriceLines();scheduleDrawRedraw();paintCmeta();paintMarketNote();
   var acc=myAcc();
   if(acc)accPositions(acc).forEach(function(p){
    var se=document.querySelector('[data-spnl="'+p.id+'"]');
