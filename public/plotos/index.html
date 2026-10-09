@@ -1168,7 +1168,7 @@ function closePosition(p,px,reason){var a=DB.accounts.find(function(x){return x.
  var net=+(gross-comm).toFixed(2);
  a.balance=+(a.balance+net).toFixed(2);
  var dk=todayKey();if(a.days.indexOf(dk)<0)a.days.push(dk);
- DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now()});
+ try{mt5Audio.orderClose()}catch(e){};DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now()});
  DB.positions=DB.positions.filter(function(x){return x.id!==p.id});
  a.curve.push({t:Date.now(),e:a.balance});if(a.curve.length>400)a.curve.shift();
  var u=user();audit(u?u.email:a.userId,'Position Closed',p.symbol,(REASON[reason]||reason)+' · net '+net.toFixed(2));
@@ -1388,7 +1388,7 @@ function chartMount(){
   handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true}},handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:false},
   crosshair:{mode:0,vertLine:{color:'#4D8DFF55',labelBackgroundColor:'#4D8DFF'},horzLine:{color:'#4D8DFF55',labelBackgroundColor:'#4D8DFF'}}});
  chart.c._el=el;
- chart.cs=chart.c.addCandlestickSeries({upColor:'#000000',downColor:'#EF5350',borderUpColor:'#26A69A',borderDownColor:'#EF5350',borderVisible:true,wickUpColor:'#26A69A',wickDownColor:'#EF5350',priceLineVisible:false,lastValueVisible:false});
+ chart.cs=chart.c.addCandlestickSeries({upColor:'#089981',downColor:'#EF5350',borderUpColor:'#089981',borderDownColor:'#EF5350',borderVisible:true,wickUpColor:'#089981',wickDownColor:'#EF5350',priceLineVisible:false,lastValueVisible:false});
  chart.ls=chart.c.addLineSeries({color:'#4D8DFF',lineWidth:2,visible:false,priceLineVisible:false,lastValueVisible:false});
  chart.ar=chart.c.addAreaSeries({lineColor:'#26A69A',topColor:'rgba(38,166,154,.2)',bottomColor:'rgba(38,166,154,0)',lineWidth:1,visible:false,priceLineVisible:false,lastValueVisible:false});
  var I=chart.is;
@@ -1613,7 +1613,7 @@ function oscRefresh(force){
  try{applyIndicators()}catch(e){}}
 function chartSettings(){
  var C=DB.settings.chart||(DB.settings.chart={ohlc:false,dataWindow:false,volumes:false,tradePositions:true,tradeOrders:true,tradeHistory:true,grid:true,profitLoss:true,slTp:true,askLine:true,countdown:true,freeMove:false});
- var rows=[['ohlc','OHLC','Show open, high, low and close values'],['dataWindow','Data window','Show the data window'],['volumes','Volumes','Show volumes'],['tradePositions','Trade positions','Show open trade levels'],['tradeOrders','Trade orders','Show pending order levels'],['tradeHistory','Trade history','Show entry and exit markers'],['grid','Show grid','Show chart grid'],['profitLoss','Profit/loss','Show floating P/L'],['slTp','SL/TP levels','Show stop and target levels'],['periodSeparators','Show period separators','Show vertical session separators'],['askLine','Ask price line','Show Ask price'],['lastPriceLine','Last price line','Show current Bid price'],['oneClickPanel','One Click panel at the bottom','Show quick trading panel'],['countdown','Countdown to bar close','Show remaining bar time'],['freeMove','Free chart movement','Allow free chart movement']];
+ var rows=[['ohlc','OHLC','Show open, high, low and close values'],['dataWindow','Data window','Show the data window'],['volumes','Volumes','Show volumes'],['tradePositions','Trade positions','Show open trade levels'],['tradeOrders','Trade orders','Show pending order levels'],['tradeHistory','Trade history','Show entry and exit markers'],['grid','Show grid','Show chart grid'],['profitLoss','Profit/loss','Show floating P/L'],['slTp','SL/TP levels','Show stop and target levels'],['periodSeparators','Show period separators','Show vertical session separators'],['askLine','Ask price line','Show Ask price'],['lastPriceLine','Last price line','Show current Bid price'],['oneClickPanel','One Click panel at the bottom','Show quick trading panel'],['countdown','Countdown to bar close','Show remaining bar time'],['freeMove','Free chart movement','Allow free chart movement'],['radialTap','Tap chart opens dial','Open the timeframe dial on tap']];
  modal('<div class="mt5screen"><div class="mt5top"><button class="back" onclick="tfModal()">‹</button><b>Settings</b><span class="grow"></span><span class="mt5icon">⌕</span></div><div class="mt5section"><div class="mt5sub">Chart</div><div class="mt5row"><span>Chart type</span><b>'+({candles:'Candlesticks',ha:'Heikin Ashi',line:'Line',area:'Area'}[chart.style]||'Candlesticks')+'</b></div><div class="mt5row"><span>Symbol</span><b>'+esc(chart.sym)+'</b></div></div><div class="mt5section"><div class="mt5sub">Options</div></div>'+rows.map(function(r){return'<div class="mt5row" data-copt="'+r[0]+'"><span>'+r[1]+'<small>'+r[2]+'</small></span><i class="mt5switch '+(C[r[0]]?'on':'')+'"></i></div>'}).join('')+'<div class="mt5section"><div class="mt5sub">Indicators</div><div class="mt5row" id="mt5IndOpen"><span>Indicators</span><b class="mt5blue">›</b></div></div></div>');
  $$('[data-copt]').forEach(function(row){row.onclick=function(){var id=row.getAttribute('data-copt');C[id]=!C[id];row.querySelector('.mt5switch').classList.toggle('on',C[id]);save();applyChartSettings()}});
  var ib=$('#mt5IndOpen');if(ib)ib.onclick=function(){indicatorsModal()};
@@ -2041,13 +2041,15 @@ function frameChartWindow(){
  var last=chart.candleArr[chart.candleArr.length-1],from=last.time-TFSEC[chart.tf]*110,to=last.time+TFSEC[chart.tf]*6;
  try{chart.c.timeScale().setVisibleRange({from:from,to:to})}catch(e){}
 }
+window.mt5Audio=(function(){var ac;function t(f,d,w,at){if(DB.settings&&DB.settings.sound===false)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+(at||0);o.type=w||'sine';o.frequency.value=f;g.gain.setValueAtTime(.15,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+d)}catch(e){}}
+return{orderOk:function(){t(523,.12);t(784,.18,0,.12)},orderClose:function(){t(659,.12);t(523,.18,0,.12)},alert:function(){t(880,.4,'triangle')},error:function(){t(180,.25,'sawtooth')}}})();
 function barCountdown(){var sec=TFSEC[chart.tf]||60,rem=Math.max(0,Math.ceil(sec-(Date.now()/1e3)%sec)),h=Math.floor(rem/3600),m=Math.floor(rem%3600/60),s=rem%60;function z(n){return(n<10?'0':'')+n}return(h?h+':'+z(m):z(m))+':'+z(s)}
 function syncLivePriceLines(){if(!chart.cs)return;var q=Q[chart.sym],C=DB.settings.chart||{};if(!q||!(q.bid>0))return;
    try{
     if(C.lastPriceLine===false){if(chart.liveLines.bid){chart.cs.removePriceLine(chart.liveLines.bid);chart.liveLines.bid=null}}
-    else if(!chart.liveLines.bid)chart.liveLines.bid=chart.cs.createPriceLine({price:q.bid,color:'#4D8DFF',lineWidth:1,lineStyle:0,axisLabelVisible:true,title:'BID'});
-    if(chart.liveLines.bid)chart.liveLines.bid.applyOptions({price:q.bid,title:C.countdown!==false&&q.status==='LIVE'?barCountdown():(q.status==='LIVE'?'BID':'LAST')});
-    if(C.askLine!==false&&q.ask>0){if(!chart.liveLines.ask)chart.liveLines.ask=chart.cs.createPriceLine({price:q.ask,color:'#E85B61',lineWidth:1,lineStyle:0,axisLabelVisible:true,title:'ASK'});chart.liveLines.ask.applyOptions({price:q.ask,title:q.status==='LIVE'?'ASK':'LAST ASK'})}
+    else if(!chart.liveLines.bid)chart.liveLines.bid=chart.cs.createPriceLine({price:q.bid,color:'#4D8DFF',lineWidth:1,lineStyle:0,axisLabelVisible:true,title:''});
+    if(chart.liveLines.bid)chart.liveLines.bid.applyOptions({price:q.bid,title:C.countdown!==false&&q.status==='LIVE'?barCountdown():''});
+    if(C.askLine!==false&&q.ask>0){if(!chart.liveLines.ask)chart.liveLines.ask=chart.cs.createPriceLine({price:q.ask,color:'#E85B61',lineWidth:1,lineStyle:0,axisLabelVisible:true,title:''});chart.liveLines.ask.applyOptions({price:q.ask,title:''})}
     else if(chart.liveLines.ask){chart.cs.removePriceLine(chart.liveLines.ask);chart.liveLines.ask=null}
    }catch(e){}}
 setInterval(function(){if(view==='charts')syncLivePriceLines()},1000);
