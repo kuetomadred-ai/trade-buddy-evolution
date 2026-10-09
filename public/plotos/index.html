@@ -673,6 +673,8 @@ html[dir="rtl"] #drawer{border-left:1px solid #292929}
 .ditem .count{margin-left:auto;background:#1976e9;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px}
 .dsep{margin:6px 0;background:#262626}
 @media(min-width:960px){body{justify-content:center}#app{max-width:480px;flex-direction:column}#bnav{display:flex!important}#shellMain{height:auto}}
+#chartEl{touch-action:none;overscroll-behavior:contain}
+@media (orientation:landscape) and (max-height:520px){#bnav,.pre-nav,#marketNote{display:none!important}}
 </style>
 </head>
 <body>
@@ -1384,7 +1386,7 @@ function chartMount(){
   grid:{vertLines:{color:'#0F1522'},horzLines:{color:'#0F1522'}},
   rightPriceScale:{visible:true,borderColor:'#1B2540',borderVisible:true,ticksVisible:true,entireTextOnly:true,minimumWidth:62,scaleMargins:DB.settings.priceMargins||{top:.08,bottom:.12}},
   leftPriceScale:{visible:false,borderColor:'#1B2540'},
-  timeScale:{borderColor:'#1B2540',timeVisible:true,secondsVisible:false,barSpacing:7,rightOffset:8,uniformDistribution:true},
+  timeScale:{borderColor:'#1B2540',timeVisible:true,secondsVisible:false,barSpacing:7,rightOffset:8,uniformDistribution:true,minBarSpacing:1.5},kineticScroll:{touch:true,mouse:true},trackingMode:{exitMode:1},
   handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true}},handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:false},
   crosshair:{mode:0,vertLine:{color:'#4D8DFF55',labelBackgroundColor:'#4D8DFF'},horzLine:{color:'#4D8DFF55',labelBackgroundColor:'#4D8DFF'}}});
  chart.c._el=el;
@@ -1987,6 +1989,24 @@ setInterval(function(){
    title:p.side.toUpperCase()+' '+p.lots+' · '+(pnl>=0?'+':'')+pnl.toFixed(2)+'$'});
    r.line=nl;if(chart.lines.indexOf(nl)<0)chart.lines.push(nl)}catch(e){}})
 },2000);
+
+/* MT5-style touch drag of SL/TP lines on open positions */
+(function(){var drag=null;
+ function el(){return document.getElementById('chartEl')}
+ function hit(y){var a=myAcc();if(!a||!chart.cs)return null;var best=null;
+  accPositions(a).filter(function(p){return p.symbol===chart.sym}).forEach(function(p){['sl','tp'].forEach(function(k){if(!p[k])return;var ly=chart.cs.priceToCoordinate(p[k]);if(ly!=null&&Math.abs(ly-y)<14&&(!best||Math.abs(ly-y)<best.d))best={p:p,k:k,d:Math.abs(ly-y)}})});return best}
+ document.addEventListener('pointerdown',function(e){var c=el();if(!c||view!=='charts'||!c.contains(e.target)||DT.mode)return;var r=c.getBoundingClientRect(),h=hit(e.clientY-r.top);if(!h)return;
+  drag=h;drag.r=r;e.stopPropagation();e.preventDefault();chart.c.applyOptions({handleScroll:false,handleScale:false})},true);
+ document.addEventListener('pointermove',function(e){if(!drag)return;e.stopPropagation();e.preventDefault();var pr=chart.cs.coordinateToPrice(e.clientY-drag.r.top);if(pr==null)return;var S=SYMBOLS[chart.sym];pr=+pr.toFixed(S.digits);drag.pr=pr;
+  var p=drag.p,pnl=pnlUSD(p,pr),pts=Math.round(Math.abs(pr-p.entry)/Math.pow(10,-S.digits));
+  if(drag.line)try{chart.cs.removePriceLine(drag.line)}catch(x){}
+  drag.line=chart.cs.createPriceLine({price:pr,color:drag.k==='sl'?'#EF5350':'#26A69A',lineWidth:2,lineStyle:0,title:drag.k.toUpperCase()+' '+(pnl>=0?'+':'')+pnl.toFixed(2)+'$ · '+pts+' pts'})},true);
+ document.addEventListener('pointerup',function(e){if(!drag)return;var d=drag;drag=null;if(d.line)try{chart.cs.removePriceLine(d.line)}catch(x){}
+  chart.c.applyOptions({handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true}},handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:false}});
+  if(d.pr!=null){var p=d.p,ok=d.k==='sl'?(p.side==='buy'?d.pr<(Q[p.symbol].bid||1e18):d.pr>(Q[p.symbol].ask||0)):(p.side==='buy'?d.pr>(Q[p.symbol].bid||0):d.pr<(Q[p.symbol].ask||1e18));
+   if(ok){p[d.k]=d.pr;save();toast(d.k.toUpperCase()+' → '+pxf(d.pr,SYMBOLS[p.symbol].digits),'up');try{mt5Audio.orderOk()}catch(x){}}else{toast('Invalid '+d.k.toUpperCase()+' level','dn');try{mt5Audio.error()}catch(x){}}}
+  chartDrawLines()},true);
+})();
 /* Historical OHLC bars come only from GET /api/{symbol}/ohlc. */
 function fetchK(sym,tf){
  if(!SYMBOLS[sym])return Promise.resolve({data:[],src:'Biquote'});
