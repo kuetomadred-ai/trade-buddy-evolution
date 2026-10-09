@@ -3465,6 +3465,7 @@ setInterval(function(){try{engineTick()}catch(e){}},600);
   if(!PORTAL_ADMIN){try{enterDemo()}catch(x){renderAuth()}}else renderAuth()
  });
  ensureChartLib();
+ setTimeout(function(){if(!DB.session&&!PORTAL_ADMIN){try{enterDemo()}catch(e){}}},2500);
  (function(){var sx,sy,st,n=0;document.addEventListener('pointerdown',function(e){var el=document.getElementById('chartEl');if(!el||!el.contains(e.target)){st=0;return}n++;sx=e.clientX;sy=e.clientY;st=Date.now()},true);document.addEventListener('pointerup',function(e){var go=st&&Date.now()-st<260&&Math.abs(e.clientX-sx)<8&&Math.abs(e.clientY-sy)<8;st=0;if(!go||chart.dtOn||chart.crosshair)return;var C=DB.settings.chart||{};if(C.radialTap===false)return;if(document.querySelector('#ovl')&&getComputedStyle(document.querySelector('#ovl')).display!=='none')return;setTimeout(function(){if(DSEL&&DSEL.idx>=0)return;tfModal()},30)},true)})();
 })();
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
