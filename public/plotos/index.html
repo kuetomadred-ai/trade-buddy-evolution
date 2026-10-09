@@ -1168,7 +1168,7 @@ function closePosition(p,px,reason){var a=DB.accounts.find(function(x){return x.
  var net=+(gross-comm).toFixed(2);
  a.balance=+(a.balance+net).toFixed(2);
  var dk=todayKey();if(a.days.indexOf(dk)<0)a.days.push(dk);
- DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now()});
+ try{mt5Audio.orderClose()}catch(e){};DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now()});
  DB.positions=DB.positions.filter(function(x){return x.id!==p.id});
  a.curve.push({t:Date.now(),e:a.balance});if(a.curve.length>400)a.curve.shift();
  var u=user();audit(u?u.email:a.userId,'Position Closed',p.symbol,(REASON[reason]||reason)+' · net '+net.toFixed(2));
