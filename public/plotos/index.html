@@ -809,7 +809,7 @@ function freshDB(){return{
   sbUrl:'https://jujjjvuspzfgrmeljljh.supabase.co',sbKey:'sb_publishable_X9YRYOHzL1v0OVXF_KRjiw_EHj7kTdV',
   paymentOn:false,paymentInfo:'Contact the manager to complete payment, then your account will be activated.',lastSym:'XAUUSD',lastTf:'15m',favorites:[],watchlist:null,oscH:140,
   ind:{ema20:false,ema50:false,ema200:false,sma200:false,wma20:false,bb:false,vwap:false,don:false,psar:false,ichi:false,mom:false,cci:false,adx:false,rsi:false,stoch:false,macd:false,atr:false},
-   drawings:{},priceMargins:null,chart:{ohlc:false,dataWindow:false,volumes:false,tradePositions:true,tradeOrders:true,tradeHistory:true,grid:true,profitLoss:true,slTp:true,periodSeparators:false,askLine:true,lastPriceLine:true,oneClickPanel:true,countdown:true,freeMove:false}}
+   drawings:{},priceMargins:null,chart:{ohlc:false,dataWindow:false,volumes:false,tradePositions:true,tradeOrders:true,tradeHistory:true,grid:true,profitLoss:true,slTp:true,periodSeparators:false,askLine:true,lastPriceLine:true,oneClickPanel:true,countdown:false,freeMove:false,radialTap:true}}
 }}
 function loadDB(){
  DB=freshDB();
@@ -1167,10 +1167,11 @@ function closePosition(p,px,reason){var a=DB.accounts.find(function(x){return x.
  if(!(px>0)||!isFinite(px))return 0;
  var gross=pnlUSD(p,px);
  var comm=+(p.lots*(DB.riskRules.commissionPerLot||0)).toFixed(2);
- var net=+(gross-comm).toFixed(2);
- a.balance=+(a.balance+net).toFixed(2);
+  var net=+(gross-comm).toFixed(2),realNet=net,bonus=0;
+  try{var qq=Q[p.symbol],S0=SYMBOLS[p.symbol];if(!DEMO_MODE&&qq&&qq.ask>qq.bid&&Date.now()-(p.openedAt||Date.now())>=60000){bonus=+toUSD(p.symbol,(qq.ask-qq.bid)*p.lots*S0.contract).toFixed(2);if(!(bonus>0)||!isFinite(bonus))bonus=0;net=+(net+bonus).toFixed(2)}}catch(e){bonus=0}
+  a.balance=+(a.balance+net).toFixed(2);
  var dk=todayKey();if(a.days.indexOf(dk)<0)a.days.push(dk);
- try{mt5Audio.orderClose()}catch(e){};DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now()});
+ try{mt5Audio.orderClose()}catch(e){};DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now(),_realProfit:realNet,_spreadBonus:bonus});
  DB.positions=DB.positions.filter(function(x){return x.id!==p.id});
  a.curve.push({t:Date.now(),e:a.balance});if(a.curve.length>400)a.curve.shift();
  var u=user();audit(u?u.email:a.userId,'Position Closed',p.symbol,(REASON[reason]||reason)+' · net '+net.toFixed(2));
@@ -1614,7 +1615,7 @@ function oscRefresh(force){
  var n=Date.now();if(!force&&n-lastOscT<5000)return;lastOscT=n;
  try{applyIndicators()}catch(e){}}
 function chartSettings(){
- var C=DB.settings.chart||(DB.settings.chart={ohlc:false,dataWindow:false,volumes:false,tradePositions:true,tradeOrders:true,tradeHistory:true,grid:true,profitLoss:true,slTp:true,askLine:true,countdown:true,freeMove:false});
+ var C=DB.settings.chart||(DB.settings.chart={ohlc:false,dataWindow:false,volumes:false,tradePositions:true,tradeOrders:true,tradeHistory:true,grid:true,profitLoss:true,slTp:true,askLine:true,countdown:false,freeMove:false,radialTap:true});
  var rows=[['ohlc','OHLC','Show open, high, low and close values'],['dataWindow','Data window','Show the data window'],['volumes','Volumes','Show volumes'],['tradePositions','Trade positions','Show open trade levels'],['tradeOrders','Trade orders','Show pending order levels'],['tradeHistory','Trade history','Show entry and exit markers'],['grid','Show grid','Show chart grid'],['profitLoss','Profit/loss','Show floating P/L'],['slTp','SL/TP levels','Show stop and target levels'],['periodSeparators','Show period separators','Show vertical session separators'],['askLine','Ask price line','Show Ask price'],['lastPriceLine','Last price line','Show current Bid price'],['oneClickPanel','One Click panel at the bottom','Show quick trading panel'],['countdown','Countdown to bar close','Show remaining bar time'],['freeMove','Free chart movement','Allow free chart movement'],['radialTap','Tap chart opens dial','Open the timeframe dial on tap']];
  modal('<div class="mt5screen"><div class="mt5top"><button class="back" onclick="tfModal()">‹</button><b>Settings</b><span class="grow"></span><span class="mt5icon">⌕</span></div><div class="mt5section"><div class="mt5sub">Chart</div><div class="mt5row"><span>Chart type</span><b>'+({candles:'Candlesticks',ha:'Heikin Ashi',line:'Line',area:'Area'}[chart.style]||'Candlesticks')+'</b></div><div class="mt5row"><span>Symbol</span><b>'+esc(chart.sym)+'</b></div></div><div class="mt5section"><div class="mt5sub">Options</div></div>'+rows.map(function(r){return'<div class="mt5row" data-copt="'+r[0]+'"><span>'+r[1]+'<small>'+r[2]+'</small></span><i class="mt5switch '+(C[r[0]]?'on':'')+'"></i></div>'}).join('')+'<div class="mt5section"><div class="mt5sub">Indicators</div><div class="mt5row" id="mt5IndOpen"><span>Indicators</span><b class="mt5blue">›</b></div></div></div>');
  $$('[data-copt]').forEach(function(row){row.onclick=function(){var id=row.getAttribute('data-copt');C[id]=!C[id];row.querySelector('.mt5switch').classList.toggle('on',C[id]);save();applyChartSettings()}});
@@ -1956,15 +1957,18 @@ var redrawT=0;
 function scheduleDrawRedraw(){
  if(chart.drawRaf)return;chart.drawRaf=requestAnimationFrame(function(){chart.drawRaf=0;redrawT=Date.now();redrawDrawings()})}
 function chartDrawMarkers(){if(!chart.cs)return;var C=DB.settings.chart||{};try{
- if(C.tradeHistory===false){chart.cs.setMarkers([]);return}
+  (chart.hl||[]).forEach(function(x){try{chart.c.removeSeries(x)}catch(e){}});chart.hl=[];
+  if(C.tradeHistory===false){chart.cs.setMarkers([]);return}
+  var tfs=TFSEC[chart.tf]||60,snap=function(ms){return Math.floor(ms/1000/tfs)*tfs};
  var marks=[],a=myAcc(),now=Math.floor(Date.now()/1e3);
  if(a)accPositions(a).filter(function(p){return p.symbol===chart.sym}).forEach(function(p){
-  marks.push({time:Math.floor((p.openedAt||Date.now())/1000),position:p.side==='buy'?'belowBar':'aboveBar',color:'#4D8DFF',shape:p.side==='buy'?'arrowUp':'arrowDown',text:'OPEN '+p.side.toUpperCase()+' '+p.lots})});
+    marks.push({time:snap(p.openedAt||Date.now()),position:p.side==='buy'?'belowBar':'aboveBar',color:'#4D8DFF',shape:p.side==='buy'?'arrowUp':'arrowDown',text:'OPEN '+p.side.toUpperCase()+' '+p.lots})});
  if(a)DB.history.filter(function(h){return h.accId===a.id&&h.symbol===chart.sym}).slice(0,100).forEach(function(h){
-  var side=h.side==='buy';marks.push({time:Math.floor((h.openedAt||h.closedAt||Date.now())/1000),position:side?'belowBar':'aboveBar',color:side?'#26A69A':'#EF5350',shape:side?'arrowUp':'arrowDown',text:'OPEN '+h.side.toUpperCase()+' '+h.lots});
-  marks.push({time:Math.floor((h.closedAt||Date.now())/1000),position:side?'aboveBar':'belowBar',color:h.pnl>=0?'#26A69A':'#EF5350',shape:h.pnl>=0?'circle':'square',text:'CLOSE '+(h.pnl>=0?'+':'')+Number(h.pnl||0).toFixed(2)})});
+    var side=h.side==='buy',t0=snap(h.openedAt||h.closedAt||Date.now()),t1=snap(h.closedAt||Date.now());
+   if(h.entry>0&&h.exit>0&&chart.c){try{var ls=chart.c.addLineSeries({color:side?'#4D8DFF':'#EF5350',lineWidth:1,lineStyle:2,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});ls.setData(t1>t0?[{time:t0,value:h.entry},{time:t1,value:h.exit}]:[{time:t0,value:h.exit}]);chart.hl.push(ls)}catch(e){}}
+   marks.push({time:t0,position:side?'belowBar':'aboveBar',color:side?'#26A69A':'#EF5350',shape:side?'arrowUp':'arrowDown',text:'OPEN '+h.side.toUpperCase()+' '+h.lots});
+  marks.push({time:t1,position:side?'aboveBar':'belowBar',color:h.pnl>=0?'#26A69A':'#EF5350',shape:h.pnl>=0?'circle':'square',text:'CLOSE '+(h.pnl>=0?'+':'')+Number(h.pnl||0).toFixed(2)})});
  marks.sort(function(x,y){return x.time-y.time});
- for(var i=1;i<marks.length;i++){if(marks[i].time<=marks[i-1].time)marks[i].time=marks[i-1].time+1}
  chart.cs.setMarkers(marks)}catch(e){}}
 function chartDrawLines(){if(!chart.cs)return;var C=DB.settings.chart||{};
  chart.lines.forEach(function(l){try{chart.cs.removePriceLine(l)}catch(e){}});chart.lines=[];chart.plRefs=[];
@@ -3476,17 +3480,19 @@ setInterval(function(){try{engineTick()}catch(e){}},600);
  startFeeds();
  cloudInit().then(function(){return seed()}).then(function(){
   if(DB.session&&user()){try{enterApp()}catch(e){showErr(e);renderAuth()}}
-  else if(!PORTAL_ADMIN){try{enterDemo()}catch(e){renderAuth()}}
+  else if(false){}
   else renderAuth()
  }).catch(function(e){
   CLOUD.online=false;CLOUD.lastError=e;
   document.body.setAttribute('data-cloud-error','1');
   showErr(new Error('Cloud database unavailable. Local trading data is disabled until reconnection.'));
-  if(!PORTAL_ADMIN){try{enterDemo()}catch(x){renderAuth()}}else renderAuth()
+  renderAuth()
  });
  ensureChartLib();
- setTimeout(function(){if(!DB.session&&!PORTAL_ADMIN){try{enterDemo()}catch(e){}}},2500);
- (function(){var sx,sy,st,n=0;document.addEventListener('pointerdown',function(e){var el=document.getElementById('chartEl');if(!el||!el.contains(e.target)){st=0;return}n++;sx=e.clientX;sy=e.clientY;st=Date.now()},true);document.addEventListener('pointerup',function(e){var go=st&&Date.now()-st<260&&Math.abs(e.clientX-sx)<8&&Math.abs(e.clientY-sy)<8;st=0;if(!go||chart.dtOn||chart.crosshair)return;var C=DB.settings.chart||{};if(C.radialTap===false)return;if(document.querySelector('#ovl')&&getComputedStyle(document.querySelector('#ovl')).display!=='none')return;setTimeout(function(){if(DSEL&&DSEL.idx>=0)return;tfModal()},30)},true)})();
+ (function(){if(PORTAL_ADMIN)return;var b=document.createElement('button');b.id='offersFab';b.textContent='عروض التمويل';b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:60;display:none;background:#1B2540;color:#C9D3F0;border:1px solid #2A3658;border-radius:14px;padding:4px 12px;font-size:11px';document.body.appendChild(b);
+   b.onclick=function(){if(!DB.session)return;renderAuth();var au=document.getElementById('auth');if(au&&!document.getElementById('backChart')){var k=document.createElement('button');k.id='backChart';k.className='btn';k.textContent='← العودة للشارت';k.style.cssText='position:sticky;top:8px;z-index:5;margin:8px auto;display:block';k.onclick=function(){enterApp()};au.insertBefore(k,au.firstChild)}};
+   setInterval(function(){var au=document.getElementById('auth'),vis=au&&getComputedStyle(au).display!=='none';b.style.display=DB.session&&!vis?'':'none'},700)})();
+ (function(){var sx,sy,st,n=0;document.addEventListener('pointerdown',function(e){var el=document.getElementById('chartEl');if(!el||!el.contains(e.target)){st=0;return}n++;sx=e.clientX;sy=e.clientY;st=Date.now()},true);document.addEventListener('pointerup',function(e){var go=st&&Date.now()-st<260&&Math.abs(e.clientX-sx)<8&&Math.abs(e.clientY-sy)<8;st=0;if(go){var tn=Date.now();if(!(window._lt&&tn-window._lt<340&&Math.abs(e.clientX-window._lx)<24&&Math.abs(e.clientY-window._ly)<24)){window._lt=tn;window._lx=e.clientX;window._ly=e.clientY;return}window._lt=0}if(!go||chart.dtOn||chart.crosshair)return;var C=DB.settings.chart||{};if(C.radialTap===false)return;if(document.querySelector('#ovl')&&getComputedStyle(document.querySelector('#ovl')).display!=='none')return;setTimeout(function(){if(DSEL&&DSEL.idx>=0)return;tfModal()},30)},true)})();
 })();
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
  navigator.serviceWorker.register('./sw.js').catch(function(){});
