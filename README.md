@@ -37,20 +37,19 @@ The mobile wrapper packages the existing PLOTOS page from `public/plotos/` as a 
 
 Requirements: Node.js 22 or newer, Android Studio with an Android SDK for Android builds, and macOS with Xcode 26 or newer for iOS builds. iOS projects can be prepared in this repository, but compiling and signing them requires macOS and Xcode.
 
-Install dependencies and add each native platform once:
+The Android and iOS native project folders are included in this repository. After cloning, install the dependencies:
 
 ```sh
 npm install
-npx cap add android
-npx cap add ios
 ```
 
-Build the web app and stage the PLOTOS page in Capacitor's `dist/` directory, then sync native projects:
+Build the web app, stage the PLOTOS page in Capacitor's `dist/` directory, and sync both native projects:
 
 ```sh
-npm run mobile:build
 npm run mobile:sync
 ```
+
+Run `npm run mobile:build` alone only when you want to prepare `dist/` without syncing native projects. Use `npx cap add android` or `npx cap add ios` only if the corresponding native folder has been removed and needs to be regenerated.
 
 To build or open one platform at a time:
 
