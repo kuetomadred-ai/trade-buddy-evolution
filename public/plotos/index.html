@@ -1854,8 +1854,9 @@ function bindPriceScaleGesture(){
  },true);
  box.addEventListener('pointermove',function(e){
   var g=chart._axisDrag;if(!g)return;
-  var r=box.getBoundingClientRect(),delta=(e.clientY-r.top-g.y)/g.h,top=Math.max(.025,Math.min(.44,g.top+delta*.7)),bottom=Math.max(.025,Math.min(.44,g.bottom-delta*.7));
-  chart.c.priceScale('right').applyOptions({autoScale:false,scaleMargins:{top:top,bottom:bottom}});scheduleDrawRedraw();e.preventDefault();e.stopPropagation()
+  var r=box.getBoundingClientRect(),dy=e.clientY-r.top-g.y,z=Math.exp(dy*.0035),room=Math.max(.05,Math.min(.88,(g.top+g.bottom)*z)),k=g.top/Math.max(.001,g.top+g.bottom),top=Math.max(.02,Math.min(.46,room*k)),bottom=Math.max(.02,Math.min(.46,room*(1-k)));
+  e.preventDefault();e.stopPropagation();if(g.raf)return;
+  g.raf=requestAnimationFrame(function(){g.raf=0;if(!chart._axisDrag)return;chart.c.priceScale('right').applyOptions({autoScale:false,scaleMargins:{top:top,bottom:bottom}});scheduleDrawRedraw()})
  },true);
  box.addEventListener('wheel',function(e){var r=box.getBoundingClientRect(),x=e.clientX-r.left;if(x<r.width-72)return;var dy=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?100:1),sm=DB.settings.priceMargins||{top:.08,bottom:.12},z=Math.exp(dy*.0015),anchor=Math.max(.05,Math.min(.95,(e.clientY-r.top)/Math.max(1,r.height))),room=Math.max(.06,Math.min(.86,(sm.top+sm.bottom)*z)),top=Math.max(.025,Math.min(.44,room*anchor)),bottom=Math.max(.025,Math.min(.44,room*(1-anchor)));DB.settings.priceMargins={top:top,bottom:bottom};chart.c.priceScale('right').applyOptions({autoScale:false,scaleMargins:DB.settings.priceMargins});scheduleDrawRedraw();e.preventDefault();e.stopPropagation()},{capture:true,passive:false});
  box.addEventListener('dblclick',function(e){var r=box.getBoundingClientRect();if(e.clientX-r.left<r.width-72)return;chart.c.priceScale('right').applyOptions({autoScale:true,scaleMargins:{top:.08,bottom:.12}});chart._axisDrag=null;e.preventDefault();e.stopPropagation()},{capture:true});
