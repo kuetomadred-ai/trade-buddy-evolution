@@ -2166,6 +2166,8 @@ function openDrawer(){var u=user();if(!u)return;
  var am=$('#drawer [data-act="accounts"]');if(am)am.onclick=function(){closeDrawer();accountsModal()};
  $$('#drawer [data-act="out"]').forEach(function(b){b.onclick=function(){doLogout()}});
  $('#drawer').classList.add('on');$('#dOvl').classList.add('on')}
+function showOffers(){renderAuth();var au=document.getElementById('auth');if(!au||document.getElementById('backChart'))return;var k=document.createElement('button');k.id='backChart';k.className='btn';k.textContent='← Back to chart';k.style.cssText='position:sticky;top:8px;z-index:5;margin:8px auto;display:block;max-width:220px';k.onclick=function(){enterApp()};au.insertBefore(k,au.firstChild)}
+window.showOffers=showOffers;
 function closeDrawer(){$('#drawer').classList.remove('on');$('#dOvl').classList.remove('on')}
  $('#dOvl').onclick=closeDrawer;
 window.openDrawer=openDrawer;
@@ -2275,7 +2277,7 @@ function renderAuth(notice){var setup=false;
 function enterApp(freshSignup){var u=user();
  if(!u){renderAuth();return}
  if(PORTAL_ADMIN&&!isStaff(u)){DB.session=null;save();renderAuth('This account is not authorized for the Admin portal.');return}
- if(!PORTAL_ADMIN&&isStaff(u)){DB.session=null;save();renderAuth('Staff accounts must use the dedicated Admin portal: ?portal=admin');return}
+ if(!PORTAL_ADMIN&&isStaff(u)){DB.session=null;save();renderAuth('Staff accounts must sign in from the separate admin app.');return}
  $('#auth').style.display='none';$('#app').style.display='flex';
  applyTheme();applyLang();renderBNav();$('#bnav').style.display=PORTAL_ADMIN?'none':'';
  if(freshSignup)toast('Welcome to PLOTOS FUND','up');
@@ -2917,7 +2919,7 @@ function renderProfile(){var el=$('#v-profile'),u=user(),a=myAcc();
  '<button class="btn sm ghost" style="flex:1" id="thBtn">Theme: '+(DB.settings.theme==='light'?'Light':'Dark')+'</button>'+
  '<select id="langSel" style="flex:1;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:9px;font-size:12.5px">'+
  Object.keys(LANGS).map(function(k){return'<option value="'+k+'" '+(DB.settings.lang===k?'selected':'')+'>'+LANGS[k]+'</option>'}).join('')+'</select></div>'+
- (isStaff(u)&&!PORTAL_ADMIN?'<div class="pad" style="padding-top:14px"><button class="btn" onclick="location.href=location.pathname+\'?portal=admin\'">Open Admin Portal</button></div>':'')+
+ 
  '<div class="pad" style="padding-top:14px"><button class="btn red" id="outBtn">Log out</button></div>';
  $('#pfNotifs').onclick=notifsModal;
  $('#pfHist').onclick=function(){navGo('hist')};
