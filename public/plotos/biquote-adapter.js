@@ -66,7 +66,8 @@
   }
 
   function getSymbols() {
-    return request('/api/symbols?liveOnly=true').then(function (items) {
+    // Keep recently quoted instruments visible while their market is closed.
+    return request('/api/symbols?quotedWithinDays=7').then(function (items) {
       if (!Array.isArray(items)) throw new BiquoteError('Biquote returned an invalid symbol catalogue');
       return items;
     });

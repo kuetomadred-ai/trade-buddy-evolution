@@ -78,7 +78,8 @@
   }
 
   function getSymbols() {
-    return request('/api/symbols?liveOnly=true').then(function (items) {
+    // Keep recently quoted instruments visible while their market is closed.
+    return request('/api/symbols?quotedWithinDays=7').then(function (items) {
       if (!Array.isArray(items)) throw new BiquoteError('Biquote returned an invalid symbol catalogue');
       return items;
     });
@@ -751,7 +752,7 @@ function copyText(t){
  else{toast(t,'')}}
 function csvEsc(v){return'"'+String(v==null?'':v).replace(/"/g,'""')+'"'}
 
-/* Instruments are populated exclusively from GET /api/symbols?liveOnly=true.
+/* Instruments are populated from GET /api/symbols?quotedWithinDays=7.
    The catalogue cache is UI-only: prices and candles are never read from it. */
 var SYMBOL_CACHE_KEY='plotos_biquote_symbol_catalogue_v2_video_reference';
 var SYMBOLS={};
