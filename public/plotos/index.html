@@ -795,14 +795,35 @@ function marketOpen(sym){
 var SESSIONS=[{n:'Sydney',cls:'sy',o:21,c:6},{n:'Tokyo',cls:'tk',o:0,c:9},{n:'London',cls:'ld',o:7,c:16},{n:'New York',cls:'ny',o:12,c:21}];
 function sessActive(s){var h=new Date().getUTCHours();return s.o<s.c?(h>=s.o&&h<s.c):(h>=s.o||h<s.c)}
 
+var PROP_PROGRAMS=[
+ {id:'prog_2step',shortName:'Standard 2-Step',name:'Standard 2-Step',badge:'Popular',description:'Two simulated evaluation phases with fixed drawdown rules.',mode:'challenge',splitMin:80,splitMax:90,dailyLossPct:5,maxDDPct:10,trailingDD:false,tiers:[
+  {id:'2s-10k',name:'$10,000 Standard',size:10000,fee:89,profit1:8,profit2:5,minDays:3,lev:100},{id:'2s-25k',name:'$25,000 Standard',size:25000,fee:169,profit1:8,profit2:5,minDays:3,lev:100},{id:'2s-50k',name:'$50,000 Standard',size:50000,fee:289,profit1:8,profit2:5,minDays:3,lev:100},{id:'2s-100k',name:'$100,000 Standard',size:100000,fee:489,profit1:8,profit2:5,minDays:4,lev:100},{id:'2s-200k',name:'$200,000 Standard',size:200000,fee:949,profit1:8,profit2:5,minDays:4,lev:100}]},
+ {id:'prog_1step',shortName:'Rapid 1-Step',name:'Rapid 1-Step',badge:'Single phase',description:'One simulated evaluation phase with a trailing drawdown ceiling.',mode:'challenge',splitMin:75,splitMax:85,dailyLossPct:4,maxDDPct:6,trailingDD:true,tiers:[
+  {id:'1s-10k',name:'$10,000 Rapid',size:10000,fee:109,profit1:9,profit2:0,minDays:1,lev:50},{id:'1s-25k',name:'$25,000 Rapid',size:25000,fee:199,profit1:9,profit2:0,minDays:1,lev:50},{id:'1s-50k',name:'$50,000 Rapid',size:50000,fee:339,profit1:9,profit2:0,minDays:1,lev:50},{id:'1s-100k',name:'$100,000 Rapid',size:100000,fee:599,profit1:9,profit2:0,minDays:1,lev:50}]},
+ {id:'prog_instant',shortName:'Direct Simulation',name:'Direct Simulated Funding',badge:'Staff approval required',description:'Simulated funded account with no evaluation target and a 14-day payout request interval.',mode:'instant',splitMin:70,splitMax:80,dailyLossPct:0,maxDDPct:6,trailingDD:false,payoutCadenceDays:14,tiers:[
+  {id:'ins-10k',name:'$10,000 Direct',size:10000,fee:290,profit1:0,profit2:0,minDays:0,lev:30},{id:'ins-25k',name:'$25,000 Direct',size:25000,fee:650,profit1:0,profit2:0,minDays:0,lev:30},{id:'ins-50k',name:'$50,000 Direct',size:50000,fee:1250,profit1:0,profit2:0,minDays:0,lev:30}]}
+];
+var BROKER_SIM_TEMPLATES=[{id:'raw_ecn_sim',name:'ECN-style practice simulation',minDep:1000,lev:500,spreadLabel:'Variable Biquote spread',comm:3},{id:'standard_sim',name:'Standard practice simulation',minDep:500,lev:200,spreadLabel:'Variable Biquote spread',comm:0}];
+function programTemplateRecords(){var out=[];
+ PROP_PROGRAMS.forEach(function(p){p.tiers.forEach(function(t){var targets=[+t.profit1||0,+t.profit2||0].filter(function(x){return x>0});out.push({id:t.id,name:p.name+' · '+t.name,size:t.size,fee:t.fee,profitPct:targets[0]||0,phase2ProfitPct:targets[1]||0,phaseTargets:targets,dailyLossPct:p.dailyLossPct,maxDDPct:p.maxDDPct,minDays:t.minDays,maxDays:0,lev:t.lev,programId:p.id,programName:p.name,programMode:p.mode,badge:p.badge,description:p.description,payoutSplit:p.splitMin,payoutSplitMax:p.splitMax,payoutCadenceDays:p.payoutCadenceDays||0,trailingDD:!!p.trailingDD})})});
+ BROKER_SIM_TEMPLATES.forEach(function(p){out.push({id:p.id,name:p.name,size:p.minDep,fee:0,profitPct:0,dailyLossPct:0,maxDDPct:0,minDays:0,maxDays:0,lev:p.lev,programId:'broker_sim',programMode:'broker_sim',commissionPerLot:p.comm,spreadLabel:p.spreadLabel})});return out}
+function defaultTemplates(){return[
+ {id:'t50',name:'$50K Challenge',size:50000,fee:39,profitPct:8,dailyLossPct:5,maxDDPct:10,minDays:5,maxDays:0,lev:100},
+ {id:'t100',name:'$100K Challenge',size:100000,fee:89,profitPct:10,dailyLossPct:5,maxDDPct:10,minDays:5,maxDays:0,lev:100},
+ {id:'t200',name:'$200K Challenge',size:200000,fee:159,profitPct:10,dailyLossPct:5,maxDDPct:10,minDays:5,maxDays:0,lev:100}
+ ].concat(programTemplateRecords())}
+function ensureProgramTemplates(){if(!Array.isArray(DB.templates))DB.templates=[];var changed=false;
+ programTemplateRecords().forEach(function(t){if(!DB.templates.some(function(x){return x.id===t.id})){DB.templates.push(t);changed=true}});
+ if((+DB.propCatalogVersion||0)<1){DB.propCatalogVersion=1;changed=true}return changed}
+function challengeTargets(t){if(!t||t.programMode==='instant')return[];var a=Array.isArray(t.phaseTargets)?t.phaseTargets.slice():[];
+ if(a.length){a[0]=+t.profitPct||a[0];if(a.length>1)a[1]=+t.phase2ProfitPct||a[1]}else if(+t.profitPct>0)a=[+t.profitPct];
+ if(+t.phase2ProfitPct>0&&a.length<2)a.push(+t.phase2ProfitPct);return a.filter(function(x){return isFinite(x)&&x>0})}
+
 /* store */
 var DB=null;
 function freshDB(){return{
  users:[],session:null,accSeq:50001,activeAcc:{},
- templates:[
-  {id:'t50',name:'$50K Challenge',size:50000,fee:39,profitPct:8,dailyLossPct:5,maxDDPct:10,minDays:5,maxDays:0,lev:100},
-  {id:'t100',name:'$100K Challenge',size:100000,fee:89,profitPct:10,dailyLossPct:5,maxDDPct:10,minDays:5,maxDays:0,lev:100},
-  {id:'t200',name:'$200K Challenge',size:200000,fee:159,profitPct:10,dailyLossPct:5,maxDDPct:10,minDays:5,maxDays:0,lev:100}],
+ propCatalogVersion:1,templates:defaultTemplates(),
  riskRules:{dailyLossPct:5,maxDDPct:10,profitPct:10,minDays:5,stopoutLevel:20,warnAt:80,
   commissionPerLot:3,consistencyPct:40,maxPosPct:50,weekendHold:false,payoutSplit:80,requireKYC:false,requireTerms:false},
  accounts:[],positions:[],orders:[],history:[],notifications:[],audit:[],payouts:[],chRequests:[],alerts:[],wallets:{},
@@ -832,8 +853,9 @@ function save(){savePrefs();if(DEMO_MODE)return Promise.resolve(true);clearTimeo
 window.addEventListener('beforeunload',function(){savePrefs()});
 function mkAccount(userId,templateId,kind){
  var t=DB.templates.find(function(x){return x.id===templateId})||DB.templates[1];
- return{id:uid(),login:DB.accSeq++,userId:userId,templateId:t.id,kind:kind||'PROP',size:t.size,balance:t.size,leverage:t.lev,currency:'USD',status:'ACTIVE',createdAt:Date.now(),dayKey:todayKey(),dayStartEq:t.size,highEq:t.size,days:[],curve:[{t:Date.now(),e:t.size}],paidTotal:0,swapTotal:0,funded:false,
-  ch:kind==='PAPER'?null:{status:'ACTIVE',startedAt:Date.now(),profitPct:t.profitPct,dailyLossPct:t.dailyLossPct,maxDDPct:t.maxDDPct,minDays:t.minDays,maxDays:t.maxDays||0}}}
+ var isInstant=t.programMode==='instant',targets=challengeTargets(t);
+ return{id:uid(),login:DB.accSeq++,userId:userId,templateId:t.id,kind:kind||'PROP',size:t.size,balance:t.size,leverage:t.lev,currency:'USD',status:'ACTIVE',createdAt:Date.now(),dayKey:todayKey(),dayStartEq:t.size,highEq:t.size,days:[],curve:[{t:Date.now(),e:t.size}],paidTotal:0,swapTotal:0,funded:isInstant,commissionPerLot:t.commissionPerLot,brokerProfileId:t.programId==='broker_sim'?t.id:null,spreadLabel:t.spreadLabel||null,
+  ch:kind==='PAPER'?null:{status:isInstant?'FUNDED':'ACTIVE',startedAt:Date.now(),profitPct:targets[0]||0,phase2ProfitPct:targets[1]||0,phaseTargets:targets,phase:targets.length?1:0,phaseCount:targets.length,programId:t.programId||'legacy',programMode:t.programMode||'challenge',dailyLossPct:t.dailyLossPct,maxDDPct:t.maxDDPct,minDays:t.minDays,maxDays:t.maxDays||0,payoutSplit:t.payoutSplit,payoutSplitMax:t.payoutSplitMax,payoutCadenceDays:t.payoutCadenceDays||0,trailingDD:!!t.trailingDD}}}
 function seed(){return Promise.resolve()}
 function audit(actor,action,entity,details){
  var event={id:uid(),ts:Date.now(),actor:actor,action:action,entity:entity,details:details||''};
@@ -880,13 +902,14 @@ function cloudInit(){
   }catch(e){reject(e)}})});
 }
 function publicUser(u){var p={};Object.keys(u||{}).forEach(function(k){if(k!=='pass')p[k]=u[k]});return p}
-function firmBlob(){return{users:DB.users.map(publicUser),templates:DB.templates,riskRules:DB.riskRules,accSeq:DB.accSeq,
+function firmBlob(){return{users:DB.users.map(publicUser),templates:DB.templates,propCatalogVersion:DB.propCatalogVersion||1,riskRules:DB.riskRules,accSeq:DB.accSeq,
  firm:{paymentOn:DB.settings.paymentOn,paymentInfo:DB.settings.paymentInfo}}}
 function applyFirm(b){if(!b)return;
  var cm={};(b.users||[]).forEach(function(x){delete x.pass;cm[x.id]=x});
  DB.users=DB.users.map(function(x){var c=cm[x.id];return(c&&(c._u||0)>(x._u||0))?c:x});
  (b.users||[]).forEach(function(x){if(!DB.users.some(function(y){return y.id===x.id}))DB.users.push(x)});
  if(b.templates&&b.templates.length)DB.templates=b.templates;
+ if((+b.propCatalogVersion||0)<1)ensureProgramTemplates();else DB.propCatalogVersion=+b.propCatalogVersion;
  if(b.riskRules)DB.riskRules=Object.assign({},DB.riskRules,b.riskRules);
  if(b.accSeq)DB.accSeq=Math.max(DB.accSeq,b.accSeq);
  if(b.audit&&b.audit.length>DB.audit.length)DB.audit=b.audit;
@@ -1134,12 +1157,13 @@ function usedMargin(a){return accPositions(a).reduce(function(t,p){var q=qt(p.sy
 function equity(a){return a.balance+accPositions(a).reduce(function(t,p){var q=qt(p.symbol);
  var px=tradePrice(p.symbol,p.side,q)||p.entry;return t+pnlUSD(p,px)},0)}
 function accMetrics(a){var eq=equity(a),um=usedMargin(a),ml=um>0?eq/um*100:0,ch=a.ch||null;
+ var ddBase=ch&&ch.trailingDD?Math.max(a.size,+a.highEq||a.size):a.size;
  return{eq:eq,um:um,ml:ml,free:eq-um,
   profitPct:ch?(eq-a.size)/a.size*100:0,
   dailyPL:eq-(+a.dayStartEq||0),
   dailyLossPct:a.dayStartEq>0?Math.max(0,(a.dayStartEq-eq)/a.dayStartEq*100):0,
-  ddFromStartPct:Math.max(0,(a.size-eq)/a.size*100),
-  totFloor:a.size*(1-(ch?ch.maxDDPct:DB.riskRules.maxDDPct)/100)}}
+  ddFromStartPct:Math.max(0,(ddBase-eq)/ddBase*100),
+  totFloor:ddBase*(1-(ch?ch.maxDDPct:DB.riskRules.maxDDPct)/100)}}
 function canTrade(a){if(!user())return'Not authenticated';
  if(a.status!=='ACTIVE')return'Account '+a.status.toLowerCase()+' — trading disabled';
  if(a.ch&&a.ch.status==='PASSED')return'Challenge passed — trading disabled';
@@ -1192,10 +1216,11 @@ function placeOrder(a,sym,side,lots,type,price,sl,tp){
  o.state='PENDING';o.log.push({t:Date.now(),s:'ACCEPTED'});o.status='PENDING';
  DB.orders.unshift(o);save();
  return{o:o}}
+function commissionPerLotFor(a){return a&&a.commissionPerLot!==undefined&&a.commissionPerLot!==null?Math.max(0,+a.commissionPerLot||0):Math.max(0,+DB.riskRules.commissionPerLot||0)}
 function closePosition(p,px,reason){var a=DB.accounts.find(function(x){return x.id===p.accId});if(!a)return 0;
  if(!(px>0)||!isFinite(px))return 0;
  var gross=pnlUSD(p,px);
- var comm=+(p.lots*(DB.riskRules.commissionPerLot||0)).toFixed(2);
+ var comm=+(p.lots*commissionPerLotFor(a)).toFixed(2);
   var net=+(gross-comm).toFixed(2),realNet=net,bonus=0;
   try{var qq=Q[p.symbol],S0=SYMBOLS[p.symbol];if(!DEMO_MODE&&qq&&qq.ask>qq.bid&&Date.now()-(p.openedAt||Date.now())>=60000){bonus=+toUSD(p.symbol,(qq.ask-qq.bid)*p.lots*S0.contract).toFixed(2);if(!(bonus>0)||!isFinite(bonus))bonus=0;net=+(net+bonus).toFixed(2)}}catch(e){bonus=0}
   a.balance=+(a.balance+net).toFixed(2);
@@ -1214,7 +1239,7 @@ function closePartial(p,frac){
  var closeLots=Math.round(p.lots*frac*100)/100;
  if(p.lots-closeLots<0.01){closePosition(p,px,'market');renderStrip();return}
  var gross=pnlUSD(p,px)*(closeLots/p.lots);
- var comm=+(closeLots*(DB.riskRules.commissionPerLot||0)).toFixed(2);
+ var comm=+(closeLots*commissionPerLotFor(a)).toFixed(2);
  var net=+(gross-comm).toFixed(2);
  a.balance=+(a.balance+net).toFixed(2);
  DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:closeLots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:'partial',note:'',openedAt:p.openedAt,closedAt:Date.now()});
@@ -1228,13 +1253,14 @@ function closeAll(a,reason){var n=0;
 function RiskEval(a){
  var M=accMetrics(a),R=DB.riskRules,ch=a.ch,out={state:'ACTIVE',dailyLossPct:M.dailyLossPct,ddPct:M.ddFromStartPct,ml:M.ml};
  if(M.um>0&&M.ml<R.stopoutLevel){out.state='BREACHED';out.why='stopout';return out}
- if(a.kind!=='PAPER'&&ch&&ch.status==='ACTIVE'){
+ var managed=a.kind!=='PAPER'&&ch&&(ch.status==='ACTIVE'||ch.status==='FUNDED');
+ if(managed){
   var warn=(R.warnAt||80)/100;
   if(M.eq<=M.totFloor){out.state='BREACHED';out.why='maxdd';return out}
-  if(M.dailyLossPct>=ch.dailyLossPct){out.state='BREACHED';out.why='daily';return out}
-  if(M.dailyLossPct>=ch.dailyLossPct*warn)out.state='WARNING';
+  if(ch.dailyLossPct>0&&M.dailyLossPct>=ch.dailyLossPct){out.state='BREACHED';out.why='daily';return out}
+  if(ch.dailyLossPct>0&&M.dailyLossPct>=ch.dailyLossPct*warn)out.state='WARNING';
   else if(M.ddFromStartPct>=ch.maxDDPct*warn)out.state='WARNING';
-  if(ch.maxDays>0&&(Date.now()-ch.startedAt)/864e5>=ch.maxDays){out.state='BREACHED';out.why='maxdays';return out}}
+  if(ch.status==='ACTIVE'&&ch.maxDays>0&&(Date.now()-ch.startedAt)/864e5>=ch.maxDays){out.state='BREACHED';out.why='maxdays';return out}}
  return out}
 function rejectPending(a,o,why){o.state='REJECTED';o.status='REJECTED';o.reason=why;o.log.push({t:Date.now(),s:'REJECTED',why:why});
  audit('engine','Pending Order Rejected',o.symbol,why);notify(a.userId,'warn','Pending order rejected',o.symbol+' '+why)}
@@ -1276,9 +1302,9 @@ function engineTick(){
    else if(rv.why==='maxdd'){failCh(a,'Maximum drawdown breached')}
    else if(rv.why==='daily'){failCh(a,'Daily loss limit breached')}
    else if(rv.why==='maxdays'){failCh(a,'Maximum trading days reached')}}
-  else if(rv.state==='WARNING'&&a.kind!=='PAPER'){
+  else if(rv.state==='WARNING'&&a.kind!=='PAPER'&&a.ch){
    var ch=a.ch;
-   if(!a.w1&&rv.dailyLossPct>=ch.dailyLossPct*(DB.riskRules.warnAt||80)/100){a.w1=true;notify(a.userId,'warn','Daily loss warning',rv.dailyLossPct.toFixed(1)+'% of '+ch.dailyLossPct+'% daily limit used')}
+   if(ch.dailyLossPct>0&&!a.w1&&rv.dailyLossPct>=ch.dailyLossPct*(DB.riskRules.warnAt||80)/100){a.w1=true;notify(a.userId,'warn','Daily loss warning',rv.dailyLossPct.toFixed(1)+'% of '+ch.dailyLossPct+'% daily limit used')}
    if(!a.w2&&rv.ddPct>=ch.maxDDPct*(DB.riskRules.warnAt||80)/100){a.w2=true;notify(a.userId,'warn','Drawdown warning',rv.ddPct.toFixed(1)+'% of '+ch.maxDDPct+'% used')}}
   var ch2=a.ch;
   if(a.kind!=='PAPER'&&ch2&&ch2.status==='ACTIVE'){
@@ -1290,19 +1316,25 @@ function failCh(a,why){var ch=a.ch;ch.status='FAILED';ch.failWhy=why;
  closeAll(a,'admin');audit('engine','Risk Violation','account '+a.login,why);
  audit('engine','Challenge Failed','account '+a.login,why);
  notify(a.userId,'crit','Challenge failed',why+' — account #'+a.login)}
-function passCh(a){var ch=a.ch;ch.status='PASSED';ch.passAt=Date.now();
- a.riskLock='challenge passed';
+function passCh(a){var ch=a.ch,targets=challengeTargets(ch),phase=+ch.phase||1;
+ if(ch.programMode==='challenge'&&phase<targets.length){
+  closeAll(a,'admin');a.balance=a.size;a.dayKey=todayKey();a.dayStartEq=a.size;a.highEq=a.size;a.days=[];a.curve=[{t:Date.now(),e:a.size}];
+  ch.phase=phase+1;ch.phaseCount=targets.length;ch.profitPct=targets[phase];ch.status='ACTIVE';ch.startedAt=Date.now();ch.passAt=null;ch.failWhy=null;
+  a.riskLock=null;a.w1=false;a.w2=false;a.highEq=a.size;
+  audit('engine','Challenge Phase Passed','account '+a.login,'Phase '+phase+' complete; phase '+ch.phase+' started');
+  notify(a.userId,'success','Phase '+phase+' passed','Phase '+ch.phase+' has started. The simulated balance was reset to $'+a.size.toLocaleString()+'.');save();return}
+ ch.status='PASSED';ch.passAt=Date.now();a.riskLock='challenge passed';
  closeAll(a,'admin');audit('engine','Challenge Passed','account '+a.login,'Target reached');
  notify(a.userId,'success','Challenge passed!','Account #'+a.login+' met the target. Payout options in the Prop screen.')}
-function dayProfits(accId){var m={};
- DB.history.forEach(function(h){if(h.accId!==accId)return;
+function dayProfits(accId,since){var m={};
+ DB.history.forEach(function(h){if(h.accId!==accId||(since&&h.closedAt<since))return;
   var k=new Date(h.closedAt).toLocaleDateString('en-CA');m[k]=(m[k]||0)+h.pnl});
  return m}
 function consistencyCheck(a){
  var R=DB.riskRules;
  var profit=a.balance-a.size;
  if(profit<=0||!R.consistencyPct)return{ok:true,best:0,limit:0,profit:profit};
- var m=dayProfits(a.id),best=0,k;
+ var since=a.ch&&(a.ch.fundedAt||a.ch.startedAt)||0,m=dayProfits(a.id,since),best=0,k;
  for(k in m)if(m[k]>best)best=m[k];
  var limit=profit*R.consistencyPct/100;
  return{ok:best<=limit,best:best,limit:limit,profit:profit}}
@@ -1310,18 +1342,22 @@ function kycGate(u){
  if(!DB.riskRules.requireKYC)return null;
  if(u.kyc==='APPROVED')return null;
  return u.kyc==='SUBMITTED'?'KYC verification is under review — payouts unlock after approval':'KYC verification required before payouts — submit it in Profile'}
+function accountPayoutShare(a){var x=a&&a.ch?a.ch.payoutSplit:null;return x===null||x===undefined?(+DB.riskRules.payoutSplit||0):Math.max(0,+x||0)}
 function requestPayout(a){
  if(a.kind==='PAPER')return'Payouts are not available on paper accounts';
  var u=DB.users.find(function(x){return x.id===a.userId});
  var kg=kycGate(u);if(kg)return kg;
  var funded=a.ch&&a.ch.status==='FUNDED';
- if(!funded&&(!a.ch||a.ch.status!=='PASSED'))return'Payouts unlock after passing the challenge';
+ if(!funded)return'Payouts unlock after staff approves the account as FUNDED';
+ var cadence=+(a.ch&&a.ch.payoutCadenceDays||0),lastPaid=0;
+ if(cadence)DB.payouts.forEach(function(p){if(p.accId===a.id&&p.status==='PAID')lastPaid=Math.max(lastPaid,+p.paidAt||+p.createdAt||0)});
+ if(lastPaid&&Date.now()-lastPaid<cadence*864e5)return'Payout requests are available every '+cadence+' days for this program';
  var c=consistencyCheck(a);
  if(!c.ok)return'Consistency rule: best day ('+c.best.toFixed(2)+') exceeds '+DB.riskRules.consistencyPct+'% of total profit ('+c.limit.toFixed(2)+')';
- var amt=+(c.profit*DB.riskRules.payoutSplit/100).toFixed(2);
+ var split=accountPayoutShare(a),amt=+(c.profit*split/100).toFixed(2);
  if(amt<=0)return'No profit available';
  if(DB.payouts.some(function(p){return p.accId===a.id&&p.status==='PENDING'}))return'A payout request is already pending';
- DB.payouts.unshift({id:uid(),userId:a.userId,accId:a.id,amount:amt,profit:c.profit,status:'PENDING',createdAt:Date.now()});
+ DB.payouts.unshift({id:uid(),userId:a.userId,accId:a.id,amount:amt,profit:c.profit,payoutSplit:split,status:'PENDING',createdAt:Date.now()});
  audit(user()?user().email:a.userId,'Payout Requested','account '+a.login,'$'+amt.toFixed(2));
  notify(a.userId,'info','Payout requested','$'+amt.toFixed(2)+' — awaiting manager review');
  save();return null}
@@ -1333,18 +1369,20 @@ function scaleAccount(a){
  a.dayStartEq=equity(a);a.highEq=equity(a);
  audit(user()?user().email:'admin','Account Scaled','account '+a.login,'+25% → $'+a.size.toLocaleString());
  save()}
+function startFundedPeriod(a){closeAll(a,'admin');a.balance=a.size;a.days=[];a.dayKey=todayKey();a.dayStartEq=a.size;a.highEq=a.size;a.curve=[{t:Date.now(),e:a.size}];a.ch.fundedAt=Date.now();a.fundedAt=a.ch.fundedAt;a.funded=true;a.riskLock=null}
 function goFunded(a){
  if(!canManageAccounts())return false;
  if(!a.ch)return;
- a.ch.status='FUNDED';a.funded=true;a.riskLock=null;
- audit(user()?user().email:'admin','Account Funded','account '+a.login,'profit share '+DB.riskRules.payoutSplit+'%');
+ if(a.ch.status==='FUNDED')return false;
+ startFundedPeriod(a);a.ch.status='FUNDED';
+ audit(user()?user().email:'admin','Account Funded','account '+a.login,'profit share '+accountPayoutShare(a)+'%');
  save()}
 function resetChallenge(a){
  if(!canManageAccounts())return false;
  closeAll(a,'admin');
  a.balance=a.size;a.days=[];a.dayKey=todayKey();a.dayStartEq=a.size;a.highEq=a.size;a.riskLock=null;
  a.curve=[{t:Date.now(),e:a.size}];a.w1=false;a.w2=false;
- if(a.ch){a.ch.status='ACTIVE';a.ch.failWhy=null;a.ch.startedAt=Date.now()}
+ if(a.ch){a.ch.status='ACTIVE';a.ch.failWhy=null;a.ch.startedAt=Date.now();a.ch.fundedAt=null}a.funded=false;a.fundedAt=null;
  audit(user()?user().email:'admin','Challenge Reset','account '+a.login,'balance restored');
  save()}
 function leaderboard(){
@@ -2318,6 +2356,10 @@ window.accountsModal=accountsModal;
 
 /* auth screen */
 function renderAuth(notice){var setup=false;
+ function refreshLandingProgramCards(){var el=document.querySelector('#lp-programs .lp-plans');if(!el)return;
+  el.innerHTML=PROP_PROGRAMS.map(function(p,i){var rows=DB.templates.filter(function(t){return t.programId===p.id}).sort(function(a,b){return a.size-b.size});if(!rows.length)return'';
+   var lo=rows[0],hi=rows[rows.length-1],target=p.mode==='instant'?'No evaluation target':(p.id==='prog_2step'?'Phase 1 '+lo.profitPct+'% · Phase 2 '+lo.phase2ProfitPct+'%':'Single phase '+lo.profitPct+'%');
+   return'<div class="lp-plan '+(i===0?'hot':'')+'">'+(i===0?'<em>'+esc(p.badge)+'</em>':'')+'<small>'+esc(p.shortName)+'</small><b>$'+(lo.size/1000)+'K–$'+(hi.size/1000)+'K</b><ul><li><span>Targets</span><i>'+esc(target)+'</i></li><li><span>Max drawdown</span><i>'+(p.trailingDD?'Trailing ':'')+p.maxDDPct+'%</i></li><li><span>Daily limit</span><i>'+(p.dailyLossPct?p.dailyLossPct+'%':'None')+'</i></li><li><span>Leverage</span><i>1:'+lo.lev+'</i></li><li><span>Fee range</span><i>$'+lo.fee+'–$'+hi.fee+'</i></li><li><span>Profit share</span><i>'+p.splitMin+'%–'+p.splitMax+'%</i></li><li><span>Fee credit</span><i>Wallet-paid fee returned at first approved payout</i></li></ul><button class="lp-cta lp-go">'+(p.mode==='instant'?'Request simulated funding':'Start challenge')+'</button></div>'}).join('')}
  $('#auth').style.display='flex';$('#app').style.display='none';
  var pre=PORTAL_ADMIN?'':'<div class="lp">'+
   '<nav class="lp-nav"><div class="lp-brand"><span class="lp-logo">P</span>PLOTOS<b>FUND</b></div><div class="lp-links"><a data-go="programs">Programs</a><a data-go="how">How it works</a><a data-go="platform">Platform</a><a data-go="faq">FAQ</a></div><button class="lp-ghost" id="preDemo">Free demo</button><button class="lp-cta lp-go">Get funded</button></nav>'+
@@ -2362,6 +2404,13 @@ function renderAuth(notice){var setup=false;
    '<div class="demo-hint">Local paper account only — no email verification or real funds.</div>';
  }
  $('#auth').innerHTML=html;
+ refreshLandingProgramCards();
+ refreshLandingClaims();
+ var splitNote=document.querySelector('#auth #lp-programs .lp-lead');if(splitNote)splitNote.textContent+=' Profit-share percentages show the starting rate and program ceiling; no automatic increase is configured.';
+ function refreshLandingClaims(){var hero=document.querySelector('#auth .lp-hero .lp-copy');if(hero){var h=hero.querySelector('h2'),p=hero.querySelector('p');if(h)h.innerHTML='Practice with clear rules.<br><span>Trade in simulation.</span>';if(p)p.textContent='Explore structured simulated trading programs, variable Biquote Bid/Ask prices, and mobile-friendly charts. Account balances, challenges, wallet credits, and payouts are simulated; no live broker or payment processor is connected.';var pill=hero.querySelector('.lp-pill');if(pill)pill.innerHTML='<i></i>Simulated trading environment';var labels=hero.querySelectorAll('.lp-stats small');if(labels.length>1)labels[1].textContent='Simulated accounts'}
+  var trust=document.querySelector('#auth .lp-trust');if(trust)trust.innerHTML='<span>Market data</span><b>Biquote</b><span>Bid / Ask quotes</span><span>Historical OHLC</span><span>Streaming ticks when available</span>';
+  var platform=document.querySelector('#auth .lp-platform');if(platform){var ph=platform.querySelector('h3'),pp=platform.querySelector('.lp-lead');if(ph)ph.textContent='Mobile-ready trading simulator';if(pp)pp.textContent='A familiar trading interface for practice: Market Watch, one-click simulated trades, pending orders, chart tools, indicators and trade history. No connection to MetaTrader or a live brokerage is enabled.'}
+  var nav=document.querySelector('#auth .lp-nav .lp-go');if(nav)nav.textContent='Explore programs';var heroBtn=document.querySelector('#auth .lp-actions .lp-go');if(heroBtn)heroBtn.textContent='Explore simulated programs'}
  (function(){var ha=document.getElementById('heroAuth');if(!ha)return;var box=document.querySelector('#auth .auth-box');box.classList.add('lp-mode');Array.prototype.slice.call(box.children).forEach(function(c){if(!c.classList.contains('lp')&&!c.classList.contains('logo')&&!c.classList.contains('auth-sub'))ha.appendChild(c)});
   document.querySelectorAll('#auth [data-go]').forEach(function(x){x.onclick=function(){var t=document.getElementById('lp-'+x.dataset.go);if(t)t.scrollIntoView({behavior:'smooth'})}});
   document.querySelectorAll('#auth .lp-go').forEach(function(x){x.onclick=function(){var t=document.getElementById('tabUp');if(t)t.click();ha.scrollIntoView({behavior:'smooth',block:'center'})}});
@@ -2831,29 +2880,31 @@ function renderProp(){var el=$('#v-prop'),a=myAcc();
 	  '<div class="riskcard"><small>DAILY LOSS</small><b id="rDaily">'+M.dailyLossPct.toFixed(2)+'%</b><span class="sub">Limit '+(ch?ch.dailyLossPct:DB.riskRules.dailyLossPct)+'%</span></div>'+ 
 	  '</div>';
 	 if(ch){
-  var tU=Math.min(100,M.ddFromStartPct/ch.maxDDPct*100),dU=Math.min(100,M.dailyLossPct/ch.dailyLossPct*100);
-  var cc=consistencyCheck(a);
-  var passed=ch.status==='PASSED',funded=ch.status==='FUNDED';
-  var avail=(passed||funded)?Math.max(0,(a.balance-a.size))*DB.riskRules.payoutSplit/100:0;
-  html2+='<div class="brandline"><span class="pmark">P</span>PLOTOS FUND · PROP TRADING FIRM</div>'+
-  '<div class="cprog"><div style="display:flex;align-items:center;gap:8px"><h3 style="font-size:16px">$'+a.size.toLocaleString()+' Challenge</h3><span class="badge '+ch.status+'">'+ch.status+'</span></div>'+
-  '<div class="eq" id="chEq">'+money(M.eq)+'</div>'+
-  '<div class="prow"><span>Profit target ('+ch.profitPct+'%)</span><b>'+pp.toFixed(2)+'%</b></div>'+
-  '<div class="pbar"><i id="chP1" style="width:'+Math.min(100,pp/ch.profitPct*100)+'%"></i></div>'+
-  '<div class="prow"><span>Daily loss ('+ch.dailyLossPct+'%)</span><b style="color:'+(dU>60?'var(--dn)':'var(--up)')+'">'+M.dailyLossPct.toFixed(2)+'%</b></div>'+
-  '<div class="pbar"><i id="chP2" class="'+(dU>85?'dang':dU>60?'warn':'')+'" style="width:'+dU+'%"></i></div>'+ 
-  '<div class="prow"><span>Max drawdown ('+ch.maxDDPct+'%)</span><b style="color:'+(tU>60?'var(--dn)':'var(--up)')+'">'+M.ddFromStartPct.toFixed(2)+'%</b></div>'+
-  '<div class="pbar"><i id="chP3" class="'+(tU>85?'dang':tU>60?'warn':'')+'" style="width:'+tU+'%"></i></div>'+ 
-  '<div class="prow"><span>Trading days</span><b>'+a.days.length+' / '+ch.minDays+'</b></div>'+
-  '<div class="prow"><span>Consistency best day</span><b style="color:'+(cc.ok?'var(--up)':'var(--dn)')+'">'+cc.best.toFixed(0)+' / '+cc.limit.toFixed(0)+'</b></div>'+
-  (ch.failWhy?'<div style="margin-top:8px;font-size:12px;color:var(--dn)">Failed: '+esc(ch.failWhy)+'</div>':'')+
-  (ch.maxDays>0?'<div class="prow"><span>Max days</span><b>'+Math.ceil((Date.now()-ch.startedAt)/864e5)+' / '+ch.maxDays+'</b></div>':'')+'</div>';
-  if(passed||funded){
-   html2+='<div class="cprog" style="border-color:var(--ac)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><h3 style="font-size:15px">Payout</h3><span class="badge '+(funded?'FUNDED':'PASSED')+'">'+(funded?'FUNDED':'ELIGIBLE')+'</span></div>'+
-   '<div class="prow" style="margin-top:0"><span>Your share ('+DB.riskRules.payoutSplit+'%)</span><b style="color:var(--ac);font-size:15px">'+money(avail)+'</b></div>'+
-   '<div class="prow"><span>Consistency</span><b style="color:'+(cc.ok?'var(--up)':'var(--dn)')+'">'+(cc.ok?'PASS':'BLOCKED — spread your profits')+'</b></div>'+
-   '<button class="btn gold" style="margin-top:12px" id="pyReq">Request payout — '+money(avail)+'</button>'+
-   '<button class="btn ghost" style="margin-top:8px" id="pyCert">Download certificate</button></div>'}
+	  var ddLimit=+ch.maxDDPct||0,dailyLimit=+ch.dailyLossPct||0,tU=ddLimit>0?Math.min(100,M.ddFromStartPct/ddLimit*100):0,dU=dailyLimit>0?Math.min(100,M.dailyLossPct/dailyLimit*100):0;
+	  var cc=consistencyCheck(a),passed=ch.status==='PASSED',funded=ch.status==='FUNDED',share=accountPayoutShare(a);
+	  var avail=(passed||funded)?Math.max(0,(a.balance-a.size))*share/100:0;
+	  var tpl=DB.templates.find(function(x){return x.id===a.templateId}),isDirect=ch.programMode==='instant';
+	  var title=tpl?esc(tpl.programName||tpl.name):'Simulated program';
+	  var phaseLabel=isDirect?'Direct simulated funding':(ch.phaseCount>1?' · Phase '+(ch.phase||1)+' of '+ch.phaseCount:' · Single phase');
+	  html2+='<div class="brandline"><span class="pmark">P</span>PLOTOS FUND · SIMULATED PROGRAM</div>'+
+	  '<div class="cprog"><div style="display:flex;align-items:center;gap:8px"><h3 style="font-size:16px">$'+a.size.toLocaleString()+' '+title+esc(phaseLabel)+'</h3><span class="badge '+ch.status+'">'+ch.status+'</span></div>'+
+	  '<div class="eq" id="chEq">'+money(M.eq)+'</div>'+
+	  (isDirect?'<div class="prow"><span>Evaluation target</span><b>None · staff approval required</b></div>':'<div class="prow"><span>Profit target ('+ch.profitPct+'%)</span><b>'+pp.toFixed(2)+'%</b></div><div class="pbar"><i id="chP1" style="width:'+(ch.profitPct>0?Math.min(100,pp/ch.profitPct*100):0)+'%"></i></div>')+
+	  (dailyLimit>0?'<div class="prow"><span>Daily loss limit ('+dailyLimit+'%)</span><b style="color:'+(dU>60?'var(--dn)':'var(--up)')+'">'+M.dailyLossPct.toFixed(2)+'%</b></div><div class="pbar"><i id="chP2" class="'+(dU>85?'dang':dU>60?'warn':'')+'" style="width:'+dU+'%"></i></div>':'<div class="prow"><span>Daily loss limit</span><b>Not applied</b></div>')+
+	  '<div class="prow"><span>'+(ch.trailingDD?'Trailing max drawdown':'Max drawdown')+' ('+ddLimit+'%)</span><b style="color:'+(tU>60?'var(--dn)':'var(--up)')+'">'+M.ddFromStartPct.toFixed(2)+'%</b></div>'+
+	  '<div class="pbar"><i id="chP3" class="'+(tU>85?'dang':tU>60?'warn':'')+'" style="width:'+tU+'%"></i></div>'+
+	  (!isDirect?'<div class="prow"><span>Trading days</span><b>'+a.days.length+' / '+ch.minDays+'</b></div>':'')+
+	  '<div class="prow"><span>Consistency best day</span><b style="color:'+(cc.ok?'var(--up)':'var(--dn)')+'">'+cc.best.toFixed(0)+' / '+cc.limit.toFixed(0)+'</b></div>'+
+	  (ch.failWhy?'<div style="margin-top:8px;font-size:12px;color:var(--dn)">Failed: '+esc(ch.failWhy)+'</div>':'')+
+	  (ch.maxDays>0?'<div class="prow"><span>Max days</span><b>'+Math.ceil((Date.now()-ch.startedAt)/864e5)+' / '+ch.maxDays+'</b></div>':'')+'</div>';
+	  if(passed||funded){
+	   html2+='<div class="cprog" style="border-color:var(--ac)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><h3 style="font-size:15px">Simulated payout</h3><span class="badge '+(funded?'FUNDED':'PASSED')+'">'+(funded?'FUNDED':'ELIGIBLE')+'</span></div>'+
+  '<div class="prow" style="margin-top:0"><span>Your share ('+share+'%)</span><b style="color:var(--ac);font-size:15px">'+money(avail)+'</b></div>'+
+  (ch.feePaid&&!ch.feeRefunded?'<div class="prow"><span>Simulated fee credit with first approved payout</span><b>'+money(ch.paidFee||0)+'</b></div>':'')+
+  (ch.payoutCadenceDays?'<div class="prow"><span>Request interval</span><b>Every '+ch.payoutCadenceDays+' days</b></div>':'')+
+	   '<div class="prow"><span>Consistency</span><b style="color:'+(cc.ok?'var(--up)':'var(--dn)')+'">'+(cc.ok?'PASS':'BLOCKED — spread your profits')+'</b></div>'+
+   (funded?'<button class="btn gold" style="margin-top:12px" id="pyReq">Request payout — '+money(avail)+'</button>':'<div class="demo-hint" style="margin-top:12px">Challenge passed — payout requests unlock after staff approves the account as FUNDED.</div>')+
+	   '<button class="btn ghost" style="margin-top:8px" id="pyCert">Download certificate</button><div style="font-size:10px;color:var(--dim);margin-top:8px">Payouts are simulated wallet credits and require staff review.</div></div>'}
   html2+='<div class="pad" style="padding-bottom:4px"><div class="sec">Equity curve</div>'+
   '<div style="background:var(--pn);border:1px solid var(--ln);border-radius:12px;direction:ltr"><div id="eqChart" style="height:150px"></div></div></div>'}
  html2+=plansHTML()+leaderboardHTML();
@@ -2873,36 +2924,44 @@ function drawEqCurve(a){if(typeof LightweightCharts==='undefined'){
    data.push({time:t,value:p.e})});
   if(data.length>1){s.setData(data);c.timeScale().fitContent()}
   else el.innerHTML='<div class="empty">Close trades to build your curve</div>'}catch(e){}}
-var planSel=null;
+var planSel='2s-50k',programSel='prog_2step';
+function selectedProgramTemplates(){return DB.templates.filter(function(t){return t.programId===programSel})}
+function selectedPlanTemplate(){var list=selectedProgramTemplates();return list.find(function(t){return t.id===planSel})||list[0]||null}
 function plansHTML(){
- var sel=planSel||DB.templates[1].id;
- return'<div class="pad" style="padding-bottom:4px"><div class="sec">Challenge plans</div></div>'+
- DB.templates.map(function(t){return'<div class="plan '+(t.id===sel?'on':'')+'" data-plan="'+t.id+'">'+
- '<div class="ph"><span class="ps">$'+t.size.toLocaleString()+'</span><span class="fee">$'+t.fee+'</span></div>'+
- '<div class="pp">Target '+t.profitPct+'% · Daily '+t.dailyLossPct+'% · MaxDD '+t.maxDDPct+'% · '+t.minDays+'+ days · 1:'+t.lev+'</div></div>'}).join('')+
- '<div style="margin:6px 14px 0"><button class="btn" id="rqGo">Request this challenge</button>'+
- (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet">Pay from wallet & request approval</button>':'')+
- '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">'+esc(DB.settings.paymentInfo||'Payment and account activation require staff review. Wallet payment is not automatically verified.')+'</div></div>'}
+ var prog=PROP_PROGRAMS.find(function(p){return p.id===programSel})||PROP_PROGRAMS[0];programSel=prog.id;
+ var list=selectedProgramTemplates(),t=list.find(function(x){return x.id===planSel})||list.find(function(x){return x.id==='2s-50k'})||list[0];if(t)planSel=t.id;
+ if(!t)return'<div class="empty">Program catalog is unavailable.</div>';
+ var targets=challengeTargets(t),targetText=t.programMode==='instant'?'No evaluation target · funded after staff approval':targets.map(function(x,i){return'Phase '+(i+1)+' '+x+'%'}).join(' → ');
+ var splitText=(t.payoutSplit||0)+'% starting share'+(t.payoutSplitMax>(t.payoutSplit||0)?' · '+t.payoutSplitMax+'% cap; no automatic increase':'');
+ return'<div class="pad" style="padding-bottom:4px"><div class="sec">Funding programs · simulation</div></div>'+
+ '<div style="display:flex;gap:6px;margin:0 14px 10px;flex-wrap:wrap">'+PROP_PROGRAMS.map(function(p){return'<button class="mbtn '+(p.id===prog.id?'on':'')+'" data-program="'+p.id+'">'+esc(p.shortName)+'</button>'}).join('')+'</div>'+
+ '<div class="plan on" style="margin-bottom:8px"><div class="ph"><span class="ps">'+esc(prog.name)+'</span><span class="fee">'+esc(prog.badge)+'</span></div><div class="pp">'+esc(prog.description)+'</div></div>'+
+ '<div style="display:flex;gap:6px;margin:0 14px 10px;flex-wrap:wrap">'+list.map(function(x){return'<button class="mbtn '+(x.id===t.id?'on':'')+'" data-plan="'+x.id+'">$'+(x.size/1000)+'K · $'+x.fee+'</button>'}).join('')+'</div>'+
+ '<div class="plan on"><div class="ph"><span class="ps">'+esc(t.name)+'</span><span class="fee">$'+t.fee+'</span></div>'+
+ '<div class="pp" style="line-height:1.8">'+esc(targetText)+'<br>Daily loss: '+(t.dailyLossPct>0?t.dailyLossPct+'%':'Off')+' · '+(t.trailingDD?'Trailing ':'')+'Max drawdown: '+t.maxDDPct+'%<br>Min. trading days: '+(t.minDays||0)+' · Leverage: 1:'+t.lev+'<br>Profit share: '+esc(splitText)+' · Payout cadence: '+(t.payoutCadenceDays?t.payoutCadenceDays+' days':'per staff policy')+'</div></div>'+
+ '<div style="margin:8px 14px 0"><button class="btn" id="rqGo">'+(t.programMode==='instant'?'Request simulated funding':'Request this challenge')+'</button>'+
+ (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet">Pay from simulated wallet & request review</button>':'')+
+ '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">All balances, fees and payouts here are simulated. A request remains pending until ADMIN/FINANCE approval. If the fee was paid from the simulated wallet, its full amount is credited on the first approved payout. No external payment processor or live broker is connected. '+esc(DB.settings.paymentInfo||'')+'</div></div>'}
 function bindReq(){
+ $$('[data-program]').forEach(function(p){p.onclick=function(){programSel=p.getAttribute('data-program');var options=selectedProgramTemplates();planSel=options.length?options[0].id:null;renderProp()}});
  $$('[data-plan]').forEach(function(p){p.onclick=function(){planSel=p.getAttribute('data-plan');renderProp()}});
  var rg=$('#rqGo');
- if(rg)rg.onclick=function(){var u=user();
-  DB.chRequests.unshift({id:uid(),userId:u.id,templateId:planSel||DB.templates[1].id,txid:'',status:'PENDING',createdAt:Date.now()});
-  audit(u.email,'Challenge Requested','','');
-  notify(u.id,'info','Challenge request submitted','The manager will review and activate your account.');
+ if(rg)rg.onclick=function(){var u=user(),t=selectedPlanTemplate();if(!t){toast('Program unavailable','dn');return}
+  DB.chRequests.unshift({id:uid(),userId:u.id,templateId:t.id,programId:t.programId,fee:t.fee,txid:'',status:'PENDING',createdAt:Date.now()});
+  audit(u.email,'Program Requested',t.name,'Staff approval required');
+  notify(u.id,'info','Program request submitted','Your request is pending staff approval; no trading account is active yet.');
   save();toast('Request submitted','up');renderProp()};
  var rw=$('#rqWallet');
- if(rw)rw.onclick=function(){var u=user();
-  var t=DB.templates.find(function(x){return x.id===(planSel||DB.templates[1].id)});
+ if(rw)rw.onclick=function(){var u=user(),t=selectedPlanTemplate();if(!t)return;
   var w=wallet(u);
   if(w.bal<t.fee){toast('Wallet balance too low ('+money(w.bal)+')','dn');return}
-  confirmM('Pay from wallet','Pay $'+t.fee+' from wallet '+money(w.bal)+'? The request will remain pending until staff approval.','Pay & Request Review',false)
+  confirmM('Pay from simulated wallet','Pay $'+t.fee+' from wallet '+money(w.bal)+'? The request remains pending until staff approval.','Pay & Request Review',false)
    .then(function(ok){
     if(!ok)return;
     wTx(u,'FEE',-t.fee,'Challenge fee '+t.name);
-    DB.chRequests.unshift({id:uid(),userId:u.id,templateId:t.id,txid:'',status:'PENDING',paymentStatus:'WALLET_PAID_PENDING_REVIEW',fee:t.fee,createdAt:Date.now()});
-    audit(u.email,'Challenge Fee Submitted for Review',t.name,'Wallet debit $'+t.fee+'; staff approval required');
-    notify(u.id,'info','Payment submitted for review','The wallet debit is recorded. Account access starts only after staff approval.');
+    DB.chRequests.unshift({id:uid(),userId:u.id,templateId:t.id,programId:t.programId,txid:'',status:'PENDING',paymentStatus:'WALLET_PAID_PENDING_REVIEW',fee:t.fee,createdAt:Date.now()});
+    audit(u.email,'Challenge Fee Submitted for Review',t.name,'Simulated wallet debit $'+t.fee+'; staff approval required');
+    notify(u.id,'info','Payment submitted for review','The simulated wallet debit is recorded. Account access starts only after staff approval.');
     save();toast('Payment submitted — awaiting staff approval','up');renderProp()})}}
 function bindProp(a){
  var pr=$('#pyReq');
@@ -2958,15 +3017,16 @@ function renderBroker(){var el=$('#v-broker'),u=user(),a=myAcc();
   (on?'<span class="badge ACTIVE">ACTIVE</span>':'<button class="mbtn" data-sw="'+ac.id+'" style="color:var(--ac);border:1px solid var(--ac);border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;font-family:var(--mono)">SWITCH</button>')+
   '</div>'}).join('')+'</div>'+
  '<div style="display:flex;gap:8px;margin:10px 14px">'+
- '<button class="btn sm grn" style="flex:1" id="newPaper">+ New Paper account</button>'+
+ '<button class="btn sm grn" style="flex:1" id="newPaper">+ New practice profile</button>'+
  (a?'<button class="btn sm ghost" style="flex:1" onclick="navGo(\'trade\')">Trade screen →</button>':'')+'</div>';
+ html+='<div class="demo-hint" style="margin:0 14px 10px"><b>Simulation only.</b> All practice profiles use Biquote Bid/Ask quotes and variable spreads; no real broker connection, deposits, or ECN execution is enabled.</div>';
  if(a){var M=accMetrics(a);
   html+='<div class="pad" style="padding-top:0"><div class="kgrid c3">'+
   '<div class="kc"><small>BALANCE</small><span class="v mono">'+money(a.balance)+'</span></div>'+
   '<div class="kc"><small>EQUITY</small><span class="v mono ac">'+money(M.eq)+'</span></div>'+
   '<div class="kc"><small>MARGIN LEVEL</small><span class="v mono">'+(M.um>0?M.ml.toFixed(0)+'%':'—')+'</span></div>'+
   '<div class="kc"><small>LEVERAGE</small><span class="v mono">1:'+a.leverage+'</span></div>'+
-  '<div class="kc"><small>COMMISSION</small><span class="v mono">'+money(DB.riskRules.commissionPerLot)+'/lot</span></div>'+
+  '<div class="kc"><small>COMMISSION</small><span class="v mono">'+money(commissionPerLotFor(a))+'/lot</span></div>'+
   '<div class="kc"><small>STATUS</small><span class="badge '+(a.ch?a.ch.status:a.status)+'">'+(a.ch?a.ch.status:a.status)+'</span></div></div></div>'}
  html+='<div class="pad" style="padding-bottom:4px"><div class="sec">Wallet</div></div>'+
  '<div style="margin:0 14px;border:1px solid var(--ln);border-radius:14px;padding:16px;background:var(--pn)">'+
@@ -2990,8 +3050,9 @@ function bindAccBtns(){
   toast('Account activated','up');renderBroker()}});
  var np=$('#newPaper');
  if(np)np.onclick=function(){
-  modal('<h4>New Paper account</h4><p style="font-size:11.5px;color:var(--mut);margin-bottom:10px">Free practice account. No challenge rules.</p>'+
-  '<div class="fld"><label>STARTING BALANCE</label><select id="npSz">'+DB.templates.map(function(t){return'<option value="'+t.id+'">$'+t.size.toLocaleString()+'</option>'}).join('')+'</select></div>'+
+  var profiles=DB.templates.filter(function(t){return t.programId==='broker_sim'});
+  modal('<h4>New practice account</h4><p style="font-size:11.5px;color:var(--mut);margin-bottom:10px">Practice profiles only. Biquote supplies the simulated prices and variable Bid/Ask spread.</p>'+
+  '<div class="fld"><label>SIMULATION PROFILE</label><select id="npSz">'+profiles.map(function(t){return'<option value="'+t.id+'">'+esc(t.name)+' · $'+t.size.toLocaleString()+' · 1:'+t.lev+' · '+money(commissionPerLotFor(t))+'/lot</option>'}).join('')+'</select></div>'+
   '<div class="mrow-btns"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn grn" id="npGo">Create</button></div>');
   $('#npGo').onclick=function(){
    var u=user();
@@ -3227,7 +3288,7 @@ function renderAdminTab(B,u,isAdmin,agg){
     var rid=parts[1];
     var bdata=agg[parts[0]]||{};var rq=(bdata.chRequests||[]).find(function(x){return x.id===rid});
     if(rq&&rq.templateId)tpl=rq.templateId;
-     assignCloud(parts[0],tpl).then(function(){
+     assignCloud(parts[0],tpl,rq).then(function(){
       traderAction(parts[0],function(bb){var rr=(bb.chRequests||[]).find(function(x){return x.id===rid});if(rr){rr.status='ASSIGNED';if(rr.paymentStatus)rr.paymentStatus='STAFF_APPROVED'}},'Request approved')}).catch(function(e){toast('Approval failed: '+(e.message||e),'dn')})}});
    $$('[data-rej]').forEach(function(b){b.onclick=function(){
     var parts=b.getAttribute('data-rej').split('|');
@@ -3249,13 +3310,16 @@ function renderAdminTab(B,u,isAdmin,agg){
    $$('[data-pay]').forEach(function(b){b.onclick=function(){
     var parts=b.getAttribute('data-pay').split('|');
     traderAction(parts[0],function(bb){
-     var p=(bb.payouts||[]).find(function(x){return x.id===parts[1]});if(!p)return;
+     var p=(bb.payouts||[]).find(function(x){return x.id===parts[1]});if(!p||p.status!=='PENDING')return;
      p.status='PAID';p.paidAt=Date.now();
-     var a=(bb.accounts||[]).find(function(x){return x.id===p.accId});if(a)a.paidTotal=(a.paidTotal||0)+p.amount;
-     bb.wallet.bal=+((bb.wallet.bal||0)+p.amount).toFixed(2);
+     var a=(bb.accounts||[]).find(function(x){return x.id===p.accId}),refund=0;
+     if(a){a.paidTotal=(a.paidTotal||0)+p.amount;if(a.ch&&a.ch.feePaid&&!a.ch.feeRefunded){refund=Math.max(0,+a.ch.paidFee||0);if(refund){a.ch.feeRefunded=true;a.ch.feeRefundedAt=Date.now();p.feeRefund=refund}}}
+     bb.wallet=bb.wallet||{bal:0,txns:[]};bb.wallet.txns=bb.wallet.txns||[];
+     bb.wallet.bal=+((+bb.wallet.bal||0)+p.amount+refund).toFixed(2);
      bb.wallet.txns.unshift({t:Date.now(),type:'PAYOUT',amt:p.amount,note:'Payout approved',bal:bb.wallet.bal});
-     bb.notifications.unshift({id:uid(),ts:Date.now(),userId:parts[0],level:'success',title:'Payout approved',body:'$'+p.amount.toFixed(2)+' credited to your wallet.',read:false});
-     audit(u.email,'Payout Paid','payout '+p.id,'$'+p.amount.toFixed(2)+' → wallet')},'Payout paid & wallet credited')}});
+     if(refund)bb.wallet.txns.unshift({t:Date.now(),type:'FEE_REFUND',amt:refund,note:'First approved payout — simulated program fee credit',bal:bb.wallet.bal});
+     bb.notifications.unshift({id:uid(),ts:Date.now(),userId:parts[0],level:'success',title:'Payout approved',body:'$'+p.amount.toFixed(2)+' credited to your simulated wallet.'+(refund?' Simulated program fee credit: $'+refund.toFixed(2)+'.':''),read:false});
+     audit(u.email,'Payout Paid','payout '+p.id,'$'+p.amount.toFixed(2)+' profit'+(refund?' + $'+refund.toFixed(2)+' simulated fee credit':'')+' → simulated wallet')},'Payout paid & wallet credited')}});
    $$('[data-pdeny]').forEach(function(b){b.onclick=function(){
     var parts=b.getAttribute('data-pdeny').split('|');
     modal('<h4>Reject payout</h4><div class="fld"><label>REASON</label><input id="pdR"></div>'+
@@ -3311,9 +3375,12 @@ function renderAdminTab(B,u,isAdmin,agg){
   $('#goRisk').onclick=function(){adminTab='rules';renderAdmin()};
   $('#goTpl').onclick=function(){adminTab='templates';renderAdmin()};
  }else if(adminTab==='templates'){
-  B.innerHTML='<div class="pad" style="padding-top:0">'+DB.templates.map(function(t){
+  B.innerHTML='<div class="pad" style="padding-top:0">'+DB.templates.filter(function(t){return t.programId!=='broker_sim'}).map(function(t){
    var fields=[['size','Balance $'],['fee','Fee $'],['profitPct','Target %'],['dailyLossPct','Daily %'],['maxDDPct','MaxDD %'],['minDays','Min days'],['maxDays','Max days'],['lev','Leverage']];
+   if(t.programId==='prog_2step')fields.push(['phase2ProfitPct','Phase 2 target %']);
+   if(t.programId)fields.push(['payoutSplit','Initial payout share %']);
    return'<div class="kc" style="margin-bottom:10px"><b style="font-size:13px">'+esc(t.name)+'</b>'+
+   '<div style="font-size:10px;color:var(--dim);margin-top:4px">'+(t.trailingDD?'Trailing drawdown · ':'')+(t.payoutSplitMax?'Share cap '+t.payoutSplitMax+'% · ':'')+(t.payoutCadenceDays?'Payout interval '+t.payoutCadenceDays+' days':'')+'</div>'+
    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:10px">'+
    fields.map(function(f){return'<div><small style="font-size:9px;color:var(--dim);display:block;margin-bottom:3px">'+f[1]+'</small><input class="mini-in" data-tpl="'+t.id+'.'+f[0]+'" value="'+t[f[0]]+'"></div>'}).join('')+'</div>'+
    (isAdmin?'<button class="btn sm" style="margin-top:10px;width:auto;padding:7px 16px" data-save="'+t.id+'">Save</button>':'')+'</div>'}).join('')+'</div>';
@@ -3322,6 +3389,8 @@ function renderAdminTab(B,u,isAdmin,agg){
    $$('[data-tpl^="'+t.id+'."]').forEach(function(i){
     var kk=i.getAttribute('data-tpl').split('.')[1];var v=parseFloat(i.value);
     if(!isNaN(v)&&v>=0)t[kk]=v});
+   if(t.programId==='prog_2step')t.phaseTargets=[+t.profitPct||0,+t.phase2ProfitPct||0].filter(function(x){return x>0});
+   else if(t.programId==='prog_1step')t.phaseTargets=[+t.profitPct||0].filter(function(x){return x>0});
    audit(u.email,'Template Updated',t.name,'');save();toast('Saved & synced','up');renderAdmin()}})}
  else if(adminTab==='rules'){
   var R=DB.riskRules;
@@ -3415,9 +3484,11 @@ function renderAdminTab(B,u,isAdmin,agg){
     toast('Saved — syncing to all devices','up');
     if(CLOUD.ok)cloudPush().then(function(){toast('Cloud updated ✓','up')})}}}
 }
-function assignCloud(tuid,tplId){
+function assignCloud(tuid,tplId,requestMeta){
  if(!canApprovePlanRequests()||DEMO_MODE)return Promise.reject(new Error('Only ADMIN or FINANCE may approve and assign plan requests.'));
  var acc=mkAccount(tuid,tplId,'PROP');
+ if(acc.ch&&acc.ch.programMode==='instant'){acc.ch.fundedAt=Date.now();acc.fundedAt=acc.ch.fundedAt}
+ if(requestMeta&&requestMeta.paymentStatus==='WALLET_PAID_PENDING_REVIEW'&&acc.ch){acc.ch.paidFee=Math.max(0,+requestMeta.fee||0);acc.ch.feePaid=acc.ch.paidFee>0;acc.ch.feeRefunded=false;acc.ch.feePaymentMethod='SIMULATED_WALLET'}
  return traderAction(tuid,function(b){
   b.accounts.push(acc);
   b.notifications.unshift({id:uid(),ts:Date.now(),userId:tuid,level:'success',title:'Trading account assigned',body:'Account #'+acc.login+' · $'+acc.size.toLocaleString()+' is ready to trade.',read:false})
@@ -3432,8 +3503,8 @@ function bindClientsAdmin(B,isAdmin,agg){
   var t=DB.users.find(function(x){return x.id===tuid});
   modal('<h4>Assign trading account</h4>'+
   '<p style="font-size:11.5px;color:var(--mut);margin-bottom:12px">Trader: <b style="color:var(--tx)">'+esc(t?t.name:'?')+'</b></p>'+
-  '<div class="fld"><label>CHALLENGE TEMPLATE</label><select id="asTpl">'+
-  DB.templates.map(function(x){return'<option value="'+x.id+'">'+x.name+' — fee $'+x.fee+'</option>'}).join('')+'</select></div>'+
+ '<div class="fld"><label>CHALLENGE TEMPLATE</label><select id="asTpl">'+
+  DB.templates.filter(function(x){return x.programId!=='broker_sim'}).map(function(x){return'<option value="'+x.id+'">'+esc(x.name)+' — fee $'+x.fee+'</option>'}).join('')+'</select></div>'+
   '<div class="mrow-btns"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="asGo">Create & Assign</button></div>');
   $('#asGo').onclick=function(){
    assignCloud(tuid,$('#asTpl').value).then(function(){closeModal()})}}});
@@ -3484,8 +3555,8 @@ function bindClientsAdmin(B,isAdmin,agg){
   confirmM('Convert to Funded','Account becomes FUNDED — payout requests unlocked.','Convert',false)
    .then(function(ok){if(!ok)return;
     traderAction(tuid,function(bb){
-     var a=(bb.accounts||[]).find(function(x){return x.id===accId});if(!a||!a.ch)return;
-     a.ch.status='FUNDED';a.funded=true;
+     var a=(bb.accounts||[]).find(function(x){return x.id===accId});if(!a||!a.ch||a.ch.status==='FUNDED')return;
+     startFundedPeriod(a);a.ch.status='FUNDED';
      bb.notifications.unshift({id:uid(),ts:Date.now(),userId:tuid,level:'success',title:'Funded account!',body:'Account #'+a.login+' is now FUNDED.',read:false});
      audit(user()?user().email:'admin','Account Funded','account '+(a?a.login:''),'')},'Converted to Funded')})}});
  $$('[data-scale]').forEach(function(b){b.onclick=function(){
