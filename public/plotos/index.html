@@ -939,6 +939,7 @@ function localAgg(){var m={};DB.users.forEach(function(u){
  function f(a){return a.filter(function(x){return x.userId===u.id})}
  m[u.id]={accounts:f(DB.accounts),positions:f(DB.positions),orders:f(DB.orders),history:f(DB.history),notifications:f(DB.notifications),payouts:f(DB.payouts),chRequests:f(DB.chRequests),alerts:f(DB.alerts),wallet:DB.wallets[u.id]||{bal:0,txns:[]}}});return m}
 function traderAction(tuid,fn,msg){
+ if(!isStaff(user())||DEMO_MODE)return Promise.reject(new Error('Staff authorization required.'));
  if(CLOUD.ok){
   return cloudGetUser(tuid).then(function(b){
    b=b||{};['accounts','positions','orders','history','notifications','payouts','chRequests','alerts'].forEach(function(k){if(!Array.isArray(b[k]))b[k]=[]});
@@ -1026,6 +1027,8 @@ function enterDemo(){
 function doLogout(){var u=user();var done=!DEMO_MODE&&CLOUD.ok?CLOUD.sb.auth.signOut():Promise.resolve();done.catch(function(){}).then(function(){if(u)audit(u.email,'Logout','user',DEMO_MODE?'Local demo':'Supabase Auth');DB.session=null;DEMO_MODE=false;save();closeDrawer();renderAuth()})}
 window.doLogout=doLogout;
 function isStaff(u){var r=CLOUD.authRole;return!!(u&&r&&(r==='ADMIN'||r==='RISK'||r==='FINANCE'||r==='SUPPORT'))}
+function canApprovePlanRequests(){return!!user()&&!DEMO_MODE&&(CLOUD.authRole==='ADMIN'||CLOUD.authRole==='FINANCE')}
+function canManageAccounts(){return!!user()&&!DEMO_MODE&&CLOUD.authRole==='ADMIN'}
 function staffTabs(role){
  if(role==='ADMIN')return['overview','trading','clients','requests','payouts','templates','rules','kyc','reports','audit','settings'];
  if(role==='RISK')return['trading','rules','audit','reports','clients'];
@@ -1321,6 +1324,7 @@ function requestPayout(a){
  notify(a.userId,'info','Payout requested','$'+amt.toFixed(2)+' — awaiting manager review');
  save();return null}
 function scaleAccount(a){
+ if(!canManageAccounts())return false;
  var inc=Math.round(a.size*0.25);
  a.balance=+(a.balance+inc).toFixed(2);
  a.size=+(a.size+inc).toFixed(2);
@@ -1328,11 +1332,13 @@ function scaleAccount(a){
  audit(user()?user().email:'admin','Account Scaled','account '+a.login,'+25% → $'+a.size.toLocaleString());
  save()}
 function goFunded(a){
+ if(!canManageAccounts())return false;
  if(!a.ch)return;
- a.ch.status='FUNDED';a.funded=true;
+ a.ch.status='FUNDED';a.funded=true;a.riskLock=null;
  audit(user()?user().email:'admin','Account Funded','account '+a.login,'profit share '+DB.riskRules.payoutSplit+'%');
  save()}
 function resetChallenge(a){
+ if(!canManageAccounts())return false;
  closeAll(a,'admin');
  a.balance=a.size;a.days=[];a.dayKey=todayKey();a.dayStartEq=a.size;a.highEq=a.size;a.riskLock=null;
  a.curve=[{t:Date.now(),e:a.size}];a.w1=false;a.w2=false;
@@ -2855,8 +2861,8 @@ function plansHTML(){
  '<div class="ph"><span class="ps">$'+t.size.toLocaleString()+'</span><span class="fee">$'+t.fee+'</span></div>'+
  '<div class="pp">Target '+t.profitPct+'% · Daily '+t.dailyLossPct+'% · MaxDD '+t.maxDDPct+'% · '+t.minDays+'+ days · 1:'+t.lev+'</div></div>'}).join('')+
  '<div style="margin:6px 14px 0"><button class="btn" id="rqGo">Request this challenge</button>'+
- (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet">Pay from wallet & start instantly</button>':'')+
- '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">'+esc(DB.settings.paymentInfo||'Payment confirmed manually by the manager.')+'</div></div>'}
+ (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet">Pay from wallet & request approval</button>':'')+
+ '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">'+esc(DB.settings.paymentInfo||'Payment and account activation require staff review. Wallet payment is not automatically verified.')+'</div></div>'}
 function bindReq(){
  $$('[data-plan]').forEach(function(p){p.onclick=function(){planSel=p.getAttribute('data-plan');renderProp()}});
  var rg=$('#rqGo');
@@ -2870,15 +2876,14 @@ function bindReq(){
   var t=DB.templates.find(function(x){return x.id===(planSel||DB.templates[1].id)});
   var w=wallet(u);
   if(w.bal<t.fee){toast('Wallet balance too low ('+money(w.bal)+')','dn');return}
-  confirmM('Pay from wallet','Pay $'+t.fee+' from wallet '+money(w.bal)+'? Your PROP account starts instantly.','Pay & Start',false)
+  confirmM('Pay from wallet','Pay $'+t.fee+' from wallet '+money(w.bal)+'? The request will remain pending until staff approval.','Pay & Request Review',false)
    .then(function(ok){
     if(!ok)return;
     wTx(u,'FEE',-t.fee,'Challenge fee '+t.name);
-    var a=mkAccount(u.id,t.id,'PROP');
-    DB.accounts.push(a);u.status='ACTIVE';DB.activeAcc[u.id]=a.id;
-    audit(u.email,'Challenge Paid (wallet)','account '+a.login,'$'+t.fee);
-    notify(u.id,'success','Challenge started',t.name+' · Account #'+a.login);
-    save();toast('Account #'+a.login+' created','up');navGo('prop')})}}
+    DB.chRequests.unshift({id:uid(),userId:u.id,templateId:t.id,txid:'',status:'PENDING',paymentStatus:'WALLET_PAID_PENDING_REVIEW',fee:t.fee,createdAt:Date.now()});
+    audit(u.email,'Challenge Fee Submitted for Review',t.name,'Wallet debit $'+t.fee+'; staff approval required');
+    notify(u.id,'info','Payment submitted for review','The wallet debit is recorded. Account access starts only after staff approval.');
+    save();toast('Payment submitted — awaiting staff approval','up');renderProp()})}}
 function bindProp(a){
  var pr=$('#pyReq');
  if(pr)pr.onclick=function(){var err=requestPayout(a);err?toast(err,'dn'):toast('Payout request submitted','up');renderProp()};
@@ -3191,21 +3196,22 @@ function renderAdminTab(B,u,isAdmin,agg){
    var tpl=DB.templates.find(function(t){return t.id===r.templateId});
    return'<div class="prow2"><div class="l1"><b>'+esc(uname(x.tuid))+'</b><span class="badge '+r.status+'">'+r.status+'</span>'+
    '<span class="lots">'+(tpl?tpl.name:'?')+'</span><span class="t">'+new Date(r.createdAt).toLocaleDateString()+'</span></div>'+
-   (r.txid?'<div class="l2"><span style="color:var(--wn)">TX: '+esc(r.txid)+'</span></div>':'')+
-   (r.status==='PENDING'&&isAdmin?'<div class="l2"><button class="mbtn" data-appr="'+x.tuid+'|'+r.id+'" style="color:var(--up);border-color:var(--up)">APPROVE & ASSIGN</button><button class="mbtn" data-rej="'+x.tuid+'|'+r.id+'" style="color:var(--dn);border-color:var(--dn)">REJECT</button></div>':'')+'</div>'}).join('')
+    (r.txid?'<div class="l2"><span style="color:var(--wn)">TX: '+esc(r.txid)+'</span></div>':'')+
+    (r.paymentStatus?'<div class="l2"><span style="color:var(--wn)">Payment: '+esc(r.paymentStatus)+(r.fee?' · '+money(r.fee):'')+'</span></div>':'')+
+    (r.status==='PENDING'&&canApprovePlanRequests()?'<div class="l2"><button class="mbtn" data-appr="'+x.tuid+'|'+r.id+'" style="color:var(--up);border-color:var(--up)">APPROVE & ASSIGN</button><button class="mbtn" data-rej="'+x.tuid+'|'+r.id+'" style="color:var(--dn);border-color:var(--dn)">REJECT</button></div>':'')+'</div>'}).join('')
   :'<div class="empty">No challenge requests yet.</div>';
-  if(isAdmin){
+  if(canApprovePlanRequests()){
    $$('[data-appr]').forEach(function(b){b.onclick=function(){
     var parts=b.getAttribute('data-appr').split('|');
     var tpl=DB.templates[1].id;
     var rid=parts[1];
     var bdata=agg[parts[0]]||{};var rq=(bdata.chRequests||[]).find(function(x){return x.id===rid});
     if(rq&&rq.templateId)tpl=rq.templateId;
-    assignCloud(parts[0],tpl).then(function(){
-     traderAction(parts[0],function(bb){var rr=(bb.chRequests||[]).find(function(x){return x.id===rid});if(rr)rr.status='ASSIGNED'},'Request approved')})}});
+     assignCloud(parts[0],tpl).then(function(){
+      traderAction(parts[0],function(bb){var rr=(bb.chRequests||[]).find(function(x){return x.id===rid});if(rr){rr.status='ASSIGNED';if(rr.paymentStatus)rr.paymentStatus='STAFF_APPROVED'}},'Request approved')}).catch(function(e){toast('Approval failed: '+(e.message||e),'dn')})}});
    $$('[data-rej]').forEach(function(b){b.onclick=function(){
     var parts=b.getAttribute('data-rej').split('|');
-    traderAction(parts[0],function(bb){var rr=(bb.chRequests||[]).find(function(x){return x.id===parts[1]});if(rr)rr.status='REJECTED';
+    traderAction(parts[0],function(bb){var rr=(bb.chRequests||[]).find(function(x){return x.id===parts[1]});if(rr){rr.status='REJECTED';if(rr.paymentStatus==='WALLET_PAID_PENDING_REVIEW'&&rr.fee>0){bb.wallet=bb.wallet||{bal:0,txns:[]};bb.wallet.bal=+((bb.wallet.bal||0)+rr.fee).toFixed(2);bb.wallet.txns=bb.wallet.txns||[];bb.wallet.txns.unshift({t:Date.now(),type:'REFUND',amt:rr.fee,note:'Rejected challenge request refund',bal:bb.wallet.bal});rr.paymentStatus='REFUNDED'}}
      bb.notifications.unshift({id:uid(),ts:Date.now(),userId:parts[0],level:'warn',title:'Request rejected',body:'Your challenge request was not approved.',read:false})},'Request rejected')}})}}
  else if(adminTab==='payouts'){
   var prows=[];
@@ -3390,6 +3396,7 @@ function renderAdminTab(B,u,isAdmin,agg){
     if(CLOUD.ok)cloudPush().then(function(){toast('Cloud updated ✓','up')})}}}
 }
 function assignCloud(tuid,tplId){
+ if(!canApprovePlanRequests()||DEMO_MODE)return Promise.reject(new Error('Only ADMIN or FINANCE may approve and assign plan requests.'));
  var acc=mkAccount(tuid,tplId,'PROP');
  return traderAction(tuid,function(b){
   b.accounts.push(acc);
