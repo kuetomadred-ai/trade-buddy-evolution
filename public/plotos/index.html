@@ -974,7 +974,7 @@ function doSignup(email,pass,name,wantOwner,refCode){
  if(pass.length<6)return Promise.resolve('Password must be 6+ characters');
  if(!CLOUD.ok||!CLOUD.hydrated)return Promise.resolve('Cloud authentication is unavailable');
  AUTH_PENDING_EMAIL=email;
- return CLOUD.sb.auth.signUp({email:email,password:pass,options:{data:{name:name||email.split('@')[0],refCode:refCode||null}}}).then(function(r){
+ return CLOUD.sb.auth.signUp({email:email,password:pass,options:{emailRedirectTo:window.location.origin+'/plotos/',data:{name:name||email.split('@')[0],refCode:refCode||null}}}).then(function(r){
   if(r.error)throw r.error;
   if(!r.data.user)return 'Check your email to confirm the account';
   var u=upsertAuthProfile(r.data.user,name,refCode);CLOUD.authRole=(r.data.user.app_metadata&&r.data.user.app_metadata.role)||null;DB.session=u.id;delete u.pass;save();audit(email,'Signup','user '+u.id,'Supabase Auth');
