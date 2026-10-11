@@ -1986,7 +1986,10 @@ function chartDrawLines(){if(!chart.cs)return;var C=DB.settings.chart||{};
    if(C.slTp!==false&&p.sl)chart.lines.push(chart.cs.createPriceLine({price:p.sl,color:'#EF5350',lineWidth:1,lineStyle:2,title:p.ts>0?'TRAIL':'SL'}));
    if(C.slTp!==false&&p.tp)chart.lines.push(chart.cs.createPriceLine({price:p.tp,color:'#26A69A',lineWidth:1,lineStyle:2,title:'TP'}))}catch(e){}});
  if(C.tradeOrders!==false)accOrders(a).filter(function(o){return o.symbol===chart.sym}).forEach(function(o){
-  try{chart.ordLines.push(chart.cs.createPriceLine({price:o.price,color:'#F5A623',lineWidth:1,lineStyle:2,title:o.type+' '+o.lots}))}catch(e){}})}
+  try{chart.ordLines.push(chart.cs.createPriceLine({price:o.price,color:'#F5A623',lineWidth:1,lineStyle:2,title:o.type+' '+o.lots}))}catch(e){}});
+ var u0=user();
+ if(u0&&DB.alerts)DB.alerts.filter(function(al){return al.userId===u0.id&&al.symbol===chart.sym}).forEach(function(al){
+  try{chart.lines.push(chart.cs.createPriceLine({price:al.price,color:'#E3B34C',lineWidth:1,lineStyle:1,title:'ALERT '+(al.dir==='above'?'▲':'▼')}))}catch(e){}})}
 setInterval(function(){
  if(view!=='charts')return;
  if(!chart.plRefs.length){chartDrawLines();return}
