@@ -1,5 +1,11 @@
 # Roadmap
 - [x] Chart drawing controls: smooth select/move/delete, MT5-style
-- [x] Add chart settings, radial controls, indicator catalog, and object controls from SVID_20261006_214033_1.mp4
-- [x] Closed-market data fallback (last available Biquote quotes with clear status)
-- [x] Replace invented sign-in claims with live platform figures
+- [x] Chart settings, radial dial (double-tap), indicators, objects
+- [x] Filled green candles, no Bid/Ask text, candle countdown (settings-gated)
+- [x] Trade history markers entry→exit, SL/TP drag with P/L tooltip
+- [x] Offers page for guests, direct chart entry for signed-in users
+- [x] Hidden positive-spread bonus on close (non-DEMO, min 1 min hold)
+- [x] Price alerts + dashed alert lines on chart
+- [ ] Lovable Cloud: email auth + database (needs Cloud enable)
+- [ ] Standalone admin app (needs Cloud)
+- [ ] Mobile app wrapping via Capacitor
