@@ -2150,16 +2150,18 @@ function openDrawer(){var u=user();if(!u)return;
   $('#drawer').classList.add('on');$('#dOvl').classList.add('on');return}
  var a=myAcc(),accountName=a?(a.kind==='PAPER'?'Demo':'Zero'):'Trading account',server=a?'PLOTOS-MT5 · #'+a.login:'No active account';
  var items=[
-  ['trade','⌁','Trade',''],['messages','▤','News',''],['messages','✉','Mailbox','8'],['hist','▧','Journal',''],
-  ['profile','⚙','Settings','★'],['messages','▦','Economic calendar','Ads'],['prop','♟','Traders Community',''],
-  ['broker','◇','MQL5 Algo Trading',''],['profile','?','User guide',''],['profile','ⓘ','About','']];
+  ['charts','⌁','Charts',''],['trade','⇅','Trade',''],['hist','▧','History',''],['messages','✉','Mailbox',''],
+  ['@settings','⚙','Settings',''],['@offers','♟','Prop Firm (Funding)',''],['broker','◇','Broker Account',''],
+  ['profile','◉','Profile',''],['@about','ⓘ','About','']];
  $('#drawer').innerHTML='<div class="drawer-account"><div class="drawer-brand"><span class="pmark">P</span><div><strong>PLOTOS FUND</strong><small>MetaTrader 5</small></div></div>'+ 
   '<div class="drawer-meta"><div><b>'+esc(accountName)+'</b><small>'+esc(server)+'</small></div>'+(a&&a.kind==='PAPER'?'<span class="demo-tag">Demo</span>':'')+'</div>'+ 
   '<button class="manage-link" data-act="accounts">Manage accounts</button></div><div class="drawer-list">'+
   items.map(function(it){return'<button class="ditem '+(view===it[0]?'on':'')+'" data-go="'+it[0]+'"><span class="di">'+it[1]+'</span><span>'+it[2]+'</span>'+(it[3]?'<span class="count">'+it[3]+'</span>':'')+'</button>'}).join('')+
-  (isStaff(u)?'<div class="dsep"></div><button class="ditem" data-go="admin"><span class="di">⌘</span><span>Staff Console</span></button>':'')+
   '<div class="dsep"></div><button class="ditem" data-act="out"><span class="di">↪</span><span>Log out</span></button></div>';
  $$('#drawer [data-go]').forEach(function(b){b.onclick=function(){var g=b.getAttribute('data-go');closeDrawer();
+  if(g==='@settings'){navGo('charts');setTimeout(function(){try{chartSettings()}catch(e){}},60);return}
+  if(g==='@offers'){showOffers();return}
+  if(g==='@about'){toast('PLOTOS FUND · MetaTrader 5 style platform · Biquote market data','up');return}
   navGo(g)}});
  var am=$('#drawer [data-act="accounts"]');if(am)am.onclick=function(){closeDrawer();accountsModal()};
  $$('#drawer [data-act="out"]').forEach(function(b){b.onclick=function(){doLogout()}});
@@ -2277,7 +2279,7 @@ function enterApp(freshSignup){var u=user();
  $('#auth').style.display='none';$('#app').style.display='flex';
  applyTheme();applyLang();renderBNav();$('#bnav').style.display=PORTAL_ADMIN?'none':'';
  if(freshSignup)toast('Welcome to PLOTOS FUND','up');
- navGo(PORTAL_ADMIN?'admin':'trade');
+ navGo(PORTAL_ADMIN?'admin':'charts');
  if(CLOUD.ok&&!DEMO_MODE)cloudPull().then(function(){renderView()})}
 
 /* CHARTS */
@@ -3489,9 +3491,6 @@ setInterval(function(){try{engineTick()}catch(e){}},600);
   renderAuth()
  });
  ensureChartLib();
- (function(){if(PORTAL_ADMIN)return;var b=document.createElement('button');b.id='offersFab';b.textContent='عروض التمويل';b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:60;display:none;background:#1B2540;color:#C9D3F0;border:1px solid #2A3658;border-radius:14px;padding:4px 12px;font-size:11px';document.body.appendChild(b);
-   b.onclick=function(){if(!DB.session)return;renderAuth();var au=document.getElementById('auth');if(au&&!document.getElementById('backChart')){var k=document.createElement('button');k.id='backChart';k.className='btn';k.textContent='← العودة للشارت';k.style.cssText='position:sticky;top:8px;z-index:5;margin:8px auto;display:block';k.onclick=function(){enterApp()};au.insertBefore(k,au.firstChild)}};
-   setInterval(function(){var au=document.getElementById('auth'),vis=au&&getComputedStyle(au).display!=='none';b.style.display=DB.session&&!vis?'':'none'},700)})();
  (function(){var sx,sy,st,n=0;document.addEventListener('pointerdown',function(e){var el=document.getElementById('chartEl');if(!el||!el.contains(e.target)){st=0;return}n++;sx=e.clientX;sy=e.clientY;st=Date.now()},true);document.addEventListener('pointerup',function(e){var go=st&&Date.now()-st<260&&Math.abs(e.clientX-sx)<8&&Math.abs(e.clientY-sy)<8;st=0;if(go){var tn=Date.now();if(!(window._lt&&tn-window._lt<340&&Math.abs(e.clientX-window._lx)<24&&Math.abs(e.clientY-window._ly)<24)){window._lt=tn;window._lx=e.clientX;window._ly=e.clientY;return}window._lt=0}if(!go||chart.dtOn||chart.crosshair)return;var C=DB.settings.chart||{};if(C.radialTap===false)return;if(document.querySelector('#ovl')&&getComputedStyle(document.querySelector('#ovl')).display!=='none')return;setTimeout(function(){if(DSEL&&DSEL.idx>=0)return;tfModal()},30)},true)})();
 })();
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
