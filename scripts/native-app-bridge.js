@@ -1,0 +1,21 @@
+import { App } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
+
+if (Capacitor.isNativePlatform()) {
+  window.PLOTOS_NATIVE = true;
+
+  const deliveredUrls = new Set();
+  const deliverUrl = (url) => {
+    if (!url || deliveredUrls.has(url)) return;
+    deliveredUrls.add(url);
+    window.__PLOTOS_NATIVE_URL = url;
+    window.dispatchEvent(new CustomEvent("plotos:native-url", { detail: url }));
+  };
+
+  App.addListener("appUrlOpen", ({ url }) => deliverUrl(url));
+  App.getLaunchUrl()
+    .then((launch) => deliverUrl(launch?.url))
+    .catch(() => {});
+} else {
+  window.PLOTOS_NATIVE = false;
+}

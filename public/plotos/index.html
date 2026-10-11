@@ -969,19 +969,20 @@ function upsertAuthProfile(authUser,name,refCode){
  if(refCode){var r=DB.users.find(function(x){return x.refCode===refCode});if(r)u.referredBy=refCode}
  DB.users.push(u);return u
 }
+function authRedirectUrl(){return window.PLOTOS_NATIVE?'com.plotos.trading://auth/callback':window.location.origin+'/plotos/'}
 function doSignup(email,pass,name,wantOwner,refCode){
  if(!/^\S+@\S+\.\S+$/.test(email))return Promise.resolve('Enter a valid email');
  if(pass.length<6)return Promise.resolve('Password must be 6+ characters');
  if(!CLOUD.ok||!CLOUD.hydrated)return Promise.resolve('Cloud authentication is unavailable');
  AUTH_PENDING_EMAIL=email;
- return CLOUD.sb.auth.signUp({email:email,password:pass,options:{emailRedirectTo:window.location.origin+'/plotos/',data:{name:name||email.split('@')[0],refCode:refCode||null}}}).then(function(r){
+ return CLOUD.sb.auth.signUp({email:email,password:pass,options:{emailRedirectTo:authRedirectUrl(),data:{name:name||email.split('@')[0],refCode:refCode||null}}}).then(function(r){
   if(r.error)throw r.error;
   if(!r.data.user)return 'Check your email to confirm the account';
   var u=upsertAuthProfile(r.data.user,name,refCode);CLOUD.authRole=(r.data.user.app_metadata&&r.data.user.app_metadata.role)||null;DB.session=u.id;delete u.pass;save();audit(email,'Signup','user '+u.id,'Supabase Auth');
   return r.data.session?null:'Check your email to confirm the account';})}
 function resendVerification(email){
  if(!email||!CLOUD.ok||!CLOUD.hydrated)return Promise.resolve('Cloud authentication is unavailable');
- return CLOUD.sb.auth.resend({type:'signup',email:email}).then(function(r){
+ return CLOUD.sb.auth.resend({type:'signup',email:email,options:{emailRedirectTo:authRedirectUrl()}}).then(function(r){
   if(r.error)throw r.error;return null}).catch(function(e){return e&&e.message?e.message:String(e)})}
 function doLogin(email,pass){
  if(!CLOUD.ok||!CLOUD.hydrated)return Promise.resolve('Cloud authentication is unavailable');
@@ -991,6 +992,29 @@ function doLogin(email,pass){
   if(u.status==='SUSPENDED')return'Account suspended. Contact the manager.';
   if(u.status==='REVOKED')return'Account revoked. Contact the manager.';
   DB.session=u.id;return cloudPull().then(function(){save();audit(email,'Login','user '+u.id,'Supabase Auth');return null})})}
+var pendingNativeAuthUrl=null;
+function finishNativeAuthLink(rawUrl){
+ if(!window.PLOTOS_NATIVE||!rawUrl)return Promise.resolve();
+ if(!CLOUD.sb||!CLOUD.hydrated){pendingNativeAuthUrl=rawUrl;return Promise.resolve()}
+ var link;try{link=new URL(rawUrl)}catch(e){return Promise.resolve()}
+ if(link.protocol!=='com.plotos.trading:'||link.hostname!=='auth'||link.pathname!=='/callback')return Promise.resolve();
+ var query=new URLSearchParams(link.search),fragment=new URLSearchParams(link.hash.slice(1));
+ var authError=query.get('error_description')||fragment.get('error_description');
+ if(authError){toast('Email confirmation failed: '+authError,'dn');return Promise.resolve()}
+ var code=query.get('code'),access=fragment.get('access_token')||query.get('access_token'),refresh=fragment.get('refresh_token')||query.get('refresh_token');
+ var request=code?CLOUD.sb.auth.exchangeCodeForSession(code):access&&refresh?CLOUD.sb.auth.setSession({access_token:access,refresh_token:refresh}):null;
+ if(!request){toast('The email confirmation link is invalid or expired.','dn');return Promise.resolve()}
+ pendingNativeAuthUrl=null;
+ return request.then(function(r){
+  if(r.error)throw r.error;
+  var authUser=r.data&&r.data.session&&r.data.session.user||r.data&&r.data.user;
+  if(!authUser)throw new Error('Supabase did not return a confirmed user');
+  CLOUD.authRole=(authUser.app_metadata&&authUser.app_metadata.role)||null;
+  var profile=upsertAuthProfile(authUser);DB.session=profile.id;DEMO_MODE=false;save();
+  return cloudPull().then(function(){save();audit(authUser.email||'','Email confirmation','user '+profile.id,'Supabase Auth');enterApp(true)})
+ }).catch(function(e){toast('Could not complete email confirmation: '+(e.message||e),'dn')})
+}
+window.addEventListener('plotos:native-url',function(e){finishNativeAuthLink(e.detail)});
 function enterDemo(){
  if(PORTAL_ADMIN){toast('Demo trading login is available from the Trading Portal only','dn');return}
  DEMO_MODE=true;var id='demo-trader-local',u=DB.users.find(function(x){return x.id===id});
@@ -3491,6 +3515,8 @@ setInterval(function(){try{engineTick()}catch(e){}},600);
  if(DB.settings.lastTf&&TFSEC[DB.settings.lastTf])chart.tf=DB.settings.lastTf;
  startFeeds();
  cloudInit().then(function(){return seed()}).then(function(){
+  var nativeUrl=pendingNativeAuthUrl||window.__PLOTOS_NATIVE_URL;
+  if(nativeUrl){pendingNativeAuthUrl=null;return finishNativeAuthLink(nativeUrl)}
   if(DB.session&&user()){try{enterApp()}catch(e){showErr(e);renderAuth()}}
   else if(false){}
   else renderAuth()

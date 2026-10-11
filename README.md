@@ -49,13 +49,17 @@ Build the web app, stage the PLOTOS page in Capacitor's `dist/` directory, and s
 npm run mobile:sync
 ```
 
-Run `npm run mobile:build` alone only when you want to prepare `dist/` without syncing native projects. Use `npx cap add android` or `npx cap add ios` only if the corresponding native folder has been removed and needs to be regenerated.
+Run `npm run mobile:build` alone only when you want to prepare `dist/` without syncing native projects. Use `npx cap add android` or `npx cap add ios` only if the corresponding native folder has been removed and needs to be regenerated. Native icons and launch screens use the existing `public/favicon.ico` mark; regenerate them with `python3 scripts/generate-mobile-brand-assets.py` (requires Pillow).
 
-To build or open one platform at a time:
+Open one platform in its native IDE after syncing:
 
 ```sh
 npm run mobile:android
 npm run mobile:ios
 ```
 
-`mobile:android` opens Android Studio after syncing. On macOS, `mobile:ios` opens the iOS project in Xcode. Android release signing, store listing, iOS signing, and store submission still require the owner's developer accounts and credentials.
+`mobile:android` opens Android Studio after syncing. To create a debug APK, run `cd android && ./gradlew assembleDebug`; the APK is written under `android/app/build/outputs/apk/debug/`. On macOS, `mobile:ios` opens the iOS project in Xcode, where you can build/run or archive after selecting a signing team. Android release signing, iOS signing, and store submission still require the owner's developer accounts and credentials.
+
+### Mobile email confirmation
+
+The native projects register the `com.plotos.trading://auth/callback` URL scheme, and the mobile build handles Supabase confirmation links sent to that URI. In the Supabase Dashboard, add the exact URI under **Authentication → URL Configuration → Redirect URLs** before testing signup or resend-confirmation on a device. For production, prefer Universal Links/App Links on a domain you own; domain association and release signing must be configured for that domain.
