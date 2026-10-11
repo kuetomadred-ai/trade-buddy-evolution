@@ -1854,8 +1854,9 @@ function bindPriceScaleGesture(){
  },true);
  box.addEventListener('pointermove',function(e){
   var g=chart._axisDrag;if(!g)return;
-  var r=box.getBoundingClientRect(),delta=(e.clientY-r.top-g.y)/g.h,top=Math.max(.025,Math.min(.44,g.top+delta*.7)),bottom=Math.max(.025,Math.min(.44,g.bottom-delta*.7));
-  chart.c.priceScale('right').applyOptions({autoScale:false,scaleMargins:{top:top,bottom:bottom}});scheduleDrawRedraw();e.preventDefault();e.stopPropagation()
+  var r=box.getBoundingClientRect(),dy=e.clientY-r.top-g.y,z=Math.exp(dy*.0035),room=Math.max(.05,Math.min(.88,(g.top+g.bottom)*z)),k=g.top/Math.max(.001,g.top+g.bottom),top=Math.max(.02,Math.min(.46,room*k)),bottom=Math.max(.02,Math.min(.46,room*(1-k)));
+  e.preventDefault();e.stopPropagation();if(g.raf)return;
+  g.raf=requestAnimationFrame(function(){g.raf=0;if(!chart._axisDrag)return;chart.c.priceScale('right').applyOptions({autoScale:false,scaleMargins:{top:top,bottom:bottom}});scheduleDrawRedraw()})
  },true);
  box.addEventListener('wheel',function(e){var r=box.getBoundingClientRect(),x=e.clientX-r.left;if(x<r.width-72)return;var dy=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?100:1),sm=DB.settings.priceMargins||{top:.08,bottom:.12},z=Math.exp(dy*.0015),anchor=Math.max(.05,Math.min(.95,(e.clientY-r.top)/Math.max(1,r.height))),room=Math.max(.06,Math.min(.86,(sm.top+sm.bottom)*z)),top=Math.max(.025,Math.min(.44,room*anchor)),bottom=Math.max(.025,Math.min(.44,room*(1-anchor)));DB.settings.priceMargins={top:top,bottom:bottom};chart.c.priceScale('right').applyOptions({autoScale:false,scaleMargins:DB.settings.priceMargins});scheduleDrawRedraw();e.preventDefault();e.stopPropagation()},{capture:true,passive:false});
  box.addEventListener('dblclick',function(e){var r=box.getBoundingClientRect();if(e.clientX-r.left<r.width-72)return;chart.c.priceScale('right').applyOptions({autoScale:true,scaleMargins:{top:.08,bottom:.12}});chart._axisDrag=null;e.preventDefault();e.stopPropagation()},{capture:true});
@@ -1896,9 +1897,13 @@ function dragLineMove(xy){
  if(DRAG.ord){DRAG.ord.price=pr}
  else{var p=DRAG.pos;
   if(DRAG.kind==='sl'){var ok=p.side==='buy'?pr<p.entry:pr>p.entry;if(ok)p.sl=pr}
-  else if(DRAG.kind==='tp'){var ok2=p.side==='buy'?pr>p.entry:pr<p.entry;if(ok2)p.tp=pr}}
+  else if(DRAG.kind==='tp'){var ok2=p.side==='buy'?pr>p.entry:pr<p.entry;if(ok2)p.tp=pr}
+  try{var pt=Math.pow(10,-S.digits),pts=(pr-p.entry)/pt*(p.side==='buy'?1:-1),usd=(pr-p.entry)*(p.side==='buy'?1:-1)*p.lots*(S.contract||S.contractSize||100000),tip=document.getElementById('mt5DragTip');
+   if(!tip){tip=document.createElement('div');tip.id='mt5DragTip';tip.style.cssText='position:absolute;left:8px;z-index:60;pointer-events:none;background:rgba(20,26,38,.92);color:#E8ECF6;font:11px IBM Plex Mono,monospace;padding:4px 8px;border-radius:4px;white-space:nowrap';var bx=$('#chartBox');if(bx)bx.appendChild(tip)}
+   tip.style.display='block';tip.style.top=Math.max(0,xy.y-28)+'px';
+   tip.innerHTML=DRAG.kind.toUpperCase()+' '+pr.toFixed(S.digits)+' <span style="color:'+(usd>=0?'#4D8DFF':'#EF5350')+'">('+(pts>=0?'+':'')+pts.toFixed(0)+' pts / '+(usd>=0?'+':'')+'$'+usd.toFixed(2)+')</span>'}catch(_){}}
  if(!chart._lineRaf)chart._lineRaf=requestAnimationFrame(function(){chart._lineRaf=0;chartDrawLines()})}
-function endLineDrag(){if(!DRAG)return;var moved=DRAG,ord=moved.ord,pos=moved.pos;DRAG=null;chartDrawLines();
+function endLineDrag(){var tp0=document.getElementById('mt5DragTip');if(tp0)tp0.style.display='none';if(!DRAG)return;var moved=DRAG,ord=moved.ord,pos=moved.pos;DRAG=null;chartDrawLines();
  confirmM(ord?'Modify order level':'Confirm level change',ord?'Save the new pending-order price?':'Save the new Stop Loss / Take Profit level?','Confirm',false).then(function(ok){
   if(!ok){if(ord)ord.price=moved.original.price;else{pos.sl=moved.original.sl;pos.tp=moved.original.tp}chartDrawLines();return}
   save();chartDrawLines();if(view==='trade')paintTrade(true);toast('Level updated','up')})}
