@@ -1,0 +1,10 @@
+{
+  "appId": "com.plotos.trading",
+  "appName": "PLOTOS FUND",
+  "webDir": "dist",
+  "backgroundColor": "#000000",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#000000"
+  }
+}
