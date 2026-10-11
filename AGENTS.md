@@ -19,4 +19,5 @@
 - `public/plotos/admin.html` intentionally redirects to the authenticated staff portal in `index.html?portal=admin`; never replace it with a localStorage-only mock admin dashboard.
 - Capacitor config and Android/iOS native projects already exist. Extend the existing setup rather than adding duplicate configs or regenerating platforms blindly.
 - Load the Biquote instrument catalogue with `quotedWithinDays=7`, not `liveOnly=true`; the latter hides closed-market instruments. Quote freshness must remain separate from instrument visibility, and cached quotes must never authorize simulated orders.
+- Keep chart candles on the Bid/Ask midpoint and spread lines on exact Bid and Ask. Reconcile the final candle only when a timestamped quote belongs to its timeframe period, including calendar months; never rewrite other historical bars, and ignore older or untimed quotes after a reliable newer quote.
 - Before changing Supabase tables or RLS, inspect the live schema and policies. The current JSON blob sync is not authoritative for balances or entitlements; do not claim financial/account-state security without server-side enforcement. See `SECURITY_AND_DATABASE.md`.
