@@ -2220,7 +2220,7 @@ function chartLoad(){return ensureChartLib().then(function(ok){
  var tok=++chart.token,sym=chart.sym,tf=chart.tf,S=SYMBOLS[sym];if(!S)return Promise.resolve();
  if(chart.scaleSym!==sym){chart.scaleSym=sym;chart.following=true;chart._axisDrag=null;DB.settings.priceMargins={top:.08,bottom:.12};chart.c.priceScale('right').applyOptions({autoScale:true,scaleMargins:DB.settings.priceMargins});chart.candleArr=[];chart.cs.setData([]);chart.ls.setData([]);chart.ar.setData([]);chart.cur=null;syncLivePriceLines()}
  chart.dataSym='';chart.dataTf='';
- chart.cs.applyOptions({priceFormat:{type:'price',precision:S.digits,minMove:Math.pow(10,-S.digits)}});
+ chart.cs.applyOptions({priceFormat:{type:'price',precision:S.digits,minMove:1/Math.pow(10,S.digits)}});
 	function applyFresh(res){if(tok!==chart.token||chart.sym!==sym||chart.tf!==tf||!chart.cs)return;chart.candleArr=res.data;chart.dataSym=sym;chart.dataTf=tf;chart.kSrc=res.src;syncChartCandleWithQuote(sym,tf);setSeriesData();applyIndicators();if(chart.following)frameChartWindow();chartDrawLines();chartDrawMarkers();redrawDrawings();syncLivePriceLines();paintMarketNote()}
 	return fetchK(sym,tf,applyFresh).then(function(res){
 	 if(tok!==chart.token)return;
