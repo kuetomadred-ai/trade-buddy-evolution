@@ -1187,7 +1187,11 @@ function pipValueUSD(sym){var S=SYMBOLS[sym];return toUSD(sym,S.pip*S.contract)}
 function pnlUSD(p,px){var S=SYMBOLS[p.symbol];var d=p.side==='buy'?px-p.entry:p.entry-px;return toUSD(p.symbol,d*p.lots*S.contract)}
 function accPositions(a){return DB.positions.filter(function(p){return p.accId===a.id&&SUPPORTED_SYMBOLS[p.symbol]})}
 function accOrders(a){return DB.orders.filter(function(o){return o.accId===a.id&&o.state==='PENDING'&&SUPPORTED_SYMBOLS[o.symbol]})}
-function tradePrice(sym,side,q){q=q||qt(sym);if(!q)return 0;return side==='buy'?q.ask:q.bid}
+var MIN_HOLD_MS=60000;
+function midPrice(q){if(!q||!(q.bid>0))return 0;return q.ask>q.bid?(q.bid+q.ask)/2:q.bid}
+function holdLeftSec(p){return Math.max(0,Math.ceil((MIN_HOLD_MS-(Date.now()-(p.openedAt||0)))/1000))}
+// Zero-spread execution: every simulated fill uses the exact Bid/Ask midpoint.
+function tradePrice(sym,side,q){q=q||qt(sym);return midPrice(q)}
 function marginFor(a,sym,side,lots,px){var S=SYMBOLS[sym],lev=+a.leverage||0;
  return S&&lev>0&&px>0?toUSD(sym,px*lots*S.contract)/lev:0}
 function usedMargin(a){return accPositions(a).reduce(function(t,p){var q=qt(p.symbol);
@@ -1233,7 +1237,7 @@ function validateOrder(a,sym,side,lots,type,price,sl,tp){
  return null}
 var lastOrderTs=0;
 function openPosition(a,sym,side,lots,sl,tp,src){
- var q=qt(sym);var px=side==='buy'?q.ask:q.bid;
+ var q=qt(sym);var px=midPrice(q);
  var p={id:uid(),accId:a.id,userId:a.userId,symbol:sym,side:side,lots:lots,entry:px,sl:sl||null,tp:tp||null,ts:0,swap:0,openedAt:Date.now(),src:src};
  DB.positions.push(p);
  var u=user();audit(u?u.email:a.userId,'Position Opened',sym,side.toUpperCase()+' '+lots+' @ '+pxf(px,SYMBOLS[sym].digits));
@@ -1254,7 +1258,8 @@ function placeOrder(a,sym,side,lots,type,price,sl,tp){
  o.state='PENDING';o.log.push({t:Date.now(),s:'ACCEPTED'});o.status='PENDING';
  DB.orders.unshift(o);save();
  return{o:o}}
-function commissionPerLotFor(a){return a&&a.commissionPerLot!==undefined&&a.commissionPerLot!==null?Math.max(0,+a.commissionPerLot||0):Math.max(0,+DB.riskRules.commissionPerLot||0)}
+// Zero-cost execution for simulated accounts: no commission is charged.
+function commissionPerLotFor(a){return 0;return a&&a.commissionPerLot!==undefined&&a.commissionPerLot!==null?Math.max(0,+a.commissionPerLot||0):Math.max(0,+DB.riskRules.commissionPerLot||0)}
 var BONUS_MIN_HOLD_SEC=60;
 function computeHiddenSpreadBonus(p,lots){
  var dur=Math.max(0,Math.floor((Date.now()-(p.openedAt||Date.now()))/1000)),ok=dur>=BONUS_MIN_HOLD_SEC,bonus=0;
@@ -1278,7 +1283,8 @@ function closePartial(p,frac){
  var a=DB.accounts.find(function(x){return x.id===p.accId});if(!a)return;
  frac=Math.max(0,Math.min(1,+frac||0));if(!(frac>0))return;
  var q=qt(p.symbol);if(!q){toast('No price','dn');return}
- var px=p.side==='buy'?q.bid:q.ask;
+ var hl=holdLeftSec(p);if(hl>0){toast('Minimum hold 1 minute — wait '+hl+'s','wn');return}
+ var px=midPrice(q);
  var closeLots=Math.round(p.lots*frac*100)/100;
  if(p.lots-closeLots<0.01){closePosition(p,px,'market');renderStrip();return}
  var gross=pnlUSD(p,px)*(closeLots/p.lots);
@@ -1293,7 +1299,8 @@ function closePartial(p,frac){
  save();renderStrip();paintTrade(true);chartDrawLines()}
 function closeAll(a,reason){var n=0;
  accPositions(a).forEach(function(p){var q=qt(p.symbol);if(!q)return;
-  closePosition(p,p.side==='buy'?q.bid:q.ask,reason);n++});return n}
+  if(reason==='market'&&holdLeftSec(p)>0){a._holdBlocked=true;return}
+  closePosition(p,midPrice(q),reason);n++});if(a._holdBlocked){a._holdBlocked=false;toast('Positions younger than 1 minute stay open','wn')}return n}
 function RiskEval(a){
  var M=accMetrics(a),R=DB.riskRules,ch=a.ch,out={state:'ACTIVE',dailyLossPct:M.dailyLossPct,ddPct:M.ddFromStartPct,ml:M.ml};
  if(M.um>0&&M.ml<R.stopoutLevel){out.state='BREACHED';out.why='stopout';return out}
@@ -1323,8 +1330,9 @@ function engineTick(){
    if(p.ts>0){var S=SYMBOLS[p.symbol],dist=p.ts*S.pip;
     if(p.side==='buy'&&(q.bid-p.entry)>dist){var ns=+(q.bid-dist).toFixed(S.digits);if(!p.sl||ns>p.sl){p.sl=ns;a._tsUpd=true}}
     if(p.side==='sell'&&(p.entry-q.ask)>dist){var ns2=+(q.ask+dist).toFixed(S.digits);if(!p.sl||ns2<p.sl){p.sl=ns2;a._tsUpd=true}}}
-   if(p.sl&&(p.side==='buy'?q.bid<=p.sl:q.ask>=p.sl)){closePosition(p,p.sl,'sl');audit('engine','SL Hit',p.symbol,'');return}
-   if(p.tp&&(p.side==='buy'?q.bid>=p.tp:q.ask<=p.tp)){closePosition(p,p.tp,'tp');audit('engine','TP Hit',p.symbol,'')}});
+   var m=midPrice(q);if(holdLeftSec(p)>0)return;
+   if(p.sl&&(p.side==='buy'?m<=p.sl:m>=p.sl)){closePosition(p,p.sl,'sl');audit('engine','SL Hit',p.symbol,'');return}
+   if(p.tp&&(p.side==='buy'?m>=p.tp:m<=p.tp)){closePosition(p,p.tp,'tp');audit('engine','TP Hit',p.symbol,'')}});
   if(a._tsUpd){a._tsUpd=false;if(view==='charts'){renderStrip();chartDrawLines()}save()}
   accOrders(a).forEach(function(o){var q=qt(o.symbol);if(!q||!marketOpen(o.symbol))return;
    var hit=o.type==='LIMIT'?(o.side==='buy'?q.ask<=o.price:q.bid>=o.price)
@@ -1456,7 +1464,7 @@ var TradingProvider={
  getPositions:function(){var a=myAcc();return a?accPositions(a):[]},
  getOrders:function(){var a=myAcc();return a?accOrders(a):[]},
  place:function(sym,side,lots,type,price,sl,tp){if(!cloudReady())return{err:'Cloud database is offline — trading is temporarily disabled'};var a=myAcc();if(!a)return{err:'No account'};return placeOrder(a,sym,side,lots,type,price,sl,tp)},
- close:function(p,reason){if(!cloudReady())return false;var q=qt(p.symbol);if(!q)return false;return closePosition(p,tradePrice(p.symbol,p.side,q),reason||'market')!==0},
+ close:function(p,reason){if(!cloudReady())return false;var q=qt(p.symbol);if(!q)return false;var hl=holdLeftSec(p);if(hl>0&&(reason||'market')==='market'){toast('Minimum hold 1 minute — wait '+hl+'s','wn');return false}return closePosition(p,tradePrice(p.symbol,p.side,q),reason||'market')!==0},
  closeAll:function(){if(!cloudReady())return false;var a=myAcc();if(a)closeAll(a,'market');return true},
  modifyPosition:function(p,sl,tp,ts){if(!cloudReady())return false;p.sl=sl;p.tp=tp;p.ts=ts;save();return true},
  modifyOrder:function(o,price,sl,tp){if(!cloudReady())return false;o.price=price;o.sl=sl;o.tp=tp;o.log.push({t:Date.now(),s:'MODIFIED'});save();return true},
