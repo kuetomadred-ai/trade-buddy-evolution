@@ -676,6 +676,44 @@ html[dir="rtl"] #drawer{border-left:1px solid #292929}
 @media(min-width:960px){body{justify-content:center}#app{max-width:480px;flex-direction:column}#bnav{display:flex!important}#shellMain{height:auto}}
 #chartEl{touch-action:none;overscroll-behavior:contain}
 @media (orientation:landscape) and (max-height:520px){#bnav,.pre-nav,#marketNote{display:none!important}}
+@media(max-width:959px){
+ #app.chartMode{max-width:480px;background:#000}
+ #app.chartMode #shellMain,#app.chartMode #v-charts{background:#000}
+ #app.chartMode #shellMain{overflow:hidden;overscroll-behavior:none}
+ #app.chartMode .ctools{height:48px;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:0;padding:0 7px;background:#000;border-bottom:1px solid #303030;overflow:hidden}
+ #app.chartMode .ctools>span[style*="flex:1"]{display:none}
+ #app.chartMode .ctb{flex:1 1 0;min-width:0!important;height:47px;padding:0;color:#dedede;justify-content:center}
+ #app.chartMode .ctb svg{width:21px;height:21px}
+ #app.chartMode .ctb.tfquick{font-family:Arial,sans-serif!important;font-size:17px!important;font-weight:500!important;color:#eee!important}
+ #app.chartMode .ctb.on{color:#2581f3}
+ #app.chartMode #mktChip{display:none!important}
+ #app.chartMode .odbar{height:40px;min-height:40px;background:#000;border-bottom:1px solid #333;gap:0}
+ #app.chartMode .od{position:relative;min-width:0;padding:3px 5px;background:#347FEA;align-items:center;justify-content:center}
+ #app.chartMode .od:first-child,#app.chartMode .od:last-child{background:#347FEA}
+ #app.chartMode .od small{align-self:flex-start;margin-left:1px;font-size:9px;line-height:1;letter-spacing:.2px;opacity:1;font-weight:500}
+ #app.chartMode .od .p{font-size:17px;line-height:1.05;font-weight:600;align-self:center}
+ #app.chartMode .od .p sup{font-size:11px}
+ #app.chartMode .odmid{width:44%;min-width:0;background:#000;color:#fff;padding:0 4px;border-left:1px solid #292929;border-right:1px solid #292929}
+ #app.chartMode .odmid button{width:34px;color:#f2f2f2;font-size:20px}
+ #app.chartMode .odmid .lotbox{min-width:48px}
+ #app.chartMode .odmid .lotbox small{display:none}
+ #app.chartMode .odmid input{width:50px;color:#fff;font-size:17px;font-weight:400}
+ #app.chartMode #chartBox{background:#000;border-top:1px solid #303030}
+ #app.chartMode .charttitle{top:8px;left:5px;max-width:68%;display:flex;flex-wrap:wrap;align-items:center;column-gap:4px;row-gap:0;color:#4D8DFF;font-family:Arial,Roboto,sans-serif;font-size:13px;line-height:1.25}
+ #app.chartMode .charttitle span{color:#929292;font-size:11px}
+ #app.chartMode .charttitle small{flex:0 0 100%;margin:1px 0 0;color:#eee;font-family:Arial,Roboto,sans-serif;font-size:12px;line-height:1.2}
+ #app.chartMode .market-note{top:42px;left:5px;border-radius:0;font-size:9px}
+ #app.chartMode #bnav{height:66px;min-height:66px;padding:3px 0 max(3px,env(safe-area-inset-bottom));background:#000;border-top:1px solid #303030}
+ #app.chartMode #bnav button{gap:3px;color:#d0d0d0;font-size:11px;min-height:54px;padding:2px 0;font-weight:500}
+ #app.chartMode #bnav button svg{width:22px;height:22px;stroke-width:1.7}
+ #app.chartMode #bnav button.on{color:#347FEA}
+ #app.chartMode #bnav button.on:before{display:none}
+ #app.chartMode #bnav button[data-v="trade"]{font-size:0;gap:0}
+ #app.chartMode #bnav button[data-v="trade"] svg{display:none}
+ #app.chartMode #bnav button[data-v="trade"] .navpill{position:static;order:0;transform:none;top:auto;left:auto;margin:0;padding:3px 9px;border-radius:14px;background:#25262b;color:#aeb0b5;font-size:10px;font-weight:600;line-height:1.2}
+ #app.chartMode #bnav button[data-v="trade"].on:before{display:none}
+}
+@media(max-width:390px){#app.chartMode .odmid{width:43%}#app.chartMode .od .p{font-size:16px}#app.chartMode .odmid button{width:28px}}
 </style>
 </head>
 <body>
@@ -829,7 +867,7 @@ function freshDB(){return{
  accounts:[],positions:[],orders:[],history:[],notifications:[],audit:[],payouts:[],chRequests:[],alerts:[],wallets:{},
  settings:{theme:'dark',lang:'en',
   sbUrl:'https://jujjjvuspzfgrmeljljh.supabase.co',sbKey:'sb_publishable_X9YRYOHzL1v0OVXF_KRjiw_EHj7kTdV',
-  paymentOn:false,paymentInfo:'Contact the manager to complete payment, then your account will be activated.',lastSym:'XAUUSD',lastTf:'15m',favorites:[],watchlist:null,oscH:140,
+  paymentOn:false,paymentInfo:'Contact the manager to complete payment, then your account will be activated.',lastSym:'XAUUSD',lastTf:'1m',favorites:[],watchlist:null,oscH:140,
   ind:{ema20:false,ema50:false,ema200:false,sma200:false,wma20:false,bb:false,vwap:false,don:false,psar:false,ichi:false,mom:false,cci:false,adx:false,rsi:false,stoch:false,macd:false,atr:false},
    drawings:{},priceMargins:null,chart:{ohlc:false,dataWindow:false,volumes:false,tradePositions:true,tradeOrders:true,tradeHistory:true,grid:true,profitLoss:true,slTp:true,periodSeparators:false,askLine:true,lastPriceLine:true,oneClickPanel:true,countdown:false,freeMove:false,radialTap:true}}
 }}
@@ -1046,7 +1084,7 @@ function enterDemo(){
  if(!u){u={id:id,email:'demo@plotos.local',name:'Demo Trader',role:'TRADER',status:'ACTIVE',createdAt:Date.now(),refCode:'PFDEMO01',kyc:'NONE',termsAt:Date.now(),_u:Date.now()};DB.users.push(u)}
  var a=DB.accounts.find(function(x){return x.userId===id&&x.kind==='PAPER'});
  if(!a){a=mkAccount(id,'t50','PAPER');a.login=90001;DB.accounts.push(a)}
- DB.activeAcc[id]=a.id;DB.session=id;CLOUD.authRole='TRADER';termSym=SYMBOLS.XAUUSD?'XAUUSD':(SYMBOLS.XAUUSD_HKN?'XAUUSD_HKN':(SYIDS[0]||termSym));chart.sym=termSym;chart.tf='15m';DB.settings.lastSym=termSym;DB.settings.lastTf='15m';DB.settings.ind.rsi=false;save();audit('demo','Demo Login','account '+a.login,'Local paper account');enterApp(false)
+ DB.activeAcc[id]=a.id;DB.session=id;CLOUD.authRole='TRADER';termSym=SYMBOLS.XAUUSD?'XAUUSD':(SYMBOLS.XAUUSD_HKN?'XAUUSD_HKN':(SYIDS[0]||termSym));chart.sym=termSym;chart.tf='1m';DB.settings.lastSym=termSym;DB.settings.lastTf='1m';DB.settings.ind.rsi=false;save();audit('demo','Demo Login','account '+a.login,'Local paper account');enterApp(false)
 }
 function doLogout(){var u=user();var done=!DEMO_MODE&&CLOUD.ok?CLOUD.sb.auth.signOut():Promise.resolve();done.catch(function(){}).then(function(){if(u)audit(u.email,'Logout','user',DEMO_MODE?'Local demo':'Supabase Auth');DB.session=null;DEMO_MODE=false;save();closeDrawer();renderAuth()})}
 window.doLogout=doLogout;
@@ -1436,7 +1474,7 @@ function ensureChartLib(){
    s.onerror=function(){try{s.remove()}catch(e){};next()};
    document.head.appendChild(s)})()});
  return libPromise}
-var chart={c:null,cs:null,ls:null,ar:null,is:{},oc:null,os:{},cur:null,candleArr:[],dataSym:'',dataTf:'',kSrc:'Biquote',lines:[],plRefs:[],ordLines:[],spreadLines:[],liveLines:{},sym:'',tf:'5m',style:'candles',crosshair:false,sessOn:false,dtOn:false,dragMode:false,oscH:140,token:0,following:true,gesture:null,drawRaf:0};
+var chart={c:null,cs:null,ls:null,ar:null,is:{},oc:null,os:{},cur:null,candleArr:[],dataSym:'',dataTf:'',kSrc:'Biquote',lines:[],plRefs:[],ordLines:[],spreadLines:[],liveLines:{},sym:'',tf:'1m',style:'candles',crosshair:false,sessOn:false,dtOn:false,dragMode:false,oscH:140,token:0,following:true,gesture:null,drawRaf:0};
 function resetChartIfStale(){
  var el=$('#chartEl');
  if(chart.c&&(!el||!el.isConnected||chart.c._el!==el)){
@@ -1453,15 +1491,15 @@ function chartMount(){
  var el=$('#chartEl');
  if(!el||typeof LightweightCharts==='undefined')return false;
  chart.c=LightweightCharts.createChart(el,{autoSize:true,localization:{locale:"en-US"},
-  layout:{background:{type:'solid',color:'#000000'},textColor:'#9AA3B5',fontFamily:'IBM Plex Mono'},
-  grid:{vertLines:{color:'#0F1522'},horzLines:{color:'#0F1522'}},
-  rightPriceScale:{visible:true,borderColor:'#1B2540',borderVisible:true,ticksVisible:true,entireTextOnly:true,minimumWidth:62,scaleMargins:DB.settings.priceMargins||{top:.08,bottom:.12}},
-  leftPriceScale:{visible:false,borderColor:'#1B2540'},
-  timeScale:{borderColor:'#1B2540',timeVisible:true,secondsVisible:false,barSpacing:7,rightOffset:8,uniformDistribution:true,minBarSpacing:1.5},kineticScroll:{touch:true,mouse:true},trackingMode:{exitMode:1},
+  layout:{background:{type:'solid',color:'#000000'},textColor:'#E7E7E7',fontFamily:'Arial, Roboto, sans-serif',fontSize:11},
+  grid:{vertLines:{color:'#101010'},horzLines:{color:'#101010'}},
+  rightPriceScale:{visible:true,borderColor:'#555555',borderVisible:true,ticksVisible:true,entireTextOnly:true,minimumWidth:66,scaleMargins:DB.settings.priceMargins||{top:.08,bottom:.12}},
+  leftPriceScale:{visible:false,borderColor:'#555555'},
+  timeScale:{borderColor:'#555555',timeVisible:true,secondsVisible:false,barSpacing:7,rightOffset:8,uniformDistribution:true,minBarSpacing:1.5},kineticScroll:{touch:true,mouse:true},trackingMode:{exitMode:1},
   handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true}},handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:false},
   crosshair:{mode:0,vertLine:{color:'#4D8DFF55',labelBackgroundColor:'#4D8DFF'},horzLine:{color:'#4D8DFF55',labelBackgroundColor:'#4D8DFF'}}});
  chart.c._el=el;
- chart.cs=chart.c.addCandlestickSeries({upColor:'#089981',downColor:'#EF5350',borderUpColor:'#089981',borderDownColor:'#EF5350',borderVisible:true,wickUpColor:'#089981',wickDownColor:'#EF5350',priceLineVisible:false,lastValueVisible:false});
+ chart.cs=chart.c.addCandlestickSeries({upColor:'#26A69A',downColor:'#E85B61',borderUpColor:'#26A69A',borderDownColor:'#E85B61',borderVisible:true,wickUpColor:'#26A69A',wickDownColor:'#E85B61',priceLineVisible:false,lastValueVisible:false});
  chart.ls=chart.c.addLineSeries({color:'#4D8DFF',lineWidth:2,visible:false,priceLineVisible:false,lastValueVisible:false});
  chart.ar=chart.c.addAreaSeries({lineColor:'#26A69A',topColor:'rgba(38,166,154,.2)',bottomColor:'rgba(38,166,154,0)',lineWidth:1,visible:false,priceLineVisible:false,lastValueVisible:false});
  var I=chart.is;
@@ -2221,14 +2259,14 @@ function syncChartCandleWithQuote(sym,tf){
 function syncLivePriceLines(){if(!chart.cs)return;var sym=chart.sym,S=SYMBOLS[sym],C=DB.settings.chart||{},quote=getDisplayQuote(sym);
  function removeLine(key){if(chart.liveLines[key]){try{chart.cs.removePriceLine(chart.liveLines[key])}catch(e){}chart.liveLines[key]=null}}
  if(!quote||!S||!(quote.bid>0)){removeLine('bid');removeLine('ask');return}
-	var closed=!marketOpen(sym),color=quote.fromCache?'#A8ADB8':(closed?'#787B86':'#4D8DFF');
+ var closed=!marketOpen(sym),color=quote.fromCache?'#A8ADB8':(closed?'#85858A':'#26A69A');
 		var quoteState=quote.fromCache?'CACHED':(quote.status==='STALE'?'STALE':(closed?'CLOSED':quote.status==='LIVE'?'LIVE':'LAST'));
-		var title=quoteState+' BID'+(quoteState==='LIVE'&&C.countdown!==false?' · '+barCountdown():'');
+		var title=quoteState==='LIVE'&&C.countdown!==false?barCountdown():'';
 		try{
   if(C.lastPriceLine===false)removeLine('bid');
   else if(!chart.liveLines.bid)chart.liveLines.bid=chart.cs.createPriceLine({price:quote.bid,color:color,lineWidth:1,lineStyle:0,axisLabelVisible:true,title:title});
   if(chart.liveLines.bid)chart.liveLines.bid.applyOptions({price:quote.bid,color:color,title:title});
-		 if(C.askLine!==false&&quote.ask>0){var askColor=closed?'#9A8183':'#E85B61',askTitle=quoteState+' ASK';if(!chart.liveLines.ask)chart.liveLines.ask=chart.cs.createPriceLine({price:quote.ask,color:askColor,lineWidth:1,lineStyle:0,axisLabelVisible:true,title:askTitle});chart.liveLines.ask.applyOptions({price:quote.ask,color:askColor,title:askTitle})}
+  if(C.askLine!==false&&quote.ask>0){var askColor=closed?'#8E7779':'#E85B61',askTitle=quoteState+' ASK';if(!chart.liveLines.ask)chart.liveLines.ask=chart.cs.createPriceLine({price:quote.ask,color:askColor,lineWidth:1,lineStyle:0,axisLabelVisible:false,title:askTitle});chart.liveLines.ask.applyOptions({price:quote.ask,color:askColor,axisLabelVisible:false,title:askTitle})}
   else removeLine('ask')
  }catch(e){}}
 setInterval(function(){if(view==='charts')syncLivePriceLines()},1000);
@@ -2268,7 +2306,7 @@ var NAV=[['quotes','Quotes','M5 20v-7M10 20V5M15 20v-10M20 20V8'],
  ['trade','Trade','M4 17l5-5 4 4 7-8M14 8h6v6'],
  ['hist','History','M12 21a9 9 0 100-18 9 9 0 000 18zM12 7v5l3.5 2'],
  ['messages','Messages','M4 5h16v11H8l-4 4z']];
-function navGo(v){view=v;
+function navGo(v){view=v;var app=$('#app');if(app)app.classList.toggle('chartMode',view==='charts');
  if(view!=='charts'&&chart.c){
   stopDraw()}
  $$('.screen').forEach(function(s){s.classList.remove('on')});
@@ -2291,10 +2329,7 @@ function updateBadges(){var u=user();if(!u)return;
  var a=myAcc();
  var pill=$('#navPill');
  if(pill){
-  if(a&&accPositions(a).length){
-   var fl=equity(a)-a.balance;
-   pill.style.display='';pill.textContent=(fl>=0?'+':'')+fl.toFixed(2);
-   pill.className='navpill '+(fl>=0?'up':'dn')}
+  if(a){pill.style.display='';pill.textContent=(+a.balance||0).toFixed(2);pill.className='navpill account'}
   else pill.style.display='none'}}
 function openDrawer(){var u=user();if(!u)return;
  if(PORTAL_ADMIN){
@@ -2460,20 +2495,20 @@ function openCharts(){var el=$('#v-charts');
  '<div class="ctools">'+
   '<button class="ctb" id="mBtn">'+menuSvg()+'</button>'+
   '<button class="ctb" id="chBtn" title="Crosshair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg></button>'+
-  '<button class="ctb" id="indBtn" title="Indicators" style="font-style:italic;font-weight:700;font-size:18px">〽</button>'+ 
+  '<button class="ctb" id="indBtn" title="Indicators"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16c3.2 0 3.2-8 6.4-8s3.2 10 6.4 10 3.2-8 5.2-8"/><path d="M4 20h4M16 5h4"/></svg></button>'+
   '<button class="ctb tfquick" id="tfQuick" title="Current timeframe">'+(TFLBL[chart.tf]||chart.tf)+'</button>'+ 
-  '<button class="ctb" id="sessBtn" title="Timeframes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></button>'+ 
-  '<button class="ctb '+(chart.dtOn?'on':'')+'" id="dtBtn" title="Objects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 16l8-8"/></svg></button>'+ 
+  '<button class="ctb" id="sessBtn" title="Timeframes"><svg viewBox="0 0 24 24"><path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5H12z" fill="#E85B61"/><path d="M12 2.5V12h9.5A9.5 9.5 0 0 0 12 2.5Z" fill="#347FEA"/></svg></button>'+
+  '<button class="ctb '+(chart.dtOn?'on':'')+'" id="dtBtn" title="Objects"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="12" height="12" rx="2" fill="#E85B61"/><rect x="9" y="4" width="12" height="12" rx="2" fill="#347FEA"/><rect x="9" y="9" width="6" height="4" rx="1" fill="#CFE1FF"/></svg></button>'+
   '<span style="flex:1"></span>'+ 
   '<span class="dschip OFFLINE" id="mktChip" style="display:none">CLOSED</span>'+ 
  '</div>'+ 
  '<div class="odbar">'+
   '<button class="od" id="qSell"><small>SELL</small><span class="p" id="qSellPx">—</span></button>'+
-  '<div class="odmid"><button id="lotDn" aria-label="Decrease volume">⌄</button><div class="lotbox"><small id="qSpread">SPREAD —</small><input id="lotIn" inputmode="decimal" aria-label="Order volume in lots" value="'+lastLots.toFixed(2)+'"></div><button id="lotUp" aria-label="Increase volume">⌃</button></div>'+
+  '<div class="odmid"><button id="lotDn" aria-label="Decrease volume">⌄</button><div class="lotbox"><small id="qSpread">SPREAD —</small><input id="lotIn" inputmode="decimal" aria-label="Order volume in lots" value="'+formatLots(lastLots)+'"></div><button id="lotUp" aria-label="Increase volume">⌃</button></div>'+
   '<button class="od" id="qBuy"><small>BUY</small><span class="p" id="qBuyPx">—</span></button>'+ 
  '</div>'+ 
  (chart.sessOn?'<div class="sessrow" id="sessRow"></div>':'')+
- '<div id="chartBox"><span id="mBid" style="display:none"></span><span id="mAsk" style="display:none"></span><span id="mSymName" style="display:none"></span><span id="mSymState" style="display:none"></span><span id="mSymStatus" style="display:none"></span><div class="charttitle"><b id="chartTitleSym">'+termSym+'</b><span>›</span><b id="chartTitleTf">'+(TFLBL[chart.tf]||chart.tf)+'</b><small id="chartTitleDesc">'+esc((SYMBOLS[termSym]||{}).desc||'')+'</small></div>'+ 
+ '<div id="chartBox"><span id="mBid" style="display:none"></span><span id="mAsk" style="display:none"></span><span id="mSymName" style="display:none"></span><span id="mSymState" style="display:none"></span><span id="mSymStatus" style="display:none"></span><div class="charttitle"><b id="chartTitleSym">'+termSym+'</b><span>▾</span><b id="chartTitleTf">'+(TFLBL[chart.tf]||chart.tf)+'</b><small id="chartTitleDesc">'+esc((SYMBOLS[termSym]||{}).desc||'')+'</small></div>'+
    '<div id="mainWrap"><div id="chartEl"></div><canvas id="drawCv"></canvas><div id="marketNote" class="market-note"></div><button class="chart-live-btn" id="chartLive" aria-label="Return to current price" title="Current price">›</button>'+ 
     '<div id="dSelBar" class="dselbar"><span class="grip">⋮⋮</span><b id="dSelName"></b>'+
      '<button id="dsEdit" aria-label="Edit object"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg></button>'+
@@ -2522,8 +2557,9 @@ function bigPx(v,d){if(!(v>0))return'—';
  if(d<=2)return s;
  var head=s.slice(0,-1),tail=s.slice(-1);
  return head+'<sup>'+tail+'</sup>'}
+function formatLots(v){return(+v||0).toFixed(2).replace(/\.?0+$/,'')}
 function setLots(v){lastLots=Math.max(0.01,Math.min(100,Math.round(v*100)/100));
- var i=$('#lotIn');if(i)i.value=lastLots.toFixed(2)}
+ var i=$('#lotIn');if(i)i.value=formatLots(lastLots)}
 function getLots(){var el=$('#lotIn');var v=parseFloat(el?el.value:'0.1')||0.1;
  return Math.max(0.01,Math.min(100,Math.round(v*100)/100))}
 function quickTrade(side){var acc=myAcc();
