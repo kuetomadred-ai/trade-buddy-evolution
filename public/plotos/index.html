@@ -2216,7 +2216,9 @@ function chartLoad(){return ensureChartLib().then(function(ok){
  if(!ok){var n0=$('#cmeta');if(n0)n0.innerHTML='<div class="l2">chart lib blocked — trading still works</div>';return}
  resetChartIfStale();
  if(!chartMount())return;
- var tok=++chart.token,sym=chart.sym,tf=chart.tf,S=SYMBOLS[sym];chart.dataSym='';chart.dataTf='';if(!S)return Promise.resolve();
+ var tok=++chart.token,sym=chart.sym,tf=chart.tf,S=SYMBOLS[sym];if(!S)return Promise.resolve();
+ if(chart.scaleSym!==sym){chart.scaleSym=sym;chart.following=true;chart._axisDrag=null;DB.settings.priceMargins={top:.08,bottom:.12};chart.c.priceScale('right').applyOptions({autoScale:true,scaleMargins:DB.settings.priceMargins});chart.candleArr=[];chart.cs.setData([]);chart.ls.setData([]);chart.ar.setData([]);chart.cur=null;syncLivePriceLines()}
+ chart.dataSym='';chart.dataTf='';
  chart.cs.applyOptions({priceFormat:{type:'price',precision:S.digits,minMove:Math.pow(10,-S.digits)}});
 	function applyFresh(res){if(tok!==chart.token||chart.sym!==sym||chart.tf!==tf||!chart.cs)return;chart.candleArr=res.data;chart.dataSym=sym;chart.dataTf=tf;chart.kSrc=res.src;syncChartCandleWithQuote(sym,tf);setSeriesData();applyIndicators();if(chart.following)frameChartWindow();chartDrawLines();chartDrawMarkers();redrawDrawings();syncLivePriceLines();paintMarketNote()}
 	return fetchK(sym,tf,applyFresh).then(function(res){
@@ -2262,17 +2264,15 @@ function syncChartCandleWithQuote(sym,tf){
 	var nextHigh=Math.max(high,open,close),nextLow=Math.min(low,open,close);if(last.close===close&&last.high===nextHigh&&last.low===nextLow)return false;
 	last.close=close;last.high=nextHigh;last.low=nextLow;saveCandlesToCache(sym,tf,bars);return true
 }
-function syncLivePriceLines(){if(!chart.cs)return;var sym=chart.sym,S=SYMBOLS[sym],C=DB.settings.chart||{},quote=getDisplayQuote(sym);
+function syncLivePriceLines(){if(!chart.cs)return;if(chart.sym!==termSym){chart.sym=termSym;chartLoad();return}var sym=termSym,S=SYMBOLS[sym],C=DB.settings.chart||{},quote=getDisplayQuote(sym);
  function removeLine(key){if(chart.liveLines[key]){try{chart.cs.removePriceLine(chart.liveLines[key])}catch(e){}chart.liveLines[key]=null}}
  if(!quote||!S||!(quote.bid>0)){removeLine('bid');removeLine('ask');return}
- var closed=!marketOpen(sym),color=quote.fromCache?'#A8ADB8':(closed?'#85858A':'#26A69A');
-		var quoteState=quote.fromCache?'CACHED':(quote.status==='STALE'?'STALE':(closed?'CLOSED':quote.status==='LIVE'?'LIVE':'LAST'));
-		var title=quoteState==='LIVE'&&C.countdown!==false?barCountdown():'';
-		try{
+ var closed=!marketOpen(sym),color=quote.fromCache?'#A8ADB8':(closed||quote.status==='STALE'?'#85858A':'#26A69A');
+			try{
   if(C.lastPriceLine===false)removeLine('bid');
-  else if(!chart.liveLines.bid)chart.liveLines.bid=chart.cs.createPriceLine({price:quote.bid,color:color,lineWidth:1,lineStyle:0,axisLabelVisible:true,title:title});
-  if(chart.liveLines.bid)chart.liveLines.bid.applyOptions({price:quote.bid,color:color,title:title});
-  if(C.askLine!==false&&quote.ask>0){var askColor=closed?'#8E7779':'#E85B61',askTitle=quoteState+' ASK';if(!chart.liveLines.ask)chart.liveLines.ask=chart.cs.createPriceLine({price:quote.ask,color:askColor,lineWidth:1,lineStyle:0,axisLabelVisible:false,title:askTitle});chart.liveLines.ask.applyOptions({price:quote.ask,color:askColor,axisLabelVisible:false,title:askTitle})}
+	  else if(!chart.liveLines.bid)chart.liveLines.bid=chart.cs.createPriceLine({price:quote.bid,color:color,lineWidth:1,lineStyle:0,axisLabelVisible:true,title:''});
+	  if(chart.liveLines.bid)chart.liveLines.bid.applyOptions({price:quote.bid,color:color,axisLabelVisible:true,title:''});
+	  if(C.askLine!==false&&quote.ask>0){var askColor=closed?'#8E7779':'#E85B61';if(!chart.liveLines.ask)chart.liveLines.ask=chart.cs.createPriceLine({price:quote.ask,color:askColor,lineWidth:1,lineStyle:0,axisLabelVisible:true,title:''});chart.liveLines.ask.applyOptions({price:quote.ask,color:askColor,axisLabelVisible:true,title:''})}
   else removeLine('ask')
  }catch(e){}}
 setInterval(function(){if(view==='charts')syncLivePriceLines()},1000);
