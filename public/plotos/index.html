@@ -2134,7 +2134,8 @@ setInterval(function(){
   chartDrawLines()},true);
 })();
 /* Historical OHLC bars come only from Biquote; this bounded local cache is display-only. */
-var CANDLE_CACHE_KEY='plotos_candles_cache_v1',CANDLE_CACHE_MAX_ENTRIES=16,CANDLE_CACHE_MAX_CHARS=850000,CANDLE_CACHE_MAX_BARS=600,CANDLE_CACHE_MEMORY=null;
+var CANDLE_CACHE_KEY='plotos_candles_cache_v2',CANDLE_CACHE_MAX_ENTRIES=16,CANDLE_CACHE_MAX_CHARS=850000,CANDLE_CACHE_MAX_BARS=600,CANDLE_CACHE_MEMORY=null;
+try{localStorage.removeItem('plotos_candles_cache_v1')}catch(e){}
 function normalizeCandleBars(bars){
  var seen=Object.create(null),out=[];
  (Array.isArray(bars)?bars:[]).forEach(function(bar){
