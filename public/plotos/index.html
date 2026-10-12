@@ -2630,7 +2630,7 @@ function positionSheet(p){
  var q=Q[p.symbol],px=q&&q.bid>0?(p.side==='buy'?q.bid:q.ask):p.entry,pnl=pnlUSD(p,px);
  modal('<h4>'+p.symbol+' · '+p.side.toUpperCase()+' '+p.lots+' lot</h4><div class="qread"><div><span>ENTRY</span><b>'+pxf(p.entry,SYMBOLS[p.symbol].digits)+'</b></div><div><span>P/L</span><b class="'+(pnl>=0?'up':'dn')+'">'+(pnl>=0?'+':'')+pnl.toFixed(2)+'</b></div></div><div class="mrow-btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn ghost" id="psModify">Modify SL/TP</button><button class="btn ghost" id="psBE">Move to BE</button><button class="btn ghost" id="psPart">Close 50%</button><button class="btn red" id="psClose">Close position</button></div>');
  $('#psModify').onclick=function(){editPositionModal(p)};$('#psBE').onclick=function(){TradingProvider.modifyPosition(p,p.entry,p.tp,p.ts);save();closeModal();renderStrip();paintTrade(true);chartDrawLines();toast('Breakeven set','up')};
- $('#psPart').onclick=function(){closePartial(p,.5);closeModal()};$('#psClose').onclick=function(){TradingProvider.close(p,'market');save();closeModal();renderStrip();paintTrade(true);chartDrawLines();chartDrawMarkers();toast('Position closed','')}
+ $('#psPart').onclick=function(){closePartial(p,.5);closeModal()};$('#psClose').onclick=function(){if(!TradingProvider.close(p,'market'))return;save();closeModal();renderStrip();paintTrade(true);chartDrawLines();chartDrawMarkers();toast('Position closed','')}
 }
 function bindPosButtons(rootEl){
  rootEl.querySelectorAll('[data-openpos]').forEach(function(b){b.onclick=function(e){if(e.target.closest('button'))return;var p=DB.positions.find(function(x){return x.id===b.getAttribute('data-openpos')});if(p)positionSheet(p)}});
