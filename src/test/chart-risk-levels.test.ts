@@ -43,5 +43,9 @@ describe("chart SL/TP placement", () => {
     expect(page).toContain('id="epChartTP"');
     expect(page).toContain('id="chartLevelHint"');
     expect(page).toContain("beginChartLevelDrag(cv,e,xy)");
+    expect(page).toContain("function selectChartPosition(p)");
+    expect(page).toContain("bar.id='chartPositionBar'");
+    expect(page).toContain("root.id='mt5ModifySheet'");
+    expect(page).toContain("function submitChartPositionSheet()");
   });
 });

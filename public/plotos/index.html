@@ -410,6 +410,25 @@ html[data-theme="light"] .dtb{background:rgba(255,255,255,.92)}
 .chart-level-hint{position:absolute;top:54px;left:8px;z-index:12;display:none;align-items:center;gap:8px;max-width:calc(100% - 92px);padding:7px 9px;border:1px solid rgba(77,141,255,.55);border-radius:8px;background:rgba(13,18,28,.94);box-shadow:0 4px 14px rgba(0,0,0,.35);color:#F2F4F8;font:10px var(--mono);line-height:1.25;pointer-events:auto;touch-action:manipulation}
 .chart-level-hint.on{display:flex}.chart-level-hint span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.chart-level-hint button{flex-shrink:0;padding:3px 5px;border-radius:5px;color:#fff;border:1px solid rgba(255,255,255,.25);font:inherit}
 html[data-theme="light"] .chart-level-hint{background:rgba(255,255,255,.96);color:#151B26}
+
+.chart-position-bar{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);z-index:15;display:flex;align-items:center;gap:7px;max-width:calc(100% - 16px);padding:7px 9px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(18,22,28,.96);backdrop-filter:blur(12px);box-shadow:0 8px 24px rgba(0,0,0,.45);color:#F3F4F6;font:11px var(--mono);white-space:nowrap}
+.chart-position-bar .cpb-info{display:flex;flex-direction:column;gap:2px;padding:0 5px;min-width:55px}.chart-position-bar .cpb-info b{font-size:11px}.chart-position-bar .cpb-info span{font-size:9px;color:#AAB2C0}
+.chart-position-bar button{display:flex;align-items:center;gap:5px;padding:8px 11px;border:0;border-radius:999px;font-size:11px;font-weight:700;touch-action:manipulation}
+.chart-position-bar .cpb-close{background:rgba(239,68,68,.18);color:#EF5350}.chart-position-bar .cpb-modify{background:rgba(59,130,246,.2);color:#4D8DFF}.chart-position-bar button:active{filter:brightness(1.25);transform:scale(.97)}
+.chart-drag-pill{position:absolute;right:68px;transform:translateY(-50%);z-index:16;display:flex;align-items:center;gap:6px;max-width:calc(100% - 84px);padding:5px 8px;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.4);pointer-events:none;color:#fff;font:10px var(--mono);font-weight:700;white-space:nowrap}
+.chart-drag-pill.sl{background:#EF5350}.chart-drag-pill.tp{background:#10B981}.chart-drag-pill span{overflow:hidden;text-overflow:ellipsis}
+.mt5-bottom-sheet-backdrop{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.66);opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s}
+.mt5-bottom-sheet-backdrop.active{opacity:1;visibility:visible}
+.mt5-bottom-sheet{position:fixed;z-index:10001;left:0;right:0;bottom:0;max-height:min(88vh,740px);overflow:auto;padding:12px 16px calc(18px + env(safe-area-inset-bottom));border:1px solid var(--ln2,rgba(255,255,255,.12));border-bottom:0;border-radius:20px 20px 0 0;background:var(--pn,#161b22);color:var(--tx,#f3f4f6);box-shadow:0 -10px 40px rgba(0,0,0,.36);transform:translateY(105%);transition:transform .28s cubic-bezier(.16,1,.3,1);overscroll-behavior:contain}
+.mt5-bottom-sheet.active{transform:translateY(0)}.mt5-bottom-sheet .sheet-handle{width:40px;height:4px;margin:1px auto 14px;border-radius:9px;background:var(--mut,rgba(255,255,255,.28));touch-action:none}
+.mt5-sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.mt5-sheet-title{min-width:0}.mt5-sheet-title b{display:block;font-size:17px}.mt5-sheet-title small{display:block;margin-top:3px;color:var(--mut,#8b949e);font-size:11px}
+.mt5-sheet-quotes{display:flex;gap:12px;font:11px var(--mono)}.mt5-sheet-quotes span{display:flex;flex-direction:column;gap:3px;text-align:right}.mt5-sheet-quotes small{color:var(--mut,#8b949e);font-size:9px}.mt5-sheet-quotes .bid{color:#EF5350}.mt5-sheet-quotes .ask{color:#4D8DFF}
+.mt5-sheet-summary{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;padding:9px 11px;border:1px solid var(--ln,rgba(255,255,255,.08));border-radius:9px;background:var(--bg,#0d1117);font-size:11px}.mt5-sheet-summary .ticket{color:var(--mut,#8b949e);line-height:1.55}.mt5-sheet-summary .pnl{font:700 13px var(--mono);white-space:nowrap}.mt5-sheet-summary .pnl.up{color:var(--up,#10b981)}.mt5-sheet-summary .pnl.dn{color:var(--dn,#ef5350)}
+.mt5-sheet-opened{margin:7px 2px 0;color:var(--mut,#8b949e);font-size:10px}
+.mt5-sheet-risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.mt5-sheet-risk{min-width:0;padding:10px;border:1px solid var(--ln,rgba(255,255,255,.08));border-radius:12px;background:var(--bg,#0d1117);text-align:center}.mt5-sheet-risk.sl{border-top:3px solid #EF5350}.mt5-sheet-risk.tp{border-top:3px solid #10B981}.mt5-sheet-risk>label{font-size:11px;font-weight:700}.mt5-sheet-risk.sl>label{color:#EF5350}.mt5-sheet-risk.tp>label{color:#10B981}
+.mt5-sheet-stepper{display:flex;align-items:center;gap:4px;margin:8px 0}.mt5-sheet-stepper button{flex:0 0 31px;height:32px;border-radius:8px;background:var(--ln2,#303846);color:var(--tx,#fff);font-size:17px}.mt5-sheet-stepper input{min-width:0;width:100%;padding:4px 0;border:0;background:transparent;color:var(--tx,#fff);text-align:center;font:600 14px var(--mono)}.mt5-sheet-stepper input:focus{outline:0}.mt5-sheet-metric{min-height:16px;margin:4px 0 7px;color:var(--mut,#8b949e);font:10px var(--mono)}.mt5-sheet-metric .up{color:var(--up,#10b981)}.mt5-sheet-metric .dn{color:var(--dn,#ef5350)}.mt5-sheet-place{padding:5px 8px;border:1px solid var(--ln2,#303846);border-radius:7px;color:var(--mut,#b8c1cf);font-size:10px}
+.mt5-sheet-submit{width:100%;min-height:46px;border:0;border-radius:11px;background:#2563EB;color:#fff;font-size:14px;font-weight:700;touch-action:manipulation}.mt5-sheet-submit:active{background:#1D4ED8}.mt5-sheet-close{width:30px;height:30px;border:1px solid var(--ln2);border-radius:50%;color:var(--mut);font-size:16px;flex-shrink:0}
+
 .dundo{position:absolute;left:10px;bottom:44px;z-index:10;display:flex;align-items:center;gap:12px;padding:9px 13px;border-radius:8px;background:#2F7DE1;color:#fff;font-size:11.5px;opacity:0;pointer-events:none;transition:opacity .16s}
 .dundo.on{opacity:1;pointer-events:auto}.dundo button{color:#fff;font-weight:700;letter-spacing:.5px}
 .dsw{display:flex;gap:9px;flex-wrap:wrap}.dsw button{width:34px;height:34px;border-radius:50%;border:2px solid transparent;outline:1px solid var(--ln2)}.dsw button.on{border-color:var(--tx)}
@@ -1518,7 +1537,7 @@ function ensureChartLib(){
    s.onerror=function(){try{s.remove()}catch(e){};next()};
    document.head.appendChild(s)})()});
  return libPromise}
-var chart={c:null,cs:null,ls:null,ar:null,is:{},oc:null,os:{},cur:null,candleArr:[],dataSym:'',dataTf:'',kSrc:'Biquote',lines:[],plRefs:[],ordLines:[],spreadLines:[],liveLines:{},sym:'',tf:'1m',style:'candles',crosshair:false,sessOn:false,dtOn:false,dragMode:false,oscH:140,token:0,following:true,gesture:null,drawRaf:0,levelPlacement:null};
+var chart={c:null,cs:null,ls:null,ar:null,is:{},oc:null,os:{},cur:null,candleArr:[],dataSym:'',dataTf:'',kSrc:'Biquote',lines:[],plRefs:[],ordLines:[],spreadLines:[],liveLines:{},sym:'',tf:'1m',style:'candles',crosshair:false,sessOn:false,dtOn:false,dragMode:false,oscH:140,token:0,following:true,gesture:null,drawRaf:0,levelPlacement:null,selectedPositionId:null};
 function resetChartIfStale(){
  var el=$('#chartEl');
  if(chart.c&&(!el||!el.isConnected||chart.c._el!==el)){
@@ -1926,6 +1945,7 @@ function bindDrawEvents(){
     try{cv.setPointerCapture(e.pointerId)}catch(_){}
     e.preventDefault();scheduleDrawRedraw();return}
    if(chart.levelPlacement){beginChartLevelDrag(cv,e,xy);return}
+   var posHit=chartPositionHit(xy.y,16);if(posHit){selectChartPosition(posHit.p);e.preventDefault();return}
    if(chart.dragMode){lineDragStart(cv,e,xy);return}
    var arr=symDraws(),target=-1,handle=null;
    if(DSEL.idx>=0&&arr[DSEL.idx]){handle=hitDrawingHandle(arr[DSEL.idx],xy);if(handle||dHit(arr[DSEL.idx],xy,PT()?24:12))target=DSEL.idx}
@@ -1987,6 +2007,7 @@ function bindTargetGestures(){
   if(chart.dragMode||DT.mode||DSEL.drag||DRAG)return;
   var r=box.getBoundingClientRect(),xy={x:e.clientX-r.left,y:e.clientY-r.top},best=null,bd=24;
   manageTargets().forEach(function(t){if(t.kind==='entry')return;var yy=chart.cs.priceToCoordinate(t.price);if(yy==null)return;var dd=Math.abs(xy.y-yy);if(dd<bd){bd=dd;best=t}});
+  var posHit=chartPositionHit(xy.y,16);if(posHit&&(!best||posHit.d<=bd)){selectChartPosition(posHit.p);e.preventDefault();e.stopPropagation();return}
   if(best){lineDragStart(box,e,xy);e.preventDefault()}
  },true);
  box.addEventListener('pointermove',function(e){
@@ -2051,7 +2072,7 @@ function paintChartLevelHint(){var el=$('#chartLevelHint');if(!el)return;var req
 function cancelChartLevelPlacement(){chart.levelPlacement=null;paintChartLevelHint();toast('Level placement cancelled','')}
 function armChartLevelPlacement(p,kind){var a=myAcc();if(!p||!a||p.accId!==a.id||(kind!=='sl'&&kind!=='tp'))return;
  closeModal();if(DT.mode)stopDraw();chart.dragMode=false;chart.levelPlacement={posId:p.id,kind:kind};
- if(view!=='charts'||termSym!==p.symbol)openSym(p.symbol);paintChartLevelHint();toast('Drag or tap the chart to place '+kind.toUpperCase(),'')}
+ closeChartPositionSheet();if(view!=='charts'||termSym!==p.symbol)openSym(p.symbol);paintChartLevelHint();toast('Drag or tap the chart to place '+kind.toUpperCase(),'')}
 function beginChartLevelDrag(cv,e,xy){var req=chart.levelPlacement;if(!req||!chart.cs)return;
  var a=myAcc(),p=a&&DB.positions.find(function(x){return x.id===req.posId&&x.accId===a.id});
  if(!p||p.symbol!==chart.sym){chart.levelPlacement=null;paintChartLevelHint();toast('Position is no longer available','dn');return}
@@ -2076,9 +2097,9 @@ function dragLineMove(xy){
  else{var p=DRAG.pos;
   if(chartRiskLevelValid(p,DRAG.kind,pr,Q[p.symbol])){p[DRAG.kind]=pr;DRAG.moved=true}
   try{var pt=Math.pow(10,-S.digits),pts=(pr-p.entry)/pt*(p.side==='buy'?1:-1),usd=(pr-p.entry)*(p.side==='buy'?1:-1)*p.lots*(S.contract||S.contractSize||100000),tip=document.getElementById('mt5DragTip');
-   if(!tip){tip=document.createElement('div');tip.id='mt5DragTip';tip.style.cssText='position:absolute;left:8px;z-index:60;pointer-events:none;background:rgba(20,26,38,.92);color:#E8ECF6;font:11px IBM Plex Mono,monospace;padding:4px 8px;border-radius:4px;white-space:nowrap';var bx=$('#chartBox');if(bx)bx.appendChild(tip)}
-   tip.style.display='block';tip.style.top=Math.max(0,xy.y-28)+'px';
-   tip.innerHTML=DRAG.kind.toUpperCase()+' '+pr.toFixed(S.digits)+' <span style="color:'+(usd>=0?'#4D8DFF':'#EF5350')+'">('+(pts>=0?'+':'')+pts.toFixed(0)+' pts / '+(usd>=0?'+':'')+'$'+usd.toFixed(2)+')</span>'}catch(_){}}
+   if(!tip){tip=document.createElement('div');tip.id='mt5DragTip';var bx=$('#mainWrap');if(bx)bx.appendChild(tip)}
+   tip.className='chart-drag-pill '+DRAG.kind;tip.style.display='flex';tip.style.top=xy.y+'px';
+   tip.innerHTML='<b>'+DRAG.kind.toUpperCase()+'</b><span>'+pr.toFixed(S.digits)+'</span><span>'+(usd>=0?'+':'')+usd.toFixed(2)+' USD</span><span>'+pts.toFixed(0)+' pts</span>'}catch(_){}}
  if(!chart._lineRaf)chart._lineRaf=requestAnimationFrame(function(){chart._lineRaf=0;chartDrawLines()})}
 function cancelLineDrag(){var tip=document.getElementById('mt5DragTip');if(tip)tip.style.display='none';if(!DRAG)return;var d=DRAG;DRAG=null;
  if(d.ord)d.ord.price=d.original.price;else if(d.pos){d.pos.sl=d.original.sl;d.pos.tp=d.original.tp}chartDrawLines()}
@@ -2161,10 +2182,10 @@ function chartDrawLines(){if(!chart.cs)return;var C=DB.settings.chart||{};
  syncLivePriceLines();
  var a=myAcc();if(!a)return;
  if(C.tradePositions!==false)accPositions(a).filter(function(p){return p.symbol===chart.sym}).forEach(function(p){
-  try{var entry=chart.cs.createPriceLine({price:p.entry,color:'#4D8DFF',lineWidth:1,lineStyle:0,title:p.side.toUpperCase()+' '+p.lots});
+  try{var active=chart.selectedPositionId===p.id,entry=chart.cs.createPriceLine({price:p.entry,color:active?'#E3B34C':'#4D8DFF',lineWidth:active?2:1,lineStyle:0,title:p.side.toUpperCase()+' '+p.lots});
    chart.lines.push(entry);chart.plRefs.push({line:entry,p:p});
-   if(C.slTp!==false&&p.sl)chart.lines.push(chart.cs.createPriceLine({price:p.sl,color:'#EF5350',lineWidth:1,lineStyle:2,title:p.ts>0?'TRAIL':'SL'}));
-   if(C.slTp!==false&&p.tp)chart.lines.push(chart.cs.createPriceLine({price:p.tp,color:'#26A69A',lineWidth:1,lineStyle:2,title:'TP'}))}catch(e){}});
+   if(C.slTp!==false&&p.sl)chart.lines.push(chart.cs.createPriceLine({price:p.sl,color:'#EF5350',lineWidth:active?2:1,lineStyle:2,title:p.ts>0?'TRAIL':'SL'}));
+   if(C.slTp!==false&&p.tp)chart.lines.push(chart.cs.createPriceLine({price:p.tp,color:'#26A69A',lineWidth:active?2:1,lineStyle:2,title:'TP'}))}catch(e){}});
  if(C.tradeOrders!==false)accOrders(a).filter(function(o){return o.symbol===chart.sym}).forEach(function(o){
   try{chart.ordLines.push(chart.cs.createPriceLine({price:o.price,color:'#F5A623',lineWidth:1,lineStyle:2,title:o.type+' '+o.lots}))}catch(e){}});
  var u0=user();
@@ -2177,9 +2198,10 @@ setInterval(function(){
   if(!(q.bid>0))return;
   var px=p.side==='buy'?q.bid:q.ask;var pnl=pnlUSD(p,px);
   try{chart.cs.removePriceLine(r.line)}catch(e){}
-  try{var nl=chart.cs.createPriceLine({price:p.entry,color:'#4D8DFF',lineWidth:1,lineStyle:0,
+  try{var active=chart.selectedPositionId===p.id,nl=chart.cs.createPriceLine({price:p.entry,color:active?'#E3B34C':'#4D8DFF',lineWidth:active?2:1,lineStyle:0,
    title:p.side.toUpperCase()+' '+p.lots+' · '+(pnl>=0?'+':'')+pnl.toFixed(2)+'$'});
    r.line=nl;if(chart.lines.indexOf(nl)<0)chart.lines.push(nl)}catch(e){}})
+ if(chart.selectedPositionId&&!chartSelectedPosition()){chart.selectedPositionId=null;renderChartPositionBar()}
 },2000);
 
 /* MT5-style touch drag of SL/TP lines on open positions */
@@ -2614,7 +2636,7 @@ function openCharts(){var el=$('#v-charts');
   chart.sym=termSym;chartLoad();renderStrip();paintMarketNote();
   $('#dsEdit').onclick=editSelected;$('#dsCopy').onclick=copySelected;$('#dsDel').onclick=deleteSelected;$('#dsClose').onclick=function(){selectDrawing(-1)};$('#dsUndo').onclick=undoDelete;
   try{var mw=$('#mainWrap');if(window.ResizeObserver&&mw){new ResizeObserver(function(){scheduleDrawRedraw()}).observe(mw)}}catch(e){}
-  paintDtBar();bindDrawEvents();bindTargetGestures();bindPriceScaleGesture();bindChartWheelZoom();bindOscHandle();syncCvCapture();paintSelBar();paintChartLevelHint()}
+  paintDtBar();bindDrawEvents();bindTargetGestures();bindPriceScaleGesture();bindChartWheelZoom();bindOscHandle();syncCvCapture();paintSelBar();paintChartLevelHint();renderChartPositionBar()}
 function bindOscHandle(){var h=$('#oscHandle');if(!h||h._b)return;h._b=1;
  var sy=0,sh=0;
  h.addEventListener('pointerdown',function(e){sy=e.clientY;sh=$('#oscPane').offsetHeight;h.setPointerCapture(e.pointerId);e.preventDefault()});
@@ -2685,6 +2707,55 @@ function ordRow(o){var S=SYMBOLS[o.symbol];
   '<span class="ost">'+o.state+'</span>'+
   '<button class="mbtn" data-oedit="'+o.id+'">EDIT</button>'+
   '<button class="x" data-c="'+o.id+'">✕</button></div></div>'}
+
+var chartSheetDraft={posId:null,sl:null,tp:null,timer:0};
+function chartSelectedPosition(){var a=myAcc();if(!a||!chart.selectedPositionId)return null;return DB.positions.find(function(p){return p.id===chart.selectedPositionId&&p.accId===a.id&&p.symbol===chart.sym})||null}
+function chartPositionHit(y,maxDist){var a=myAcc();if(!a||!chart.cs||(DB.settings.chart||{}).tradePositions===false)return null;var best=null,bd=maxDist||16;
+ accPositions(a).filter(function(p){return p.symbol===chart.sym}).forEach(function(p){var yy=chart.cs.priceToCoordinate(p.entry);if(yy==null)return;var d=Math.abs(yy-y);if(d<bd){bd=d;best={p:p,d:d}}});return best}
+function renderChartPositionBar(){var host=$('#mainWrap');var bar=$('#chartPositionBar');var p=chartSelectedPosition();
+ if(!host||!p){if(bar)bar.remove();return}
+ if(!bar){bar=document.createElement('div');bar.id='chartPositionBar';bar.className='chart-position-bar';host.appendChild(bar)}
+ bar.innerHTML='<div class="cpb-info"><b>'+esc(p.symbol)+'</b><span>'+p.side.toUpperCase()+' '+formatLots(p.lots)+'</span></div>'+
+ '<button type="button" class="cpb-close"><span aria-hidden="true">×</span>Close position</button>'+
+ '<button type="button" class="cpb-modify"><span aria-hidden="true">↗</span>Modify position</button>';
+ var c=bar.querySelector('.cpb-close'),m=bar.querySelector('.cpb-modify');if(c)c.onclick=function(e){e.stopPropagation();closeSelectedChartPosition()};if(m)m.onclick=function(e){e.stopPropagation();openChartPositionSheet(p)}}
+function selectChartPosition(p){if(!p)return;if(chartSheetDraft.posId&&chartSheetDraft.posId!==p.id)closeChartPositionSheet();chart.selectedPositionId=p.id;
+ if(DSEL.idx>=0){DSEL.idx=-1;DSEL.drag=null;syncCvCapture();paintSelBar()}chartDrawLines();renderChartPositionBar()}
+function closeSelectedChartPosition(){var p=chartSelectedPosition();if(!p)return;if(!TradingProvider.close(p,'market')){var left=holdLeftSec(p);toast(left?'Close available in '+left+'s':'Position could not be closed','dn');return}
+ closeChartPositionSheet();chart.selectedPositionId=null;renderChartPositionBar();save();renderStrip();paintTrade(true);chartDrawLines();chartDrawMarkers();toast('Position closed','')}
+function chartSheetPosition(){return chartSheetDraft.posId&&DB.positions.find(function(p){return p.id===chartSheetDraft.posId})||null}
+function chartSheetPoint(S){return Number(S.point)||Math.pow(10,-S.digits)}
+function updateChartSheetMetric(kind){var p=chartSheetPosition(),el=$('#mt5Sheet'+kind.toUpperCase()+'Metric');if(!el)return;var price=Number(chartSheetDraft[kind]);
+ if(!p||!(price>0)){el.textContent='Not set';return}var S=SYMBOLS[p.symbol],usd=pnlUSD(p,price),points=Math.round(Math.abs(price-p.entry)/chartSheetPoint(S));
+ el.innerHTML='<span class="'+(usd>=0?'up':'dn')+'">'+(usd>=0?'+':'')+usd.toFixed(2)+' USD</span> · '+points+' pts'}
+function chartSheetInput(kind,value){var p=chartSheetPosition();if(!p)return;var S=SYMBOLS[p.symbol],n=parseFloat(value);chartSheetDraft[kind]=isFinite(n)&&n>0?+n.toFixed(S.digits):null;updateChartSheetMetric(kind)}
+function chartSheetStep(kind,dir){var p=chartSheetPosition();if(!p)return;var S=SYMBOLS[p.symbol],el=$('#mt5Sheet'+kind.toUpperCase()+'Input');if(!el)return;var cur=parseFloat(el.value);if(!isFinite(cur))cur=p.entry;var next=+(cur+dir*chartSheetPoint(S)*10).toFixed(S.digits);el.value=next.toFixed(S.digits);chartSheetInput(kind,next)}
+function refreshChartPositionSheet(){var p=chartSheetPosition();if(!p){closeChartPositionSheet();return}var q=Q[p.symbol]||{},S=SYMBOLS[p.symbol];
+ var b=$('#mt5SheetBid'),a=$('#mt5SheetAsk'),v=$('#mt5SheetPnl');if(b)b.textContent=q.bid>0?pxf(q.bid,S.digits):'—';if(a)a.textContent=q.ask>0?pxf(q.ask,S.digits):'—';
+ var px=p.side==='buy'?(q.bid>0?q.bid:p.entry):(q.ask>0?q.ask:(q.bid>0?q.bid:p.entry)),pnl=pnlUSD(p,px);if(v){v.textContent=(pnl>=0?'+':'')+pnl.toFixed(2)+' USD';v.className='pnl '+(pnl>=0?'up':'dn')}}
+function closeChartPositionSheet(){if(chartSheetDraft.timer)clearInterval(chartSheetDraft.timer);chartSheetDraft={posId:null,sl:null,tp:null,timer:0};var root=$('#mt5ModifySheet');if(root)root.remove()}
+function openChartPositionSheet(p){if(!p)return;selectChartPosition(p);closeChartPositionSheet();var S=SYMBOLS[p.symbol],q=Q[p.symbol]||{},root=document.createElement('div');
+ chartSheetDraft={posId:p.id,sl:p.sl||null,tp:p.tp||null,timer:0};root.id='mt5ModifySheet';root.innerHTML='<div class="mt5-bottom-sheet-backdrop active" id="mt5SheetBackdrop"></div>'+
+ '<section class="mt5-bottom-sheet active" role="dialog" aria-modal="true" aria-label="Modify simulated position">'+
+ '<div class="sheet-handle" id="mt5SheetHandle"></div><div class="mt5-sheet-head"><div class="mt5-sheet-title"><b>'+esc(p.symbol)+'</b><small>'+esc(S.desc||S.name||'Financial Instrument')+'</small></div>'+
+ '<div class="mt5-sheet-quotes"><span class="bid"><small>BID</small><b id="mt5SheetBid">'+(q.bid>0?pxf(q.bid,S.digits):'—')+'</b></span><span class="ask"><small>ASK</small><b id="mt5SheetAsk">'+(q.ask>0?pxf(q.ask,S.digits):'—')+'</b></span></div>'+
+ '<button type="button" id="mt5SheetClose" class="mt5-sheet-close" aria-label="Close">×</button></div>'+
+ '<div class="mt5-sheet-summary"><span class="ticket">#'+esc(String(p.id).slice(-8).toUpperCase())+' · '+p.side.toUpperCase()+' '+formatLots(p.lots)+' lot</span><b id="mt5SheetPnl" class="pnl">—</b></div>'+
+ '<div class="mt5-sheet-opened">Opened '+(p.openedAt?new Date(p.openedAt).toLocaleString():'—')+'</div>'+
+ '<div class="mt5-sheet-risk-grid">'+
+ '<div class="mt5-sheet-risk sl"><label>STOP LOSS</label><div class="mt5-sheet-stepper"><button type="button" data-step="sl:-1" aria-label="Lower stop loss">−</button><input id="mt5SheetSLInput" type="number" inputmode="decimal" step="'+chartSheetPoint(S)+'" value="'+(p.sl?Number(p.sl).toFixed(S.digits):'')+'" placeholder="Not set"><button type="button" data-step="sl:1" aria-label="Raise stop loss">+</button></div><div id="mt5SheetSLMetric" class="mt5-sheet-metric">Not set</div><button type="button" data-place="sl" class="mt5-sheet-place">Set on chart</button></div>'+
+ '<div class="mt5-sheet-risk tp"><label>TAKE PROFIT</label><div class="mt5-sheet-stepper"><button type="button" data-step="tp:-1" aria-label="Lower take profit">−</button><input id="mt5SheetTPInput" type="number" inputmode="decimal" step="'+chartSheetPoint(S)+'" value="'+(p.tp?Number(p.tp).toFixed(S.digits):'')+'" placeholder="Not set"><button type="button" data-step="tp:1" aria-label="Raise take profit">+</button></div><div id="mt5SheetTPMetric" class="mt5-sheet-metric">Not set</div><button type="button" data-place="tp" class="mt5-sheet-place">Set on chart</button></div></div>'+
+ '<button type="button" id="mt5SheetApply" class="mt5-sheet-submit">Modify position</button></section>';
+ document.body.appendChild(root);$('#mt5SheetBackdrop').onclick=closeChartPositionSheet;$('#mt5SheetClose').onclick=closeChartPositionSheet;
+ $('#mt5SheetSLInput').oninput=function(){chartSheetInput('sl',this.value)};$('#mt5SheetTPInput').oninput=function(){chartSheetInput('tp',this.value)};
+ root.querySelectorAll('[data-step]').forEach(function(b){b.onclick=function(){var parts=b.getAttribute('data-step').split(':');chartSheetStep(parts[0],Number(parts[1]))}});
+ root.querySelectorAll('[data-place]').forEach(function(b){b.onclick=function(){var kind=b.getAttribute('data-place');closeChartPositionSheet();armChartLevelPlacement(p,kind)}});
+ $('#mt5SheetApply').onclick=submitChartPositionSheet;var handle=$('#mt5SheetHandle'),startY=null;if(handle){handle.onpointerdown=function(e){startY=e.clientY;try{handle.setPointerCapture(e.pointerId)}catch(_){}};handle.onpointerup=function(e){if(startY!=null&&e.clientY-startY>70)closeChartPositionSheet();startY=null}}
+ updateChartSheetMetric('sl');updateChartSheetMetric('tp');refreshChartPositionSheet();chartSheetDraft.timer=setInterval(refreshChartPositionSheet,1000)}
+function submitChartPositionSheet(){var p=chartSheetPosition();if(!p){toast('Position no longer available','dn');closeChartPositionSheet();return}var sl=chartSheetDraft.sl||null,tp=chartSheetDraft.tp||null,q=Q[p.symbol];
+ if(sl&&!chartRiskLevelValid(p,'sl',sl,q)){toast('Invalid Stop Loss for '+p.side.toUpperCase(),'dn');return}if(tp&&!chartRiskLevelValid(p,'tp',tp,q)){toast('Invalid Take Profit for '+p.side.toUpperCase(),'dn');return}
+ if(!TradingProvider.modifyPosition(p,sl,tp,p.ts)){toast('Position could not be modified right now','dn');return}audit(user()?user().email:'?','Position Modified',p.symbol,'SL '+(sl||'—')+' / TP '+(tp||'—'));save();closeChartPositionSheet();chartDrawLines();renderStrip();paintTrade(true);renderChartPositionBar();toast('Position updated','up')}
+
 function positionSheet(p){
  var q=Q[p.symbol],px=q&&q.bid>0?(p.side==='buy'?q.bid:q.ask):p.entry,pnl=pnlUSD(p,px);
  modal('<h4>'+p.symbol+' · '+p.side.toUpperCase()+' '+p.lots+' lot</h4><div class="qread"><div><span>ENTRY</span><b>'+pxf(p.entry,SYMBOLS[p.symbol].digits)+'</b></div><div><span>P/L</span><b class="'+(pnl>=0?'up':'dn')+'">'+(pnl>=0?'+':'')+pnl.toFixed(2)+'</b></div></div><div class="mrow-btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn ghost" id="psModify">Modify SL/TP</button><button class="btn ghost" id="psBE">Move to BE</button><button class="btn ghost" id="psPart">Close 50%</button><button class="btn red" id="psClose">Close position</button></div>');
