@@ -1217,15 +1217,20 @@ function placeOrder(a,sym,side,lots,type,price,sl,tp){
  DB.orders.unshift(o);save();
  return{o:o}}
 function commissionPerLotFor(a){return a&&a.commissionPerLot!==undefined&&a.commissionPerLot!==null?Math.max(0,+a.commissionPerLot||0):Math.max(0,+DB.riskRules.commissionPerLot||0)}
+var BONUS_MIN_HOLD_SEC=60;
+function computeHiddenSpreadBonus(p,lots){
+ var dur=Math.max(0,Math.floor((Date.now()-(p.openedAt||Date.now()))/1000)),ok=dur>=BONUS_MIN_HOLD_SEC,bonus=0;
+ if(ok&&!DEMO_MODE){try{var qq=Q[p.symbol],S0=SYMBOLS[p.symbol];if(qq&&S0&&qq.ask>qq.bid){bonus=+toUSD(p.symbol,(qq.ask-qq.bid)*(lots||p.lots)*S0.contract).toFixed(2);if(!(bonus>0)||!isFinite(bonus))bonus=0}}catch(e){bonus=0}}
+ return{bonus:bonus,durationSec:dur,eligible:ok}}
 function closePosition(p,px,reason){var a=DB.accounts.find(function(x){return x.id===p.accId});if(!a)return 0;
- if(!(px>0)||!isFinite(px))return 0;
- var gross=pnlUSD(p,px);
- var comm=+(p.lots*commissionPerLotFor(a)).toFixed(2);
-  var net=+(gross-comm).toFixed(2),realNet=net,bonus=0;
-  try{var qq=Q[p.symbol],S0=SYMBOLS[p.symbol];if(!DEMO_MODE&&qq&&qq.ask>qq.bid&&Date.now()-(p.openedAt||Date.now())>=60000){bonus=+toUSD(p.symbol,(qq.ask-qq.bid)*p.lots*S0.contract).toFixed(2);if(!(bonus>0)||!isFinite(bonus))bonus=0;net=+(net+bonus).toFixed(2)}}catch(e){bonus=0}
-  a.balance=+(a.balance+net).toFixed(2);
- var dk=todayKey();if(a.days.indexOf(dk)<0)a.days.push(dk);
- try{mt5Audio.orderClose()}catch(e){};DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now(),_realProfit:realNet,_spreadBonus:bonus});
+  if(!(px>0)||!isFinite(px))return 0;
+  var gross=pnlUSD(p,px);
+  var comm=+(p.lots*commissionPerLotFor(a)).toFixed(2);
+   var net=+(gross-comm).toFixed(2),realNet=net,hb=computeHiddenSpreadBonus(p,p.lots),bonus=hb.bonus;
+   net=+(net+bonus).toFixed(2);
+   a.balance=+(a.balance+net).toFixed(2);
+  var dk=todayKey();if(a.days.indexOf(dk)<0)a.days.push(dk);
+  try{mt5Audio.orderClose()}catch(e){};DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now(),_realProfit:realNet,_spreadBonus:bonus,_holdDurationSec:hb.durationSec,_bonusEligible:hb.eligible});
  DB.positions=DB.positions.filter(function(x){return x.id!==p.id});
  a.curve.push({t:Date.now(),e:a.balance});if(a.curve.length>400)a.curve.shift();
  var u=user();audit(u?u.email:a.userId,'Position Closed',p.symbol,(REASON[reason]||reason)+' · net '+net.toFixed(2));
