@@ -1245,9 +1245,10 @@ function closePartial(p,frac){
  if(p.lots-closeLots<0.01){closePosition(p,px,'market');renderStrip();return}
  var gross=pnlUSD(p,px)*(closeLots/p.lots);
  var comm=+(closeLots*commissionPerLotFor(a)).toFixed(2);
- var net=+(gross-comm).toFixed(2);
- a.balance=+(a.balance+net).toFixed(2);
- DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:closeLots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:'partial',note:'',openedAt:p.openedAt,closedAt:Date.now()});
+  var net=+(gross-comm).toFixed(2),realNet=net,hb=computeHiddenSpreadBonus(p,closeLots);
+  net=+(net+hb.bonus).toFixed(2);
+  a.balance=+(a.balance+net).toFixed(2);
+  DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:closeLots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:'partial',note:'',openedAt:p.openedAt,closedAt:Date.now(),_realProfit:realNet,_spreadBonus:hb.bonus,_holdDurationSec:hb.durationSec,_bonusEligible:hb.eligible});
  p.lots=+(p.lots-closeLots).toFixed(2);
  audit(user()?user().email:a.userId,'Position Closed',p.symbol,'Partial '+Math.round(frac*100)+'% · net '+net.toFixed(2));
  toast('Closed '+Math.round(frac*100)+'% — net '+(net>=0?'+':'')+net.toFixed(2),net>=0?'up':'dn');
