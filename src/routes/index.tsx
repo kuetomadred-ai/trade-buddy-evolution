@@ -4,7 +4,10 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "PLOTOS FUND — منصة تداول للموبايل" },
-      { name: "description", content: "منصة PLOTOS FUND للتداول بأسعار حية ورسوم شموع وصفقات بتصميم MT5 للموبايل." },
+      {
+        name: "description",
+        content: "منصة PLOTOS FUND للتداول بأسعار حية ورسوم شموع وصفقات بتصميم MT5 للموبايل.",
+      },
       { property: "og:title", content: "PLOTOS FUND — منصة تداول" },
       { property: "og:description", content: "أسعار حية ورسوم بيانية وإدارة صفقات بتصميم MT5." },
       { property: "og:type", content: "website" },
