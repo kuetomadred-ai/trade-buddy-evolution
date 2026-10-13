@@ -4,6 +4,22 @@ import { Capacitor } from "@capacitor/core";
 if (Capacitor.isNativePlatform()) {
   window.PLOTOS_NATIVE = true;
 
+  App.addListener("backButton", ({ canGoBack }) => {
+    const sheet = document.getElementById("mt5ModifySheet");
+    const sheetClose = document.getElementById("mt5SheetClose");
+    if (sheet && sheetClose) {
+      sheetClose.click();
+      return;
+    }
+    const modal = document.getElementById("modal");
+    if (modal?.classList.contains("on")) {
+      modal.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      return;
+    }
+    if (canGoBack) window.history.back();
+    else App.minimizeApp();
+  });
+
   const deliveredUrls = new Set();
   const deliverUrl = (url) => {
     if (!url || deliveredUrls.has(url)) return;
