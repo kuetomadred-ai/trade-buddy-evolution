@@ -11,9 +11,15 @@ if (Capacitor.isNativePlatform()) {
       sheetClose.click();
       return;
     }
-    const modal = document.getElementById("modal");
+    const modal = document.getElementById("ovl");
     if (modal?.classList.contains("on")) {
       modal.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      return;
+    }
+    const drawer = document.getElementById("drawer");
+    const drawerOverlay = document.getElementById("dOvl");
+    if (drawer?.classList.contains("on") && drawerOverlay) {
+      drawerOverlay.click();
       return;
     }
     if (canGoBack) window.history.back();
