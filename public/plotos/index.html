@@ -1307,8 +1307,17 @@ function placeOrder(a,sym,side,lots,type,price,sl,tp){
  o.state='PENDING';o.log.push({t:Date.now(),s:'ACCEPTED'});o.status='PENDING';
  DB.orders.unshift(o);save();
  return{o:o}}
-// Zero-cost execution for simulated accounts: no commission is charged.
-function commissionPerLotFor(a){return 0;return a&&a.commissionPerLot!==undefined&&a.commissionPerLot!==null?Math.max(0,+a.commissionPerLot||0):Math.max(0,+DB.riskRules.commissionPerLot||0)}
+// Broker-simulation commissions are charged at close; PROP/PAPER accounts remain zero-cost.
+function commissionPerLotFor(a){
+ if(!a||!a.brokerProfileId)return 0;
+ var profile=DB.templates.find(function(t){return t.id===a.brokerProfileId&&t.programMode==='broker_sim'});
+ var raw=a.commissionPerLot!==undefined&&a.commissionPerLot!==null?a.commissionPerLot:profile&&profile.commissionPerLot;
+ var rate=Number(raw);return isFinite(rate)?Math.max(0,rate):0
+}
+function commissionForLots(a,lots){
+ var qty=Number(lots);if(!isFinite(qty)||qty<=0)return 0;
+ return +(qty*commissionPerLotFor(a)).toFixed(2)
+}
 var BONUS_MIN_HOLD_SEC=60;
 function computeHiddenSpreadBonus(p,lots){
  var dur=Math.max(0,Math.floor((Date.now()-(p.openedAt||Date.now()))/1000)),ok=dur>=BONUS_MIN_HOLD_SEC,bonus=0;
@@ -1317,7 +1326,7 @@ function computeHiddenSpreadBonus(p,lots){
 function closePosition(p,px,reason){var a=DB.accounts.find(function(x){return x.id===p.accId});if(!a)return 0;
   if(!(px>0)||!isFinite(px))return 0;
   var gross=pnlUSD(p,px);
-  var comm=+(p.lots*commissionPerLotFor(a)).toFixed(2);
+  var comm=commissionForLots(a,p.lots);
    var net=+(gross-comm).toFixed(2),realNet=net,hb=computeHiddenSpreadBonus(p,p.lots),bonus=hb.bonus;
    net=+(net+bonus).toFixed(2);
    a.balance=+(a.balance+net).toFixed(2);
@@ -1337,7 +1346,7 @@ function closePartial(p,frac){
  var closeLots=Math.round(p.lots*frac*100)/100;
  if(p.lots-closeLots<0.01){closePosition(p,px,'market');renderStrip();return}
  var gross=pnlUSD(p,px)*(closeLots/p.lots);
- var comm=+(closeLots*commissionPerLotFor(a)).toFixed(2);
+ var comm=commissionForLots(a,closeLots);
   var net=+(gross-comm).toFixed(2),realNet=net,hb=computeHiddenSpreadBonus(p,closeLots);
   net=+(net+hb.bonus).toFixed(2);
   a.balance=+(a.balance+net).toFixed(2);

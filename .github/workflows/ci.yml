@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies from lockfile
         run: bun install --frozen-lockfile
 
+      - name: Lint automated test code
+        run: bunx eslint src/test
+
       - name: Run automated tests
         run: bun run test
 
