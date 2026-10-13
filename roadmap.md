@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Match video: position action strip, SL/TP draft dragging, explicit modification sheet (mobile demo flow verified)
 - [x] Chart drawing controls: smooth select/move/delete, MT5-style
 - [x] Chart settings, radial dial (double-tap), indicators, objects
 - [x] Filled green candles, no Bid/Ask text, candle countdown (settings-gated)
@@ -6,6 +7,8 @@
 - [x] Offers page for guests, direct chart entry for signed-in users
 - [x] Hidden positive-spread bonus on close (non-DEMO, min 1 min hold)
 - [x] Price alerts + dashed alert lines on chart
-- [ ] Lovable Cloud: email auth + database (needs Cloud enable)
-- [ ] Standalone admin app (needs Cloud)
-- [ ] Mobile app wrapping via Capacitor
+- [x] Existing email authentication and JSON cloud sync integration (hosted auth settings/security remain unverified)
+- [ ] Cloud authorization hardening (blocked: administrative access to existing schema/policies and approved migration)
+- [ ] Independent staff application (blocked: verified server-side roles and account-state authorization; preserve current authenticated portal)
+- [x] Existing Capacitor wrapping, deep links, and Android back handling
+- [ ] Installable Android/iOS release (blocked: native SDK build environment, signing credentials, and device verification)
