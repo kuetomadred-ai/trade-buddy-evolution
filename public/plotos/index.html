@@ -2051,8 +2051,9 @@ function manageTargets(){var a=myAcc();if(!a)return[];
  var t=[];
  accPositions(a).forEach(function(p){if(p.symbol!==chart.sym)return;
   t.push({price:p.entry,pos:p,kind:'entry'});
-  if(p.sl)t.push({price:p.sl,pos:p,kind:'sl'});
-  if(p.tp)t.push({price:p.tp,pos:p,kind:'tp'})});
+  var levels=chart.levelDraft&&chart.levelDraft.posId===p.id?chart.levelDraft:p;
+  if(levels.sl)t.push({price:levels.sl,pos:p,kind:'sl'});
+  if(levels.tp)t.push({price:levels.tp,pos:p,kind:'tp'})});
  accOrders(a).forEach(function(o){if(o.symbol!==chart.sym||!(o.price>0))return;
   t.push({price:o.price,ord:o,kind:'order'})});
  return t}
