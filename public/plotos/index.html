@@ -2001,7 +2001,7 @@ function bindDrawEvents(){
 function bindTargetGestures(){
  var box=$('#chartEl');if(!box||box._targetBound)return;box._targetBound=true;
  box.addEventListener('pointerdown',function(e){
-  if(view!=='charts'||!chart.c)return;
+  if(view!=='charts'||!chart.c||e.target.closest('button,input'))return;
   if(chart.levelPlacement){var r0=box.getBoundingClientRect();beginChartLevelDrag(box,e,{x:e.clientX-r0.left,y:e.clientY-r0.top});return}
   if(chart.dragMode||DT.mode||DSEL.drag||DRAG)return;
   var r=box.getBoundingClientRect(),xy={x:e.clientX-r.left,y:e.clientY-r.top},best=null,bd=24;
