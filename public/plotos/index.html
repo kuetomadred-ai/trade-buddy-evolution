@@ -411,10 +411,9 @@ html[data-theme="light"] .dtb{background:rgba(255,255,255,.92)}
 .chart-level-hint.on{display:flex}.chart-level-hint span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.chart-level-hint button{flex-shrink:0;padding:3px 5px;border-radius:5px;color:#fff;border:1px solid rgba(255,255,255,.25);font:inherit}
 html[data-theme="light"] .chart-level-hint{background:rgba(255,255,255,.96);color:#151B26}
 
-.chart-position-bar{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);z-index:15;display:flex;align-items:center;gap:7px;max-width:calc(100% - 16px);padding:7px 9px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(18,22,28,.96);backdrop-filter:blur(12px);box-shadow:0 8px 24px rgba(0,0,0,.45);color:#F3F4F6;font:11px var(--mono);white-space:nowrap}
-.chart-position-bar .cpb-info{display:flex;flex-direction:column;gap:2px;padding:0 5px;min-width:55px}.chart-position-bar .cpb-info b{font-size:11px}.chart-position-bar .cpb-info span{font-size:9px;color:#AAB2C0}
-.chart-position-bar button{display:flex;align-items:center;gap:5px;padding:8px 11px;border:0;border-radius:999px;font-size:11px;font-weight:700;touch-action:manipulation}
-.chart-position-bar .cpb-close{background:rgba(239,68,68,.18);color:#EF5350}.chart-position-bar .cpb-modify{background:rgba(59,130,246,.2);color:#4D8DFF}.chart-position-bar button:active{filter:brightness(1.25);transform:scale(.97)}
+.chart-position-bar{position:absolute;left:0;right:0;bottom:0;z-index:15;display:flex;align-items:center;gap:8px;padding:9px 10px;background:var(--pn2);border-top:1px solid var(--ln2);color:var(--tx);font:11px var(--mono);white-space:nowrap}
+.chart-position-bar .cpb-info{display:none}.chart-position-bar button{display:flex;align-items:center;justify-content:center;gap:4px;min-height:34px;touch-action:manipulation;font-size:11px;font-weight:600}
+.chart-position-bar .cpb-close{margin-right:auto;color:var(--wn);border:1px solid var(--wn);border-radius:5px;padding:0 8px}.chart-position-bar .cpb-modify{color:var(--ac);font-size:24px;width:32px}.chart-position-bar .cpb-dismiss{color:var(--mut);width:24px}.chart-position-bar .cpb-level{width:32px;height:32px;border-radius:50%;border:1px solid currentColor}.chart-position-bar .sl{color:var(--wn)}.chart-position-bar .tp{color:var(--up)}
 .chart-drag-pill{position:absolute;right:68px;transform:translateY(-50%);z-index:16;display:flex;align-items:center;gap:6px;max-width:calc(100% - 84px);padding:5px 8px;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.4);pointer-events:none;color:#fff;font:10px var(--mono);font-weight:700;white-space:nowrap}
 .chart-drag-pill.sl{background:#EF5350}.chart-drag-pill.tp{background:#10B981}.chart-drag-pill span{overflow:hidden;text-overflow:ellipsis}
 .mt5-bottom-sheet-backdrop{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.66);opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s}
@@ -2011,7 +2010,7 @@ function bindDrawEvents(){
 function bindTargetGestures(){
  var box=$('#chartEl');if(!box||box._targetBound)return;box._targetBound=true;
  box.addEventListener('pointerdown',function(e){
-  if(view!=='charts'||!chart.c)return;
+  if(view!=='charts'||!chart.c||e.target.closest('button,input'))return;
   if(chart.levelPlacement){var r0=box.getBoundingClientRect();beginChartLevelDrag(box,e,{x:e.clientX-r0.left,y:e.clientY-r0.top});return}
   if(chart.dragMode||DT.mode||DSEL.drag||DRAG)return;
   var r=box.getBoundingClientRect(),xy={x:e.clientX-r.left,y:e.clientY-r.top},best=null,bd=24;
@@ -2028,7 +2027,7 @@ function bindTargetGestures(){
 function bindPriceScaleGesture(){
  var box=$('#chartBox');if(!box||box._axisBound)return;box._axisBound=true;
  box.addEventListener('pointerdown',function(e){
-  if(view!=='charts'||!chart.c||DRAG||DT.mode)return;
+  if(view!=='charts'||!chart.c||DRAG||DT.mode||e.target.closest('button,input'))return;
   var r=box.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
   if(x<r.width-72||y<0||y>r.height)return;
   var pr=chart.cs.coordinateToPrice(y),sm=(DB.settings.priceMargins||{top:.08,bottom:.12});
@@ -2061,8 +2060,9 @@ function manageTargets(){var a=myAcc();if(!a)return[];
  var t=[];
  accPositions(a).forEach(function(p){if(p.symbol!==chart.sym)return;
   t.push({price:p.entry,pos:p,kind:'entry'});
-  if(p.sl)t.push({price:p.sl,pos:p,kind:'sl'});
-  if(p.tp)t.push({price:p.tp,pos:p,kind:'tp'})});
+  var levels=chart.levelDraft&&chart.levelDraft.posId===p.id?chart.levelDraft:p;
+  if(levels.sl)t.push({price:levels.sl,pos:p,kind:'sl'});
+  if(levels.tp)t.push({price:levels.tp,pos:p,kind:'tp'})});
  accOrders(a).forEach(function(o){if(o.symbol!==chart.sym||!(o.price>0))return;
   t.push({price:o.price,ord:o,kind:'order'})});
  return t}
@@ -2080,7 +2080,7 @@ function paintChartLevelHint(){var el=$('#chartLevelHint');if(!el)return;var req
  el.classList.add('on');var b=$('#chartLevelCancel');if(b)b.onclick=function(e){e.stopPropagation();cancelChartLevelPlacement()}}
 function cancelChartLevelPlacement(){chart.levelPlacement=null;paintChartLevelHint();toast('Level placement cancelled','')}
 function armChartLevelPlacement(p,kind){var a=myAcc();if(!p||!a||p.accId!==a.id||(kind!=='sl'&&kind!=='tp'))return;
- closeModal();if(DT.mode)stopDraw();chart.dragMode=false;chart.levelPlacement={posId:p.id,kind:kind};
+ closeModal();if(DT.mode)stopDraw();chart.dragMode=false;chart.levelPlacement={posId:p.id,kind:kind};chart.selectedPositionId=p.id;renderChartPositionBar();
  closeChartPositionSheet();if(view!=='charts'||termSym!==p.symbol)openSym(p.symbol);paintChartLevelHint();toast('Drag or tap the chart to place '+kind.toUpperCase(),'')}
 function beginChartLevelDrag(cv,e,xy){var req=chart.levelPlacement;if(!req||!chart.cs)return;
  var a=myAcc(),p=a&&DB.positions.find(function(x){return x.id===req.posId&&x.accId===a.id});
@@ -2088,14 +2088,14 @@ function beginChartLevelDrag(cv,e,xy){var req=chart.levelPlacement;if(!req||!cha
  var S=SYMBOLS[p.symbol],raw=chart.cs.coordinateToPrice(xy.y);if(raw==null)return;var pr=+raw.toFixed(S.digits);
  if(!chartRiskLevelValid(p,req.kind,pr,Q[p.symbol])){var rel=req.kind==='sl'?(p.side==='buy'?'below Bid':'above Ask'):(p.side==='buy'?'above Bid':'below Ask');toast(req.kind.toUpperCase()+' must be '+rel,'dn');return}
  chart.levelPlacement=null;paintChartLevelHint();DRAG={pos:p,kind:req.kind,original:{sl:p.sl,tp:p.tp},creating:!p[req.kind],moved:true};p[req.kind]=pr;
- try{cv.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault();e.stopPropagation();dragLineMove(xy)}
+ chart.c.applyOptions({handleScroll:false,handleScale:false});try{cv.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault();e.stopPropagation();dragLineMove(xy)}
 function lineDragStart(cv,e,xy){
  var y=xy.y;
  var tgs=manageTargets();var best=null,bd=22;
  tgs.forEach(function(t){var yy=chart.cs.priceToCoordinate(t.price);if(yy==null)return;
   if(t.kind==='entry')return;var d=Math.abs(y-yy);if(d<bd){bd=d;best=t}});
  if(!best)return;
- DRAG=best;DRAG.original=best.ord?{price:best.ord.price}:{sl:best.pos.sl,tp:best.pos.tp};
+ chart.c.applyOptions({handleScroll:false,handleScale:false});DRAG=best;DRAG.original=best.ord?{price:best.ord.price}:{sl:best.pos.sl,tp:best.pos.tp};
  try{cv.setPointerCapture(e.pointerId)}catch(_){}
  e.preventDefault()}
 function dragLineMove(xy){
@@ -2105,18 +2105,21 @@ function dragLineMove(xy){
  if(DRAG.ord){DRAG.ord.price=pr}
  else{var p=DRAG.pos;
   if(chartRiskLevelValid(p,DRAG.kind,pr,Q[p.symbol])){p[DRAG.kind]=pr;DRAG.moved=true}
-  try{var pt=Math.pow(10,-S.digits),pts=(pr-p.entry)/pt*(p.side==='buy'?1:-1),usd=(pr-p.entry)*(p.side==='buy'?1:-1)*p.lots*(S.contract||S.contractSize||100000),tip=document.getElementById('mt5DragTip');
+  try{var pt=Math.pow(10,-S.digits),pts=(pr-p.entry)/pt*(p.side==='buy'?1:-1),usd=pnlUSD(p,pr),tip=document.getElementById('mt5DragTip');
    if(!tip){tip=document.createElement('div');tip.id='mt5DragTip';var bx=$('#mainWrap');if(bx)bx.appendChild(tip)}
    tip.className='chart-drag-pill '+DRAG.kind;tip.style.display='flex';tip.style.top=xy.y+'px';
    tip.innerHTML='<b>'+DRAG.kind.toUpperCase()+'</b><span>'+pr.toFixed(S.digits)+'</span><span>'+(usd>=0?'+':'')+usd.toFixed(2)+' USD</span><span>'+pts.toFixed(0)+' pts</span>'}catch(_){}}
  if(!chart._lineRaf)chart._lineRaf=requestAnimationFrame(function(){chart._lineRaf=0;chartDrawLines()})}
-function cancelLineDrag(){var tip=document.getElementById('mt5DragTip');if(tip)tip.style.display='none';if(!DRAG)return;var d=DRAG;DRAG=null;
+function cancelLineDrag(){var tip=document.getElementById('mt5DragTip');if(tip)tip.style.display='none';if(!DRAG)return;var d=DRAG;DRAG=null;restoreChartGestures();
  if(d.ord)d.ord.price=d.original.price;else if(d.pos){d.pos.sl=d.original.sl;d.pos.tp=d.original.tp}chartDrawLines()}
-function endLineDrag(){var tp0=document.getElementById('mt5DragTip');if(tp0)tp0.style.display='none';if(!DRAG)return;var moved=DRAG,ord=moved.ord,pos=moved.pos;DRAG=null;chartDrawLines();
- if(!ord&&pos&&!chartRiskLevelValid(pos,moved.kind,pos[moved.kind],Q[pos.symbol])){pos.sl=moved.original.sl;pos.tp=moved.original.tp;chartDrawLines();toast('Invalid '+moved.kind.toUpperCase()+' level','dn');return}
- confirmM(ord?'Modify order level':'Confirm level change',ord?'Save the new pending-order price?':'Save the new Stop Loss / Take Profit level?','Confirm',false).then(function(ok){
-  if(!ok){if(ord)ord.price=moved.original.price;else{pos.sl=moved.original.sl;pos.tp=moved.original.tp}chartDrawLines();return}
-  save();chartDrawLines();if(view==='trade')paintTrade(true);toast('Level updated','up')})}
+function restoreChartGestures(){if(chart.c)chart.c.applyOptions({handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true}},handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:false}})}
+function endLineDrag(){var tip=$('#mt5DragTip');if(tip)tip.style.display='none';if(!DRAG)return;var moved=DRAG,ord=moved.ord,pos=moved.pos;DRAG=null;restoreChartGestures();
+ if(ord){var next=ord.price;ord.price=moved.original.price;confirmM('Modify order level','Save the new pending-order price?','Confirm',false).then(function(ok){if(ok)TradingProvider.modifyOrder(ord,next,ord.sl,ord.tp);chartDrawLines()});return}
+ var price=pos[moved.kind];pos.sl=moved.original.sl;pos.tp=moved.original.tp;
+ if(!chartRiskLevelValid(pos,moved.kind,price,Q[pos.symbol])){chartDrawLines();toast('Invalid '+moved.kind.toUpperCase()+' level','dn');return}
+ if(!chart.levelDraft||chart.levelDraft.posId!==pos.id)chart.levelDraft={posId:pos.id,sl:pos.sl||null,tp:pos.tp||null};
+ chart.levelDraft[moved.kind]=price;chart.selectedPositionId=pos.id;chartDrawLines();renderChartPositionBar()
+}
 function fmtDT(t){var d=new Date(t*1000),M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];function z(n){return(n<10?'0':'')+n}return d.getDate()+' '+M[d.getMonth()]+' '+z(d.getHours())+':'+z(d.getMinutes())}
 function axisTag(ctx,w,y,txt,bg,fg){var tw=62;ctx.fillStyle=bg;ctx.fillRect(w-tw,y-8,tw,16);ctx.fillStyle=fg||'#000';ctx.font='10px IBM Plex Mono';ctx.fillText(txt,w-tw+4,y+3.5)}
 function redrawDrawings(){
@@ -2193,8 +2196,9 @@ function chartDrawLines(){if(!chart.cs)return;var C=DB.settings.chart||{};
  if(C.tradePositions!==false)accPositions(a).filter(function(p){return p.symbol===chart.sym}).forEach(function(p){
   try{var active=chart.selectedPositionId===p.id,entry=chart.cs.createPriceLine({price:p.entry,color:active?'#E3B34C':'#4D8DFF',lineWidth:active?2:1,lineStyle:0,title:p.side.toUpperCase()+' '+p.lots});
    chart.lines.push(entry);chart.plRefs.push({line:entry,p:p});
-   if(C.slTp!==false&&p.sl)chart.lines.push(chart.cs.createPriceLine({price:p.sl,color:'#EF5350',lineWidth:active?2:1,lineStyle:2,title:p.ts>0?'TRAIL':'SL'}));
-   if(C.slTp!==false&&p.tp)chart.lines.push(chart.cs.createPriceLine({price:p.tp,color:'#26A69A',lineWidth:active?2:1,lineStyle:2,title:'TP'}))}catch(e){}});
+   var draft=chart.levelDraft&&chart.levelDraft.posId===p.id?chart.levelDraft:p;
+   if(C.slTp!==false&&draft.sl)chart.lines.push(chart.cs.createPriceLine({price:draft.sl,color:'#EF5350',lineWidth:active?2:1,lineStyle:2,title:p.ts>0?'TRAIL':'SL'}));
+   if(C.slTp!==false&&draft.tp)chart.lines.push(chart.cs.createPriceLine({price:draft.tp,color:'#26A69A',lineWidth:active?2:1,lineStyle:2,title:'TP'}))}catch(e){}});
  if(C.tradeOrders!==false)accOrders(a).filter(function(o){return o.symbol===chart.sym}).forEach(function(o){
   try{chart.ordLines.push(chart.cs.createPriceLine({price:o.price,color:'#F5A623',lineWidth:1,lineStyle:2,title:o.type+' '+o.lots}))}catch(e){}});
  var u0=user();
@@ -2213,23 +2217,6 @@ setInterval(function(){
  if(chart.selectedPositionId&&!chartSelectedPosition()){chart.selectedPositionId=null;renderChartPositionBar()}
 },2000);
 
-/* MT5-style touch drag of SL/TP lines on open positions */
-(function(){var drag=null;
- function el(){return document.getElementById('chartEl')}
- function hit(y){var a=myAcc();if(!a||!chart.cs)return null;var best=null;
-  accPositions(a).filter(function(p){return p.symbol===chart.sym}).forEach(function(p){['sl','tp'].forEach(function(k){if(!p[k])return;var ly=chart.cs.priceToCoordinate(p[k]);if(ly!=null&&Math.abs(ly-y)<14&&(!best||Math.abs(ly-y)<best.d))best={p:p,k:k,d:Math.abs(ly-y)}})});return best}
- document.addEventListener('pointerdown',function(e){var c=el();if(!c||view!=='charts'||!c.contains(e.target)||DT.mode||chart.levelPlacement)return;var r=c.getBoundingClientRect(),h=hit(e.clientY-r.top);if(!h)return;
-  drag=h;drag.r=r;e.stopPropagation();e.preventDefault();chart.c.applyOptions({handleScroll:false,handleScale:false})},true);
- document.addEventListener('pointermove',function(e){if(!drag)return;e.stopPropagation();e.preventDefault();var pr=chart.cs.coordinateToPrice(e.clientY-drag.r.top);if(pr==null)return;var S=SYMBOLS[chart.sym];pr=+pr.toFixed(S.digits);drag.pr=pr;
-  var p=drag.p,pnl=pnlUSD(p,pr),pts=Math.round(Math.abs(pr-p.entry)/Math.pow(10,-S.digits));
-  if(drag.line)try{chart.cs.removePriceLine(drag.line)}catch(x){}
-  drag.line=chart.cs.createPriceLine({price:pr,color:drag.k==='sl'?'#EF5350':'#26A69A',lineWidth:2,lineStyle:0,title:drag.k.toUpperCase()+' '+(pnl>=0?'+':'')+pnl.toFixed(2)+'$ · '+pts+' pts'})},true);
- document.addEventListener('pointerup',function(e){if(!drag)return;var d=drag;drag=null;if(d.line)try{chart.cs.removePriceLine(d.line)}catch(x){}
-  chart.c.applyOptions({handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:{time:true,price:true}},handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:false}});
-  if(d.pr!=null){var p=d.p,ok=d.k==='sl'?(p.side==='buy'?d.pr<(Q[p.symbol].bid||1e18):d.pr>(Q[p.symbol].ask||0)):(p.side==='buy'?d.pr>(Q[p.symbol].bid||0):d.pr<(Q[p.symbol].ask||1e18));
-   if(ok){p[d.k]=d.pr;save();toast(d.k.toUpperCase()+' → '+pxf(d.pr,SYMBOLS[p.symbol].digits),'up');try{mt5Audio.orderOk()}catch(x){}}else{toast('Invalid '+d.k.toUpperCase()+' level','dn');try{mt5Audio.error()}catch(x){}}}
-  chartDrawLines()},true);
-})();
 /* Historical OHLC bars come only from Biquote; this bounded local cache is display-only. */
 var CANDLE_CACHE_KEY='plotos_candles_cache_v2',CANDLE_CACHE_MAX_ENTRIES=16,CANDLE_CACHE_MAX_CHARS=850000,CANDLE_CACHE_MAX_BARS=600,CANDLE_CACHE_MEMORY=null;
 try{localStorage.removeItem('plotos_candles_cache_v1')}catch(e){}
@@ -2726,9 +2713,9 @@ function renderChartPositionBar(){var host=$('#mainWrap');var bar=$('#chartPosit
  if(!bar){bar=document.createElement('div');bar.id='chartPositionBar';bar.className='chart-position-bar';host.appendChild(bar)}
  bar.innerHTML='<div class="cpb-info"><b>'+esc(p.symbol)+'</b><span>'+p.side.toUpperCase()+' '+formatLots(p.lots)+'</span></div>'+
  '<button type="button" class="cpb-close"><span aria-hidden="true">×</span>Close position</button>'+
- '<button type="button" class="cpb-modify"><span aria-hidden="true">↗</span>Modify position</button>';
- var c=bar.querySelector('.cpb-close'),m=bar.querySelector('.cpb-modify');if(c)c.onclick=function(e){e.stopPropagation();closeSelectedChartPosition()};if(m)m.onclick=function(e){e.stopPropagation();openChartPositionSheet(p)}}
-function selectChartPosition(p){if(!p)return;if(chartSheetDraft.posId&&chartSheetDraft.posId!==p.id)closeChartPositionSheet();chart.selectedPositionId=p.id;
+ '<button type="button" class="cpb-level sl" aria-label="Set stop loss">SL</button><button type="button" class="cpb-level tp" aria-label="Set take profit">TP</button><button type="button" class="cpb-modify" aria-label="Modify position">↗</button><button type="button" class="cpb-dismiss" aria-label="Deselect position">×</button>';
+ var c=bar.querySelector('.cpb-close'),m=bar.querySelector('.cpb-modify');if(c)c.onclick=function(e){e.stopPropagation();closeSelectedChartPosition()};if(m)m.onclick=function(e){e.stopPropagation();openChartPositionSheet(p)};bar.querySelector('.sl').onclick=function(){armChartLevelPlacement(p,'sl')};bar.querySelector('.tp').onclick=function(){armChartLevelPlacement(p,'tp')};bar.querySelector('.cpb-dismiss').onclick=function(){chart.selectedPositionId=null;chart.levelDraft=null;chart.levelPlacement=null;paintChartLevelHint();chartDrawLines();renderChartPositionBar()}}
+function selectChartPosition(p){if(!p)return;if(chart.selectedPositionId!==p.id)chart.levelDraft=null;if(chartSheetDraft.posId&&chartSheetDraft.posId!==p.id)closeChartPositionSheet();chart.selectedPositionId=p.id;
  if(DSEL.idx>=0){DSEL.idx=-1;DSEL.drag=null;syncCvCapture();paintSelBar()}chartDrawLines();renderChartPositionBar()}
 function closeSelectedChartPosition(){var p=chartSelectedPosition();if(!p)return;if(!TradingProvider.close(p,'market')){var left=holdLeftSec(p);toast(left?'Close available in '+left+'s':'Position could not be closed','dn');return}
  closeChartPositionSheet();chart.selectedPositionId=null;renderChartPositionBar();save();renderStrip();paintTrade(true);chartDrawLines();chartDrawMarkers();toast('Position closed','')}
@@ -2744,7 +2731,7 @@ function refreshChartPositionSheet(){var p=chartSheetPosition();if(!p){closeChar
  var px=p.side==='buy'?(q.bid>0?q.bid:p.entry):(q.ask>0?q.ask:(q.bid>0?q.bid:p.entry)),pnl=pnlUSD(p,px);if(v){v.textContent=(pnl>=0?'+':'')+pnl.toFixed(2)+' USD';v.className='pnl '+(pnl>=0?'up':'dn')}}
 function closeChartPositionSheet(){if(chartSheetDraft.timer)clearInterval(chartSheetDraft.timer);chartSheetDraft={posId:null,sl:null,tp:null,timer:0};var root=$('#mt5ModifySheet');if(root)root.remove()}
 function openChartPositionSheet(p){if(!p)return;selectChartPosition(p);closeChartPositionSheet();var S=SYMBOLS[p.symbol],q=Q[p.symbol]||{},root=document.createElement('div');
- chartSheetDraft={posId:p.id,sl:p.sl||null,tp:p.tp||null,timer:0};root.id='mt5ModifySheet';root.innerHTML='<div class="mt5-bottom-sheet-backdrop active" id="mt5SheetBackdrop"></div>'+
+ var draft=chart.levelDraft&&chart.levelDraft.posId===p.id?chart.levelDraft:p;chartSheetDraft={posId:p.id,sl:draft.sl||null,tp:draft.tp||null,timer:0};root.id='mt5ModifySheet';root.innerHTML='<div class="mt5-bottom-sheet-backdrop active" id="mt5SheetBackdrop"></div>'+
  '<section class="mt5-bottom-sheet active" role="dialog" aria-modal="true" aria-label="Modify simulated position">'+
  '<div class="sheet-handle" id="mt5SheetHandle"></div><div class="mt5-sheet-head"><div class="mt5-sheet-title"><b>'+esc(p.symbol)+'</b><small>'+esc(S.desc||S.name||'Financial Instrument')+'</small></div>'+
  '<div class="mt5-sheet-quotes"><span class="bid"><small>BID</small><b id="mt5SheetBid">'+(q.bid>0?pxf(q.bid,S.digits):'—')+'</b></span><span class="ask"><small>ASK</small><b id="mt5SheetAsk">'+(q.ask>0?pxf(q.ask,S.digits):'—')+'</b></span></div>'+
@@ -2752,8 +2739,8 @@ function openChartPositionSheet(p){if(!p)return;selectChartPosition(p);closeChar
  '<div class="mt5-sheet-summary"><span class="ticket">#'+esc(String(p.id).slice(-8).toUpperCase())+' · '+p.side.toUpperCase()+' '+formatLots(p.lots)+' lot</span><b id="mt5SheetPnl" class="pnl">—</b></div>'+
  '<div class="mt5-sheet-opened">Opened '+(p.openedAt?new Date(p.openedAt).toLocaleString():'—')+'</div>'+
  '<div class="mt5-sheet-risk-grid">'+
- '<div class="mt5-sheet-risk sl"><label>STOP LOSS</label><div class="mt5-sheet-stepper"><button type="button" data-step="sl:-1" aria-label="Lower stop loss">−</button><input id="mt5SheetSLInput" type="number" inputmode="decimal" step="'+chartSheetPoint(S)+'" value="'+(p.sl?Number(p.sl).toFixed(S.digits):'')+'" placeholder="Not set"><button type="button" data-step="sl:1" aria-label="Raise stop loss">+</button></div><div id="mt5SheetSLMetric" class="mt5-sheet-metric">Not set</div><button type="button" data-place="sl" class="mt5-sheet-place">Set on chart</button></div>'+
- '<div class="mt5-sheet-risk tp"><label>TAKE PROFIT</label><div class="mt5-sheet-stepper"><button type="button" data-step="tp:-1" aria-label="Lower take profit">−</button><input id="mt5SheetTPInput" type="number" inputmode="decimal" step="'+chartSheetPoint(S)+'" value="'+(p.tp?Number(p.tp).toFixed(S.digits):'')+'" placeholder="Not set"><button type="button" data-step="tp:1" aria-label="Raise take profit">+</button></div><div id="mt5SheetTPMetric" class="mt5-sheet-metric">Not set</div><button type="button" data-place="tp" class="mt5-sheet-place">Set on chart</button></div></div>'+
+ '<div class="mt5-sheet-risk sl"><label>STOP LOSS</label><div class="mt5-sheet-stepper"><button type="button" data-step="sl:-1" aria-label="Lower stop loss">−</button><input id="mt5SheetSLInput" type="number" inputmode="decimal" step="'+chartSheetPoint(S)+'" value="'+(draft.sl?Number(draft.sl).toFixed(S.digits):'')+'" placeholder="Not set"><button type="button" data-step="sl:1" aria-label="Raise stop loss">+</button></div><div id="mt5SheetSLMetric" class="mt5-sheet-metric">Not set</div><button type="button" data-place="sl" class="mt5-sheet-place">Set on chart</button></div>'+
+ '<div class="mt5-sheet-risk tp"><label>TAKE PROFIT</label><div class="mt5-sheet-stepper"><button type="button" data-step="tp:-1" aria-label="Lower take profit">−</button><input id="mt5SheetTPInput" type="number" inputmode="decimal" step="'+chartSheetPoint(S)+'" value="'+(draft.tp?Number(draft.tp).toFixed(S.digits):'')+'" placeholder="Not set"><button type="button" data-step="tp:1" aria-label="Raise take profit">+</button></div><div id="mt5SheetTPMetric" class="mt5-sheet-metric">Not set</div><button type="button" data-place="tp" class="mt5-sheet-place">Set on chart</button></div></div>'+
  '<button type="button" id="mt5SheetApply" class="mt5-sheet-submit">Modify position</button></section>';
  document.body.appendChild(root);$('#mt5SheetBackdrop').onclick=closeChartPositionSheet;$('#mt5SheetClose').onclick=closeChartPositionSheet;
  $('#mt5SheetSLInput').oninput=function(){chartSheetInput('sl',this.value)};$('#mt5SheetTPInput').oninput=function(){chartSheetInput('tp',this.value)};
@@ -2763,7 +2750,7 @@ function openChartPositionSheet(p){if(!p)return;selectChartPosition(p);closeChar
  updateChartSheetMetric('sl');updateChartSheetMetric('tp');refreshChartPositionSheet();chartSheetDraft.timer=setInterval(refreshChartPositionSheet,1000)}
 function submitChartPositionSheet(){var p=chartSheetPosition();if(!p){toast('Position no longer available','dn');closeChartPositionSheet();return}var sl=chartSheetDraft.sl||null,tp=chartSheetDraft.tp||null,q=Q[p.symbol];
  if(sl&&!chartRiskLevelValid(p,'sl',sl,q)){toast('Invalid Stop Loss for '+p.side.toUpperCase(),'dn');return}if(tp&&!chartRiskLevelValid(p,'tp',tp,q)){toast('Invalid Take Profit for '+p.side.toUpperCase(),'dn');return}
- if(!TradingProvider.modifyPosition(p,sl,tp,p.ts)){toast('Position could not be modified right now','dn');return}audit(user()?user().email:'?','Position Modified',p.symbol,'SL '+(sl||'—')+' / TP '+(tp||'—'));save();closeChartPositionSheet();chartDrawLines();renderStrip();paintTrade(true);renderChartPositionBar();toast('Position updated','up')}
+ if(!TradingProvider.modifyPosition(p,sl,tp,p.ts)){toast('Position could not be modified right now','dn');return}chart.levelDraft=null;audit(user()?user().email:'?','Position Modified',p.symbol,'SL '+(sl||'—')+' / TP '+(tp||'—'));save();closeChartPositionSheet();chartDrawLines();renderStrip();paintTrade(true);renderChartPositionBar();toast('Position updated','up')}
 
 function positionSheet(p){
  var q=Q[p.symbol],px=q&&q.bid>0?(p.side==='buy'?q.bid:q.ask):p.entry,pnl=pnlUSD(p,px);
