@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Match video: position action strip, SL/TP draft dragging, explicit modification sheet
 - [x] Chart drawing controls: smooth select/move/delete, MT5-style
 - [x] Chart settings, radial dial (double-tap), indicators, objects
 - [x] Filled green candles, no Bid/Ask text, candle countdown (settings-gated)
