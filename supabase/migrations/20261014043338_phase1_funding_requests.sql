@@ -1,5 +1,5 @@
 -- PLOTOS staged security migration — additive only.
--- This file is intentionally NOT applied to the live project.
+-- Applied to the live project on 2026-10-14 after explicit user approval.
 -- It does not alter pf_users_data, legacy audit policies, or current client sync.
 
 create table if not exists public.pf_funding_requests (
