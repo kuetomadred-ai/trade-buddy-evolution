@@ -24,6 +24,8 @@ describe("embedded application scripts", () => {
     expect(page).toContain("function pre(){return CLOUD.ok?cloudPull():Promise.resolve()}");
     expect(page).not.toMatch(/\bvar pre=/);
     expect(page).toContain('id="demoBtn">Sign in for paper trading');
-    expect(page).toContain("Paper trading runs on the server; sign in.");
+    expect(page).toContain("SIMULATED BALANCE");
+    expect(page).not.toContain("Paper trading runs on the server; sign in.");
+    expect(page).not.toContain('<footer class="lp-foot">');
   });
 });

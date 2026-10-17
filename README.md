@@ -1,24 +1,6 @@
-# Trade Buddy Evolution
+# PLUTUS
 
-https://github.com/kuetomadred-ai/trade-buddy-lite-68
-
-
-
-
-
-
-
-ادخل الى هذا المستودع وخذ التطبيق كاملا وانسخه لديك لنعمل عليه ونطوره واكتشف ماذا يحتاج ليصبح تطبيق متكامل
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/df947e6a-e03d-4178-91d9-4452bbca2c6a).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+PLUTUS is a mobile-first, server-side paper-trading platform built with React, Fastify, Supabase, Biquote market data, and Capacitor.
 
 ## Development and CI
 
@@ -42,9 +24,9 @@ cd backend && bun install --frozen-lockfile && bun run typecheck && bun run test
 
 ## Capacitor (Android and iOS)
 
-The mobile wrapper packages the existing Plutus page from `public/plotos/` as a local web app. The native projects load bundled assets; no remote development server is configured.
+The mobile wrapper packages the existing PLUTUS page from `public/plotos/` as a local web app. The native projects load bundled assets; no remote development server is configured.
 
-The native app ID is `com.plutus.trading`. The existing `/plotos/` web path and legacy local-storage keys remain unchanged for backward compatibility; the app display name, native identifiers, and auth callback use Plutus.
+The native app ID is `com.plutus.trading`. The existing `/plotos/` web path and legacy local-storage keys remain unchanged for backward compatibility; the app display name, native identifiers, and auth callback use PLUTUS.
 
 Requirements: Node.js 22 or newer, Android Studio with an Android SDK for Android builds, and macOS with Xcode 26 or newer for iOS builds. iOS projects can be prepared in this repository, but compiling and signing them requires macOS and Xcode.
 
@@ -54,13 +36,13 @@ The Android and iOS native project folders are included in this repository. Afte
 bun install --frozen-lockfile
 ```
 
-Build the web app, stage the Plutus page in Capacitor's `dist/` directory, and sync both native projects:
+Build the web app, stage the PLUTUS page in Capacitor's `dist/` directory, and sync both native projects:
 
 ```sh
 bun run mobile:sync
 ```
 
-Run `bun run mobile:build` alone only when you want to prepare `dist/` without syncing native projects. Use `bunx cap add android` or `bunx cap add ios` only if the corresponding native folder has been removed and needs to be regenerated. Native icons and launch screens use the existing `public/favicon.ico` mark; regenerate them with `python3 scripts/generate-mobile-brand-assets.py` (requires Pillow).
+Run `bun run mobile:build` alone only when you want to prepare `dist/` without syncing native projects. Use `bunx cap add android` or `bunx cap add ios` only if the corresponding native folder has been removed and needs to be regenerated. Web, Android, and iOS icons and launch screens are generated from `public/plotos/assets/mt5-app-icon.png`; regenerate them with `python3 scripts/generate-mobile-brand-assets.py` (requires Pillow).
 
 Open one platform in its native IDE after syncing:
 

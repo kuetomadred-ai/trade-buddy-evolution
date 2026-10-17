@@ -7,7 +7,7 @@ const destination = resolve("dist");
 const entryPoint = resolve(source, "index.html");
 
 if (!existsSync(entryPoint)) {
-  throw new Error(`Plutus web assets were not found at ${source}. Run the web build first.`);
+  throw new Error(`PLUTUS web assets were not found at ${source}. Run the web build first.`);
 }
 
 rmSync(destination, { recursive: true, force: true });

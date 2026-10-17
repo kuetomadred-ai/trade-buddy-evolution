@@ -1,0 +1,25 @@
+# Free Render web services sleep after inactivity; use this blueprint for testing only.
+services:
+  - type: web
+    name: plutus-paper-engine
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PORT
+        value: "3000"
+      - key: SUPABASE_URL
+        value: https://jujjjvuspzfgrmeljljh.supabase.co
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://localhost,capacitor://localhost,http://localhost,http://localhost:5173
+      - key: BIQUOTE_URL
+        value: https://biquote.io
+      - key: ENGINE_SYMBOLS
+        value: EURUSD,GBPUSD,USDJPY,USDCHF,USDCAD,AUDUSD,NZDUSD,XAUUSD,XAGUSD,US500,USTEC,US30

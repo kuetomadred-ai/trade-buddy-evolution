@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>Plutus</title>
-<link rel="manifest" href='data:application/manifest+json,{"name":"Plutus","short_name":"Plutus","start_url":".","display":"standalone","background_color":"%23000000","theme_color":"%23000000","description":"Professional prop trading platform."}'>
+<title>PLUTUS</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" href="./assets/mt5-app-icon.png">
 <link rel="apple-touch-icon" href="./assets/mt5-app-icon.png">
@@ -14,7 +13,7 @@
 <script src="./engine-client.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 <script>
-/* Biquote is the sole market-data provider for Plutus. */
+/* Biquote is the sole market-data provider for PLUTUS. */
 (function (global) {
   'use strict';
 
@@ -621,7 +620,6 @@ html[dir="rtl"] #drawer{left:auto;right:0;transform:translateX(102%);border-righ
 .lp-qh{padding:22px 16px 10px;font-weight:700;font-size:17px;border-bottom:1px solid #1C1C1C}
 .lp-q{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:13px 16px;border-bottom:1px solid #141414;font-family:Roboto,sans-serif;font-size:14px}.lp-q span{font-weight:700}.lp-q.u span{color:#3D8BFF}.lp-q.d span{color:#F23645}
 .lp-faq{max-width:780px;margin:30px auto 0;text-align:left}.lp-faq details{border:1px solid #1E2842;border-radius:14px;padding:18px 22px;margin-bottom:10px;background:#0A0F1C}.lp-faq summary{cursor:pointer;font-weight:600;font-size:15px}.lp-faq p{color:#9AA4BC;margin-top:10px;line-height:1.65;font-size:14px}
-.lp-foot{padding:44px max(20px,calc(50% - 580px));border-top:1px solid #141A2A;color:#5A6580}.lp-foot p{font-size:12px;line-height:1.7;margin:14px 0;max-width:820px}.lp-foot small{font-size:12px}
 @media(max-width:860px){.lp-links,.lp-nav .lp-ghost{display:none}.lp-nav{justify-content:space-between}.lp-hero,.lp-platform{grid-template-columns:1fr;padding-top:40px}.lp-stats{grid-template-columns:repeat(2,1fr)}.lp-steps{grid-template-columns:1fr}.lp-sec{padding:56px 18px}.lp-plan.hot{transform:none}}
 /* ===== MT5 mobile terminal skin ===== */
 :root{--bg:#000;--pn:#121212;--pn2:#1C1C1E;--ln:#262628;--ln2:#333336;--tx:#F2F2F2;--mut:#8E8E93;--dim:#636366;--ac:#3D8BFF;--acbg:rgba(61,139,255,.12);--up:#3D8BFF;--dn:#F23645;--upbg:rgba(61,139,255,.12);--dnbg:rgba(242,54,69,.12)}
@@ -741,7 +739,7 @@ html[dir="rtl"] #drawer{border-left:1px solid #292929}
 }
 @media(max-width:390px){#app.chartMode .odmid{width:43%}#app.chartMode .od .p{font-size:16px}#app.chartMode .odmid button{width:28px}}
 
-/* Plutus funding + broker refresh */
+/* PLUTUS funding + broker refresh */
 .lp-nav{max-width:1200px;margin-inline:auto;gap:18px}
 @media(min-width:701px){.lp-links{display:flex;align-items:center;gap:18px}.lp-nav .lp-ghost{display:inline-flex}}
 .lp-hero{isolation:isolate;position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(5,7,13,.98) 0%,rgba(5,7,13,.91) 48%,rgba(5,7,13,.54) 100%),url("assets/market-practice.jpg") center/cover no-repeat}
@@ -769,7 +767,7 @@ html[dir="rtl"] #drawer{border-left:1px solid #292929}
 </style>
 </head>
 <body>
-<div id="auth"><div class="auth-box" style="display:flex;flex-direction:column;align-items:center"><span class="pmark" style="width:52px;height:52px;font-size:26px">P</span><div style="margin-top:10px;color:var(--mut);font-size:13px;letter-spacing:2px">Plutus</div></div></div>
+<div id="auth"><div class="auth-box" style="display:flex;flex-direction:column;align-items:center"><span class="pmark" style="width:52px;height:52px;font-size:26px">P</span><div style="margin-top:10px;color:var(--mut);font-size:13px;letter-spacing:2px">PLUTUS</div></div></div>
 <div id="app" style="display:none">
   <div style="flex:1;display:flex;flex-direction:column;min-width:0;height:100dvh;position:relative">
     <main id="shellMain">
@@ -798,7 +796,7 @@ window.LT={en:{Charts:'Charts',Trade:'Trade',Quotes:'Quotes',Profile:'Profile'},
 window.T=function(k){var lg='en';try{lg=(JSON.parse(localStorage.getItem('plotos_v1'))||{}).settings.lang||'en'}catch(e){}
  return(window.LT[lg]&&window.LT[lg][k])||window.LT.en[k]||k};
 (function(){var b=document.getElementById('errbar');
- function show(m){if(b){b.style.display='block';b.textContent='Plutus: '+m}}
+ function show(m){if(b){b.style.display='block';b.textContent='PLUTUS: '+m}}
  b.onclick=function(){b.style.display='none'};
  window.addEventListener('error',function(e){var m=e.message||'error';
   if(e.error&&e.error.stack){var ls=String(e.error.stack).split('\n');if(ls[1])m+=' — '+ls[1].trim().slice(0,120)}
@@ -818,7 +816,7 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function todayKey(){return new Date().toLocaleDateString('en-CA')}
 function tsAgo(t){var s=(Date.now()-t)/1e3;return s<60?Math.floor(s)+'s':s<3600?Math.floor(s/60)+'m':s<86400?Math.floor(s/3600)+'h':Math.floor(s/86400)+'d'}
 function fmtDur(ms){var m=Math.floor(ms/60000);if(m<60)return m+'m';var h=Math.floor(m/60);if(h<24)return h+'h '+(m%60)+'m';return Math.floor(h/24)+'d '+(h%24)+'h'}
-function showErr(e){var m=(e&&e.message)?e.message:String(e);var b=document.getElementById('errbar');if(b){b.style.display='block';b.textContent='Plutus: '+m}}
+function showErr(e){var m=(e&&e.message)?e.message:String(e);var b=document.getElementById('errbar');if(b){b.style.display='block';b.textContent='PLUTUS: '+m}}
 function tfetch(url,ms,opts){if(!ms)ms=7000;var c=new AbortController();var t=setTimeout(function(){c.abort()},ms);
  return fetch(url,Object.assign({signal:c.signal},opts||{})).then(function(r){clearTimeout(t);return r},function(e){clearTimeout(t);throw e})}
 function toast(msg,type){var t=document.createElement('div');t.className='toast '+(type||'');t.innerHTML='<i></i><span>'+esc(msg)+'</span>';$('#toasts').appendChild(t);setTimeout(function(){t.classList.add('out');setTimeout(function(){t.remove()},320)},3200)}
@@ -1002,7 +1000,7 @@ function queuePendingEmails(){
  var me=user(),pending=DB.notifications.filter(function(n){return n&&n.userId===me.id&&!n.emailQueuedAt&&n.id});
  if(!pending.length)return Promise.resolve();
  return pending.reduce(function(chain,n){return chain.then(function(){
-  return CLOUD.sb.from('pf_email_queue').insert({notification_id:n.id,user_id:me.id,recipient_email:me.email,subject:'Plutus · '+n.title,body:n.body,level:n.level||'info',status:'QUEUED',created_at:new Date(n.ts||Date.now()).toISOString()}).then(function(r){
+  return CLOUD.sb.from('pf_email_queue').insert({notification_id:n.id,user_id:me.id,recipient_email:me.email,subject:'PLUTUS · '+n.title,body:n.body,level:n.level||'info',status:'QUEUED',created_at:new Date(n.ts||Date.now()).toISOString()}).then(function(r){
    if(r.error&&r.error.code!=='23505')throw r.error;
    n.emailQueuedAt=Date.now();
   });
@@ -1550,7 +1548,7 @@ function histFiltered(f){var h=DB.history.filter(function(x){return user()&&x.us
  return h.filter(function(x){return now-x.closedAt<=ms})}
 function cloudReady(){return CLOUD.ok&&CLOUD.hydrated&&ENGINE.online&&ENGINE.ready}
 var TradingProvider={
-	 name:'Plutus Paper Engine v1',
+	 name:'PLUTUS Paper Engine v1',
  getSymbols:function(){return SYIDS},
  getQuote:function(s){return qt(s)},
  getAccount:function(){return myAcc()},
@@ -1858,7 +1856,7 @@ function indicatorsModal(){var S=DB.settings.ind;
  '<div style="font-size:10px;color:var(--ac);font-weight:700;letter-spacing:.5px;margin-bottom:8px">Overlay (on candles)</div>'+chips(OVERLAY_DEFS)+
  '<div style="font-size:10px;color:var(--ac);font-weight:700;letter-spacing:.5px;margin:12px 0 8px">Oscillators (below chart)</div>'+chips(OSC_DEFS)+
  '</div>'+
- '<div style="font-size:10px;color:var(--dim);line-height:1.7">Oscillators render in a separate synced pane below the chart.</div>'+ 
+ '<div style="font-size:10px;color:var(--dim);line-height:1.7">Oscillators render in a separate synced pane below the chart.</div>'+
  '<div class="mrow-btns"><button class="btn" onclick="indicatorCatalog()">Browse indicators</button><button class="btn" onclick="closeModal()">Done</button></div>');
  $$('[data-ind]').forEach(function(ch){ch.onclick=function(){
   var id=ch.getAttribute('data-ind');S[id]=!S[id];ch.classList.toggle('on',S[id]);save();applyIndicators()}});
@@ -2462,26 +2460,26 @@ function updateBadges(){var u=user();if(!u)return;
   else pill.style.display='none'}}
 function openDrawer(){var u=user();if(!u)return;
  if(PORTAL_ADMIN){
-  $('#drawer').innerHTML='<div class="dlogo"><span class="pmark">P</span>Plutus Admin</div>'+
+  $('#drawer').innerHTML='<div class="dlogo"><span class="pmark">P</span>PLUTUS Admin</div>'+
    '<button class="ditem on" data-go="admin">Staff Console</button><div class="dsep"></div>'+
    '<div style="margin-top:auto"><button class="ditem" data-act="out">Log out</button></div>';
   $$('#drawer [data-go]').forEach(function(b){b.onclick=function(){closeDrawer();navGo('admin')}});
   $$('#drawer [data-act="out"]').forEach(function(b){b.onclick=function(){doLogout()}});
   $('#drawer').classList.add('on');$('#dOvl').classList.add('on');return}
- var a=myAcc(),accountName=a?(a.kind==='PAPER'?'Demo':'Zero'):'Trading account',server=a?'Plutus · #'+a.login:'No active account';
+ var a=myAcc(),accountName=a?(a.kind==='PAPER'?'Demo':'Zero'):'Trading account',server=a?'PLUTUS · #'+a.login:'No active account';
  var items=[
   ['charts','⌁','Charts',''],['trade','⇅','Trade',''],['hist','▧','History',''],['messages','✉','Mailbox',''],
   ['@settings','⚙','Settings',''],['@offers','♟','Prop Firm (Funding)',''],['broker','◇','Broker Account',''],
   ['profile','◉','Profile',''],['@about','ⓘ','About','']];
- $('#drawer').innerHTML='<div class="drawer-account"><div class="drawer-brand"><span class="pmark">P</span><div><strong>Plutus</strong><small>MetaTrader 5</small></div></div>'+
-  '<div class="drawer-meta"><div><b>'+esc(accountName)+'</b><small>'+esc(server)+'</small></div>'+(a&&a.kind==='PAPER'?'<span class="demo-tag">Demo</span>':'')+'</div>'+ 
+ $('#drawer').innerHTML='<div class="drawer-account"><div class="drawer-brand"><span class="pmark">P</span><div><strong>PLUTUS</strong><small>MetaTrader 5</small></div></div>'+
+  '<div class="drawer-meta"><div><b>'+esc(accountName)+'</b><small>'+esc(server)+'</small></div>'+(a&&a.kind==='PAPER'?'<span class="demo-tag">Demo</span>':'')+'</div>'+
   '<button class="manage-link" data-act="accounts">Manage accounts</button></div><div class="drawer-list">'+
   items.map(function(it){return'<button class="ditem '+(view===it[0]?'on':'')+'" data-go="'+it[0]+'"><span class="di">'+it[1]+'</span><span>'+it[2]+'</span>'+(it[3]?'<span class="count">'+it[3]+'</span>':'')+'</button>'}).join('')+
   '<div class="dsep"></div><button class="ditem" data-act="out"><span class="di">↪</span><span>Log out</span></button></div>';
  $$('#drawer [data-go]').forEach(function(b){b.onclick=function(){var g=b.getAttribute('data-go');closeDrawer();
   if(g==='@settings'){navGo('charts');setTimeout(function(){try{chartSettings()}catch(e){}},60);return}
   if(g==='@offers'){showOffers();return}
-  if(g==='@about'){toast('Plutus · MetaTrader 5 style platform · Biquote market data','up');return}
+  if(g==='@about'){toast('PLUTUS · MetaTrader 5 style platform · Biquote market data','up');return}
   navGo(g)}});
  var am=$('#drawer [data-act="accounts"]');if(am)am.onclick=function(){closeDrawer();accountsModal()};
  $$('#drawer [data-act="out"]').forEach(function(b){b.onclick=function(){doLogout()}});
@@ -2492,7 +2490,7 @@ function closeDrawer(){$('#drawer').classList.remove('on');$('#dOvl').classList.
  $('#dOvl').onclick=closeDrawer;
 window.openDrawer=openDrawer;
 function renderBNav(){$('#bnav').setAttribute('aria-label','Primary navigation');$('#bnav').innerHTML=NAV.map(function(n){
- return'<button type="button" data-v="'+n[0]+'" aria-label="'+n[1]+'" title="'+n[1]+'" class="'+(view===n[0]?'on':'')+'"'+(view===n[0]?' aria-current="page"':'')+'>'+ 
+ return'<button type="button" data-v="'+n[0]+'" aria-label="'+n[1]+'" title="'+n[1]+'" class="'+(view===n[0]?'on':'')+'"'+(view===n[0]?' aria-current="page"':'')+'>'+
  (n[0]==='trade'?'<span class="navpill" id="navPill" style="display:none">0</span>':'')+
  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+n[2]+'"/></svg>'+n[1]+
  (n[0]==='messages'?'<span class="nb" id="navBMsg" style="display:none">0</span>':'')+
@@ -2526,55 +2524,55 @@ function renderAuth(notice){var setup=false;
    return'<div class="lp-plan '+(i===0?'hot':'')+'">'+(i===0?'<em>'+esc(p.badge)+'</em>':'')+'<small>'+esc(p.shortName)+'</small><b>$'+(lo.size/1000)+'K–$'+(hi.size/1000)+'K</b><ul><li><span>Targets</span><i>'+esc(target)+'</i></li><li><span>Max drawdown</span><i>'+(p.trailingDD?'Trailing ':'')+p.maxDDPct+'%</i></li><li><span>Daily limit</span><i>'+(p.dailyLossPct?p.dailyLossPct+'%':'None')+'</i></li><li><span>Leverage</span><i>1:'+lo.lev+'</i></li><li><span>Fee range</span><i>$'+lo.fee+'–$'+hi.fee+'</i></li><li><span>Profit share</span><i>'+p.splitMin+'%–'+p.splitMax+'%</i></li><li><span>Fee credit</span><i>Wallet-paid fee returned at first approved payout</i></li></ul><button class="lp-cta lp-go">'+(p.mode==='instant'?'Request simulated account':'Request challenge review')+'</button></div>'}).join('')}
  $('#auth').style.display='flex';$('#app').style.display='none';
  var landingHtml=PORTAL_ADMIN?'':'<div class="lp">'+
-  '<nav class="lp-nav"><div class="lp-brand"><span class="lp-logo">P</span>Plutus<b>FUND</b></div><div class="lp-links"><a data-go="programs">Programs</a><a data-go="how">How it works</a><a data-go="platform">Platform</a><a data-go="broker">Broker simulator</a><a data-go="faq">FAQ</a></div><button class="lp-ghost" id="preDemo">Sign in for paper trading</button><button class="lp-cta lp-go">Get funded</button></nav>'+
+  '<nav class="lp-nav"><div class="lp-brand"><span class="lp-logo">P</span>PLUTUS</div><div class="lp-links"><a data-go="programs">Programs</a><a data-go="how">How it works</a><a data-go="platform">Platform</a><a data-go="broker">Broker simulator</a><a data-go="faq">FAQ</a></div><button class="lp-ghost" id="preDemo">Sign in for paper trading</button><button class="lp-cta lp-go">Get funded</button></nav>'+
   '<div class="lp-ticker"><div class="lp-track" id="lpTrack"></div></div>'+
-  '<header class="lp-hero"><div class="lp-copy"><span class="lp-pill"><i></i>Simulated programs · clear rules</span><h2>Build your edge.<br><span>Practice with a plan.</span></h2><p>Compare structured simulated funding paths, review risk rules up front, and practice on Biquote-priced markets in an MT5-inspired workspace. No live broker or payment processor is connected.</p><div class="lp-actions"><button class="lp-cta big lp-go">Start the challenge</button><button class="lp-ghost big" id="preLearn">How it works →</button></div><div class="lp-stats"><div><b>'+PROP_PROGRAMS.length+'</b><small>Funding paths</small></div><div><b>'+BROKER_SIM_TEMPLATES.length+'</b><small>Practice profiles</small></div><div><b>1–2</b><small>Evaluation phases</small></div><div><b>Staff</b><small>Activation review</small></div></div></div><div class="lp-auth" id="heroAuth"><div class="lp-auth-h"><b>Client area</b><span>Sign in or create your profile</span></div></div></header>'+
+  '<header class="lp-hero"><div class="lp-copy"><span class="lp-pill"><i></i>Simulated programs · clear rules</span><h2>Build your edge.<br><span>Practice with a plan.</span></h2><p>Explore structured programs, review key rules, and practice with Biquote market data in an MT5-inspired workspace.</p><div class="lp-actions"><button class="lp-cta big lp-go">Start the challenge</button><button class="lp-ghost big" id="preLearn">How it works →</button></div><div class="lp-stats"><div><b>'+PROP_PROGRAMS.length+'</b><small>Funding paths</small></div><div><b>'+BROKER_SIM_TEMPLATES.length+'</b><small>Practice profiles</small></div><div><b>1–2</b><small>Evaluation phases</small></div><div><b>Staff</b><small>Activation review</small></div></div></div><div class="lp-auth" id="heroAuth"><div class="lp-auth-h"><b>Client area</b><span>Sign in or create your profile</span></div></div></header>'+
   '<div class="lp-trust"><span>Market data</span><b>Biquote</b><span>Variable Bid / Ask</span><span>Historical OHLC</span><span>Streaming ticks</span><span style="display:inline-flex;align-items:center;gap:8px"><img src="assets/mt5-app-icon.png" alt="MetaTrader 5 icon" width="24" height="24" style="object-fit:contain">MT5-style simulator</span></div>'+
   '<section class="lp-sec" id="lp-programs"><span class="lp-kicker">FUNDING PROGRAMS</span><h3>Choose your account size</h3><p class="lp-lead">Compare simulated program paths, sizes and risk rules before requesting review.</p><div class="lp-plans">'+DB.templates.map(function(t,i){return'<div class="lp-plan'+(i==1?' hot':'')+'">'+(i==1?'<em>FEATURED PLAN</em>':'')+'<small>ACCOUNT SIZE</small><b>$'+(t.size/1000)+',000</b><ul><li><span>Profit target</span><i>'+t.profitPct+'%</i></li><li><span>Max drawdown</span><i>'+t.maxDDPct+'%</i></li><li><span>Min. trading days</span><i>'+t.minDays+'</i></li><li><span>Leverage</span><i>1:'+t.lev+'</i></li><li><span>Configured fee</span><i>$'+t.fee+'</i></li></ul><button class="lp-cta lp-go">Start challenge</button></div>'}).join('')+'</div></section>'+
   '<section class="lp-sec" id="lp-broker"><span class="lp-kicker">BROKER SIMULATOR</span><h3>Practice market access, on your terms</h3><p class="lp-lead">Choose a practice profile with variable Biquote pricing and a simulated balance.</p><div class="lp-broker-grid">'+BROKER_SIM_TEMPLATES.map(function(p){return'<article class="lp-broker-card"><span class="lp-broker-tag">PRACTICE PROFILE</span><h4>'+esc(p.name)+'</h4><div class="lp-broker-metrics"><div><small>Practice balance</small><b>$'+p.minDep.toLocaleString()+'</b></div><div><small>Leverage</small><b>1:'+p.lev+'</b></div><div><small>Spread</small><b>'+esc(p.spreadLabel)+'</b></div><div><small>Commission</small><b>$'+p.comm+'/lot</b></div></div><button class="lp-cta lp-go">Create practice profile</button></article>'}).join('')+'</div></section>'+
   '<section class="lp-sec" id="lp-how"><span class="lp-kicker">HOW IT WORKS</span><h3>Three steps to your practice path</h3><div class="lp-steps"><div><i>1</i><b>Choose a path</b><p>Compare the 1-step, 2-step and direct simulated programs and review their rules.</p></div><div><i>2</i><b>Review</b><p>Your simulated account results and risk-rule compliance are recorded for review.</p></div><div><i>3</i><b>Staff review</b><p>Authorized staff review each request before simulated account access is activated.</p></div></div></section>'+
   '<section class="lp-sec lp-platform" id="lp-platform"><div><span class="lp-kicker">PLATFORM</span><h3>A mobile-ready practice terminal</h3><p class="lp-lead">Market Watch, one-click trading, pending orders, SL/TP drag on chart, 30+ indicators, 9 timeframes and full trade history — wherever you are.</p><ul class="lp-feat"><li>Biquote Bid/Ask prices; streaming ticks when available</li><li>Candlestick, bar and line charts</li><li>Market, Limit and Stop orders</li><li>Real-time margin and risk monitoring</li></ul></div><div class="lp-phone"><div class="lp-screen"><div class="lp-qh"><span>Quotes</span></div><div id="lpQuotes"></div></div></div></section>'+
-  '<section class="lp-sec" id="lp-faq"><span class="lp-kicker">FAQ</span><h3>Frequently asked questions</h3><div class="lp-faq"><details><summary>What is a prop trading challenge?</summary><p>An evaluation where you trade a simulated account under configured risk rules.</p></details><details><summary>Where do prices come from?</summary><p>Symbols, Bid/Ask prices and historical candles are supplied by Biquote.</p></details><details><summary>Are funds and payouts real?</summary><p>No. Plutus is currently a prop-trading simulator. Deposits, withdrawals and broker execution are not enabled.</p></details><details><summary>What happens when a market closes?</summary><p>The last available Biquote price remains visible, clearly marked as closed, while new market orders stay disabled.</p></details></div></section>'+
-  '<footer class="lp-foot"><div class="lp-brand"><span class="lp-logo">P</span>Plutus<b>FUND</b></div><p>Plutus is a trading simulator: accounts, orders, program outcomes and payouts are virtual. No live broker or payment connection is enabled.</p><small>© 2026 Plutus. All rights reserved.</small></footer></div>';
+  '<section class="lp-sec" id="lp-faq"><span class="lp-kicker">FAQ</span><h3>Frequently asked questions</h3><div class="lp-faq"><details><summary>What is a prop trading challenge?</summary><p>An evaluation where you trade a simulated account under configured risk rules.</p></details><details><summary>Where do prices come from?</summary><p>Symbols, Bid/Ask prices and historical candles are supplied by Biquote.</p></details><details><summary>What happens when a market closes?</summary><p>The last available Biquote price remains visible, clearly marked as closed, while new market orders stay disabled.</p></details></div></section>'+
+  '</div>';
  var html='<div class="auth-box">'+
-  '<div class="logo"><span class="pmark">P</span><img src="assets/mt5-app-icon.png" alt="MetaTrader 5 app icon" width="32" height="32" style="object-fit:contain"><h1>'+(PORTAL_ADMIN?'Plutus Admin':'Plutus')+'</h1></div>'+
+  '<div class="logo"><span class="pmark">P</span><img src="assets/mt5-app-icon.png" alt="MetaTrader 5 app icon" width="32" height="32" style="object-fit:contain"><h1>'+(PORTAL_ADMIN?'PLUTUS Admin':'PLUTUS')+'</h1></div>'+
   '<div class="auth-sub">'+(PORTAL_ADMIN?'Staff & Risk Control Portal · assigned accounts only':(CLOUD.ok?'Cloud connected':'Connecting…'))+'</div>'+landingHtml+
  '<div class="err" id="authErr"></div>';
  if(setup){
   html+='<div class="fld"><label>INITIAL OWNER SETUP (one time)</label><input id="auName" placeholder="Owner name"></div>'+
    '<div class="fld"><input id="auEmail" type="email" placeholder="Owner email"></div>'+
    '<div class="fld"><input id="auPass" type="password" placeholder="Password (6+ chars)"></div>'+
-   '<button class="btn" id="auBtn">Create Owner Account</button>'+ 
+   '<button class="btn" id="auBtn">Create Owner Account</button>'+
    '<div class="demo-hint">This owner controls the Staff Console.</div>';
  }else if(PORTAL_ADMIN){
-  html+='<div class="demo-hint" style="border-style:solid;border-color:var(--ac);margin-bottom:14px"><b>STAFF ACCESS ONLY</b><br>Use your assigned Admin, Risk, Finance, or Support account. Trading accounts cannot enter this portal.</div>'+ 
-   '<div class="fld"><label>STAFF EMAIL</label><input id="liEmail" type="email" placeholder="staff@company.com"></div>'+ 
-   '<div class="fld"><label>PASSWORD</label><input id="liPass" type="password" placeholder="••••••••"></div>'+ 
+  html+='<div class="demo-hint" style="border-style:solid;border-color:var(--ac);margin-bottom:14px"><b>STAFF ACCESS ONLY</b><br>Use your assigned Admin, Risk, Finance, or Support account. Trading accounts cannot enter this portal.</div>'+
+   '<div class="fld"><label>STAFF EMAIL</label><input id="liEmail" type="email" placeholder="staff@company.com"></div>'+
+   '<div class="fld"><label>PASSWORD</label><input id="liPass" type="password" placeholder="••••••••"></div>'+
    '<button class="btn" id="liBtn">Enter Admin Portal</button>';
  }else{
   html+='<div class="atabs"><button class="on" id="tabIn">Log in</button><button id="tabUp">Sign up</button></div>'+
    '<div id="paneIn">'+
    '<div class="fld"><label>EMAIL</label><input id="liEmail" type="email" placeholder="you@example.com"></div>'+
    '<div class="fld"><label>PASSWORD</label><input id="liPass" type="password" placeholder="••••••••"></div>'+
-   '<button class="btn" id="liBtn">Log in</button></div>'+ 
+   '<button class="btn" id="liBtn">Log in</button></div>'+
    '<div id="paneUp" style="display:none">'+
    '<div class="fld"><label>FULL NAME</label><input id="suName" placeholder="Your name"></div>'+
    '<div class="fld"><label>EMAIL</label><input id="suEmail" type="email" placeholder="you@example.com"></div>'+
    '<div class="fld"><label>PASSWORD</label><input id="suPass" type="password" placeholder="6+ characters"></div>'+
    '<div class="fld"><label>REFERRAL CODE (optional)</label><input id="suRef" placeholder="PFXXXXXX"></div>'+
    '<button class="btn" id="suBtn">Create account</button>'+
-   '<div class="demo-hint">After signup you can watch prices & charts. A trading account is activated by the manager.</div></div>'+ 
+   '<div class="demo-hint">Account activation is reviewed by staff.</div></div>'+
    '<div style="display:flex;align-items:center;gap:8px;margin:14px 0 4px;color:var(--dim);font-size:10px"><span style="height:1px;background:var(--ln);flex:1"></span>SERVER-SIDE PAPER TRADING<span style="height:1px;background:var(--ln);flex:1"></span></div>'+
    '<button class="btn ghost" id="demoBtn">Sign in for paper trading</button>'+
-   '<div class="demo-hint">Paper trading runs on the server; sign in. Local demo execution is disabled.</div>';
+   '';
  }
  $('#auth').innerHTML=html;
  refreshLandingProgramCards();
  refreshLandingClaims();
  var splitNote=document.querySelector('#auth #lp-programs .lp-lead');if(splitNote)splitNote.textContent+=' Share ranges show configured rates; increases are not automatic.';
- function refreshLandingClaims(){var hero=document.querySelector('#auth .lp-hero .lp-copy');if(hero){var h=hero.querySelector('h2'),p=hero.querySelector('p');if(h)h.innerHTML='Build your edge.<br><span>Practice with a plan.</span>';if(p)p.textContent='Compare simulated funding paths, review clear risk rules and practice with Biquote market data in a mobile-ready workspace. No live broker or payment processor is connected.';var pill=hero.querySelector('.lp-pill');if(pill)pill.innerHTML='<i></i>Simulated trading environment';var labels=hero.querySelectorAll('.lp-stats small');if(labels.length>1)labels[1].textContent='Practice accounts'}
+ function refreshLandingClaims(){var hero=document.querySelector('#auth .lp-hero .lp-copy');if(hero){var h=hero.querySelector('h2'),p=hero.querySelector('p');if(h)h.innerHTML='Build your edge.<br><span>Practice with a plan.</span>';if(p)p.textContent='Explore programs, review key rules, and practice with Biquote market data in a mobile-ready workspace.';var pill=hero.querySelector('.lp-pill');if(pill)pill.innerHTML='<i></i>Simulated trading environment';var labels=hero.querySelectorAll('.lp-stats small');if(labels.length>1)labels[1].textContent='Practice accounts'}
   var trust=document.querySelector('#auth .lp-trust');if(trust)trust.innerHTML='<span>Market data</span><b>Biquote</b><span>Bid / Ask quotes</span><span>Historical OHLC</span><span>Streaming ticks when available</span>';
-  var platform=document.querySelector('#auth .lp-platform');if(platform){var ph=platform.querySelector('h3'),pp=platform.querySelector('.lp-lead');if(ph)ph.textContent='Mobile-ready trading simulator';if(pp)pp.textContent='A familiar trading interface for practice: Market Watch, one-click simulated trades, pending orders, chart tools, indicators and trade history. No connection to MetaTrader or a live brokerage is enabled.'}
+  var platform=document.querySelector('#auth .lp-platform');if(platform){var ph=platform.querySelector('h3'),pp=platform.querySelector('.lp-lead');if(ph)ph.textContent='Mobile-ready trading simulator';if(pp)pp.textContent='A mobile-ready workspace for practice: Market Watch, one-click trades, pending orders, charts, indicators and trade history.'}
   var nav=document.querySelector('#auth .lp-nav .lp-go');if(nav)nav.textContent='Explore programs';var heroBtn=document.querySelector('#auth .lp-actions .lp-go');if(heroBtn)heroBtn.textContent='Explore simulated programs'}
  (function(){var ha=document.getElementById('heroAuth');if(!ha)return;var box=document.querySelector('#auth .auth-box');box.classList.add('lp-mode');Array.prototype.slice.call(box.children).forEach(function(c){if(!c.classList.contains('lp')&&!c.classList.contains('logo')&&!c.classList.contains('auth-sub'))ha.appendChild(c)});
   document.querySelectorAll('#auth [data-go]').forEach(function(x){x.onclick=function(){var t=document.getElementById('lp-'+x.dataset.go);if(t)t.scrollIntoView({behavior:'smooth'})}});
@@ -2614,7 +2612,7 @@ function enterApp(freshSignup){var u=user();
  applyTheme();applyLang();renderBNav();$('#bnav').style.display=PORTAL_ADMIN?'none':'';
  if(!PORTAL_ADMIN&&!ENGINE.base)toast('Trading API is not configured; all local trading is disabled.','wn');
  else if(!PORTAL_ADMIN&&!ENGINE.online)toast('Trading server is unavailable; orders are disabled.','wn');
- if(freshSignup)toast('Welcome to Plutus','up');
+ if(freshSignup)toast('Welcome to PLUTUS','up');
  navGo(PORTAL_ADMIN?'admin':'charts');
  if(CLOUD.ok&&!DEMO_MODE)cloudPull().then(function(){renderView()})}
 
@@ -2628,17 +2626,17 @@ function openCharts(){var el=$('#v-charts');
   '<button class="ctb" id="mBtn">'+menuSvg()+'</button>'+
   '<button class="ctb" id="chBtn" title="Crosshair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg></button>'+
   '<button class="ctb" id="indBtn" title="Indicators"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16c3.2 0 3.2-8 6.4-8s3.2 10 6.4 10 3.2-8 5.2-8"/><path d="M4 20h4M16 5h4"/></svg></button>'+
-  '<button class="ctb tfquick" id="tfQuick" title="Current timeframe">'+(TFLBL[chart.tf]||chart.tf)+'</button>'+ 
+  '<button class="ctb tfquick" id="tfQuick" title="Current timeframe">'+(TFLBL[chart.tf]||chart.tf)+'</button>'+
   '<button class="ctb" id="sessBtn" title="Timeframes"><svg viewBox="0 0 24 24"><path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5H12z" fill="#E85B61"/><path d="M12 2.5V12h9.5A9.5 9.5 0 0 0 12 2.5Z" fill="#347FEA"/></svg></button>'+
   '<button class="ctb '+(chart.dtOn?'on':'')+'" id="dtBtn" title="Objects"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="12" height="12" rx="2" fill="#E85B61"/><rect x="9" y="4" width="12" height="12" rx="2" fill="#347FEA"/><rect x="9" y="9" width="6" height="4" rx="1" fill="#CFE1FF"/></svg></button>'+
-  '<span style="flex:1"></span>'+ 
-  '<span class="dschip OFFLINE" id="mktChip" style="display:none">CLOSED</span>'+ 
- '</div>'+ 
+  '<span style="flex:1"></span>'+
+  '<span class="dschip OFFLINE" id="mktChip" style="display:none">CLOSED</span>'+
+ '</div>'+
  '<div class="odbar">'+
   '<button class="od" id="qSell"><small>SELL</small><span class="p" id="qSellPx">—</span></button>'+
   '<div class="odmid"><button id="lotDn" aria-label="Decrease volume">⌄</button><div class="lotbox"><small id="qSpread">SPREAD —</small><input id="lotIn" inputmode="decimal" aria-label="Order volume in lots" value="'+formatLots(lastLots)+'"></div><button id="lotUp" aria-label="Increase volume">⌃</button></div>'+
-  '<button class="od" id="qBuy"><small>BUY</small><span class="p" id="qBuyPx">—</span></button>'+ 
- '</div>'+ 
+  '<button class="od" id="qBuy"><small>BUY</small><span class="p" id="qBuyPx">—</span></button>'+
+ '</div>'+
  (chart.sessOn?'<div class="sessrow" id="sessRow"></div>':'')+
  '<div id="chartBox"><span id="mBid" style="display:none"></span><span id="mAsk" style="display:none"></span><span id="mSymName" style="display:none"></span><span id="mSymState" style="display:none"></span><span id="mSymStatus" style="display:none"></span><div class="charttitle"><b id="chartTitleSym">'+termSym+'</b><span>▾</span><b id="chartTitleTf">'+(TFLBL[chart.tf]||chart.tf)+'</b><small id="chartTitleDesc">'+esc((SYMBOLS[termSym]||{}).desc||'')+'</small></div>'+
    '<div id="mainWrap"><div id="chartEl"></div><canvas id="drawCv"></canvas><div id="marketNote" class="market-note"></div><button class="chart-live-btn" id="chartLive" aria-label="Return to current price" title="Current price">›</button><div id="chartLevelHint" class="chart-level-hint"></div>'+
@@ -2652,8 +2650,8 @@ function openCharts(){var el=$('#v-charts');
    '<div id="dtBar" style="display:'+(chart.dtOn?'flex':'none')+'"></div>'+
    '<div id="posStrip"></div></div>'+
   '<div id="oscHandle" style="display:none"></div>'+
-  '<div id="oscPane" style="display:none;height:'+chart.oscH+'px"><div class="oscTag" id="oscTag"></div><div id="oscEl"></div></div>'+ 
- '</div>'; 
+  '<div id="oscPane" style="display:none;height:'+chart.oscH+'px"><div class="oscTag" id="oscTag"></div><div id="oscEl"></div></div>'+
+ '</div>';
  $('#mBtn').onclick=openDrawer;
  $('#chBtn').onclick=function(){chart.crosshair=!chart.crosshair;
   if(chart.c)chart.c.applyOptions({crosshair:{mode:chart.crosshair?0:1}});
@@ -2706,9 +2704,9 @@ function quickTrade(side){var acc=myAcc();
 function orderTicket(){var acc=myAcc();
  if(!acc){toast('No trading account','dn');return}
  var S=SYMBOLS[termSym],q=Q[termSym];
- modal('<h4>Order Ticket — '+termSym+'</h4>'+ 
- '<div class="qread"><div><span>BID</span><b>'+ (q&&q.bid>0?bigPx(q.bid,S.digits):'—') +'</b></div><div><span>ASK</span><b>'+ (q&&q.ask>0?bigPx(q.ask,S.digits):'—') +'</b></div></div>'+ 
- '<div class="fld"><label>SIDE</label><select id="otSide"><option value="buy">BUY</option><option value="sell">SELL</option></select></div>'+ 
+ modal('<h4>Order Ticket — '+termSym+'</h4>'+
+ '<div class="qread"><div><span>BID</span><b>'+ (q&&q.bid>0?bigPx(q.bid,S.digits):'—') +'</b></div><div><span>ASK</span><b>'+ (q&&q.ask>0?bigPx(q.ask,S.digits):'—') +'</b></div></div>'+
+ '<div class="fld"><label>SIDE</label><select id="otSide"><option value="buy">BUY</option><option value="sell">SELL</option></select></div>'+
  '<div class="fld"><label>ORDER TYPE</label><select id="otType"><option>MARKET</option><option>LIMIT</option><option>STOP</option></select></div>'+
  '<div class="fld"><label>VOLUME (LOTS)</label><input id="otLots" inputmode="decimal" value="'+lastLots.toFixed(2)+'"></div>'+
  '<div class="fld" id="otPriceW" style="display:none"><label>TRIGGER PRICE</label><input id="otPrice" inputmode="decimal" placeholder="'+pxf(q.last||0,S.digits)+'"></div>'+
@@ -2728,7 +2726,7 @@ function orderTicket(){var acc=myAcc();
   }).catch(function(e){toast(e.message||'Server rejected the order','dn')})}}
 function posRow(p){var S=SYMBOLS[p.symbol],q=Q[p.symbol];
  var px=q.bid>0?(p.side==='buy'?q.bid:q.ask):0;var pnl=px?pnlUSD(p,px):0;
- return'<div class="prow2" data-openpos="'+p.id+'"><div class="l1"><span class="side '+p.side+'">'+p.side.toUpperCase()+'</span><b>'+p.symbol+'</b>'+ 
+ return'<div class="prow2" data-openpos="'+p.id+'"><div class="l1"><span class="side '+p.side+'">'+p.side.toUpperCase()+'</span><b>'+p.symbol+'</b>'+
   '<span class="lots">'+p.lots+'</span>'+
   '<span class="pnl '+(pnl>=0?'up':'dn')+'" data-pnl="'+p.id+'">'+(px?((pnl>=0?'+':'')+pnl.toFixed(2)):'—')+'</span>'+
   '<button class="x" data-x="'+p.id+'">✕</button></div>'+
@@ -2899,8 +2897,8 @@ function renderTrade(){var el=$('#v-trade'),a=myAcc();
  '<button class="pib" id="thCloseAll" title="Close all" style="color:var(--dn)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 8h13M14 4.5L17.5 8 14 11.5M20 16H7M10 12.5L6.5 16l3.5 3.5"/></svg></button>'+
  '</div>';
 	 if(!a){var reason=!ENGINE.base?'Trading API URL is not configured.':!ENGINE.online?'Trading server is unavailable.':'No server-side paper account has been provisioned for this user.';el.innerHTML=html+'<div class="na-card"><h3>No server trading account</h3><p>'+esc(reason)+' Local accounts and local order execution are disabled.</p></div>';return}
- html+='<div class="tradebar"><button id="tradeChart">CHART</button><button class="primary" id="tradeNew">NEW ORDER</button><button id="tradeOrders">ORDERS</button><button id="tradeHistory">HISTORY</button></div>'+ 
- '<div class="drow"><span class="lbl">Balance:</span><span class="dots"></span><b id="tBal">'+money(a.balance)+'</b></div>'+ 
+ html+='<div class="tradebar"><button id="tradeChart">CHART</button><button class="primary" id="tradeNew">NEW ORDER</button><button id="tradeOrders">ORDERS</button><button id="tradeHistory">HISTORY</button></div>'+
+ '<div class="drow"><span class="lbl">Balance:</span><span class="dots"></span><b id="tBal">'+money(a.balance)+'</b></div>'+
  '<div class="drow"><span class="lbl">Equity:</span><span class="dots"></span><b id="tEq" style="color:var(--ac)">'+money(accMetrics(a).eq)+'</b></div>'+
  '<div class="drow"><span class="lbl">Free margin:</span><span class="dots"></span><b id="tFree">'+money(accMetrics(a).free)+'</b></div>'+
  '<div class="drow" style="padding-top:0"><span class="lbl">Margin level:</span><span class="dots"></span><b id="tMl">—</b></div>'+
@@ -3023,9 +3021,9 @@ function renderQuotes(){var el=$('#v-quotes');
  var html='<div class="phead">'+
  '<button class="pib" onclick="openDrawer()">'+menuSvg()+'</button><b>'+T('Quotes')+'</b><span class="sp"></span>'+
  '<span class="dschip '+gs[0]+'"><span class="dot"></span>'+gs[1]+'</span>'+
- '<button class="pib" id="smBtn" title="Manage symbols">＋</button><button class="pib" id="alBtn" title="Alerts" style="color:var(--ac)">🔔</button></div>'+ 
+ '<button class="pib" id="smBtn" title="Manage symbols">＋</button><button class="pib" id="alBtn" title="Alerts" style="color:var(--ac)">🔔</button></div>'+
  '<div class="srch"><input id="mwSrch" placeholder="Search symbol… e.g. XAU" value="'+esc(mwQ)+'"></div>'+
- '<div class="mwtools">'+['all','favorites','Forex','Metals','Indices'].map(function(c){return'<button class="mwfilter '+(mwCat===c?'on':'')+'" data-mwcat="'+c+'">'+(c==='all'?'ALL':c==='favorites'?'★ FAVORITES':c.toUpperCase())+'</button>'}).join('')+'</div>'+ 
+ '<div class="mwtools">'+['all','favorites','Forex','Metals','Indices'].map(function(c){return'<button class="mwfilter '+(mwCat===c?'on':'')+'" data-mwcat="'+c+'">'+(c==='all'?'ALL':c==='favorites'?'★ FAVORITES':c.toUpperCase())+'</button>'}).join('')+'</div>'+
  '<div class="mwhead"><span>SYMBOL</span><span>BID</span><span>ASK</span><span>★</span></div>';
  var favs=DB.settings.favorites;
  if(mwCat==='favorites'&&favs.length)html+='<div class="cat-h">★ FAVORITES</div>'+favs.filter(function(s){return SYMBOLS[s]}).map(function(s){return mwRow(s)}).join('');
@@ -3045,7 +3043,7 @@ function mwRow(s){
  var fav=DB.settings.favorites.indexOf(s)>=0;
  return'<div class="mrow '+(Q[s].status==='OFFLINE'?'off':'')+'" onclick="openSym(\''+s+'\')">'+
   '<div><div class="sym"><span class="st '+Q[s].status+'"></span>'+s+'</div>'+
-  '<div class="sub"><span>'+SYMBOLS[s].desc+'</span><span id="mc-'+s+'">—</span></div><div class="sub"><span>H <i id="mh-'+s+'">'+(Q[s].high>0?pxf(Q[s].high,SYMBOLS[s].digits):'—')+'</i></span><span>L <i id="ml-'+s+'">'+(Q[s].low>0?pxf(Q[s].low,SYMBOLS[s].digits):'—')+'</i></span></div></div>'+ 
+  '<div class="sub"><span>'+SYMBOLS[s].desc+'</span><span id="mc-'+s+'">—</span></div><div class="sub"><span>H <i id="mh-'+s+'">'+(Q[s].high>0?pxf(Q[s].high,SYMBOLS[s].digits):'—')+'</i></span><span>L <i id="ml-'+s+'">'+(Q[s].low>0?pxf(Q[s].low,SYMBOLS[s].digits):'—')+'</i></span></div></div>'+
   '<div class="pxc b" id="mb-'+s+'">—</div><div class="pxc a" id="ma-'+s+'">—</div>'+
   '<span class="fav '+(fav?'on':'')+'" onclick="toggleFav(event,\''+s+'\')">'+(fav?'★':'☆')+'</span></div>'}
 function toggleFav(e,s){e.stopPropagation();
@@ -3087,15 +3085,15 @@ function renderProp(){var el=$('#v-prop'),a=myAcc();
 	 var rv=RiskEval(a),riskText=rv.state==='BREACHED'?'RISK BREACHED':rv.state==='WARNING'?'RISK WARNING':'RISK CLEAR',riskCls=rv.state==='BREACHED'?'dn':rv.state==='WARNING'?'warn':'';
 	 var pp=ch?Math.max(0,M.profitPct):0;
 	 html2+='<div class="pad" style="padding-bottom:6px"><div class="kgrid c3">'+
-	  '<div class="kc"><small>BALANCE</small><span class="v mono" id="pBal">'+money(a.balance)+'</span></div>'+ 
-	  '<div class="kc"><small>EQUITY</small><span class="v mono ac" id="pEq">'+money(M.eq)+'</span></div>'+ 
+	  '<div class="kc"><small>BALANCE</small><span class="v mono" id="pBal">'+money(a.balance)+'</span></div>'+
+	  '<div class="kc"><small>EQUITY</small><span class="v mono ac" id="pEq">'+money(M.eq)+'</span></div>'+
 	  '<div class="kc"><small>ACCOUNT</small><span class="v mono">#'+a.login+'</span></div></div></div>';
 	 html2+='<div class="riskdash">'+
-	  '<div class="riskcard state '+riskCls+'"><i></i><b id="rRisk">'+riskText+'</b><span class="sub">'+(a.riskLock?esc(a.riskLock):'Trading permissions active')+'</span></div>'+ 
-	  '<div class="riskcard"><small>FLOATING P&amp;L</small><b id="rFloat" class="'+(M.eq-a.balance>=0?'up':'dn')+'">'+(M.eq-a.balance>=0?'+':'')+money(M.eq-a.balance)+'</b><span class="sub">Open positions</span></div>'+ 
-	  '<div class="riskcard"><small>FREE MARGIN</small><b id="rFree">'+money(M.free)+'</b><span class="sub">Used '+money(M.um)+'</span></div>'+ 
-	  '<div class="riskcard"><small>MARGIN LEVEL</small><b id="rMl">'+(M.um>0?M.ml.toFixed(0)+'%':'—')+'</b><span class="sub">Stop-out '+(DB.riskRules.stopoutLevel||0)+'%</span></div>'+ 
-	  '<div class="riskcard"><small>DAILY LOSS</small><b id="rDaily">'+M.dailyLossPct.toFixed(2)+'%</b><span class="sub">Limit '+(ch?ch.dailyLossPct:DB.riskRules.dailyLossPct)+'%</span></div>'+ 
+	  '<div class="riskcard state '+riskCls+'"><i></i><b id="rRisk">'+riskText+'</b><span class="sub">'+(a.riskLock?esc(a.riskLock):'Trading permissions active')+'</span></div>'+
+	  '<div class="riskcard"><small>FLOATING P&amp;L</small><b id="rFloat" class="'+(M.eq-a.balance>=0?'up':'dn')+'">'+(M.eq-a.balance>=0?'+':'')+money(M.eq-a.balance)+'</b><span class="sub">Open positions</span></div>'+
+	  '<div class="riskcard"><small>FREE MARGIN</small><b id="rFree">'+money(M.free)+'</b><span class="sub">Used '+money(M.um)+'</span></div>'+
+	  '<div class="riskcard"><small>MARGIN LEVEL</small><b id="rMl">'+(M.um>0?M.ml.toFixed(0)+'%':'—')+'</b><span class="sub">Stop-out '+(DB.riskRules.stopoutLevel||0)+'%</span></div>'+
+	  '<div class="riskcard"><small>DAILY LOSS</small><b id="rDaily">'+M.dailyLossPct.toFixed(2)+'%</b><span class="sub">Limit '+(ch?ch.dailyLossPct:DB.riskRules.dailyLossPct)+'%</span></div>'+
 	  '</div>';
 	 if(ch){
 	  var ddLimit=+ch.maxDDPct||0,dailyLimit=+ch.dailyLossPct||0,tU=ddLimit>0?Math.min(100,M.ddFromStartPct/ddLimit*100):0,dU=dailyLimit>0?Math.min(100,M.dailyLossPct/dailyLimit*100):0;
@@ -3104,7 +3102,7 @@ function renderProp(){var el=$('#v-prop'),a=myAcc();
 	  var tpl=DB.templates.find(function(x){return x.id===a.templateId}),isDirect=ch.programMode==='instant';
 	  var title=tpl?esc(tpl.programName||tpl.name):'Simulated program';
 	  var phaseLabel=isDirect?'Direct simulated funding':(ch.phaseCount>1?' · Phase '+(ch.phase||1)+' of '+ch.phaseCount:' · Single phase');
-	  html2+='<div class="brandline"><span class="pmark">P</span>Plutus · SIMULATED PROGRAM</div>'+
+	  html2+='<div class="brandline"><span class="pmark">P</span>PLUTUS · SIMULATED PROGRAM</div>'+
 	  '<div class="cprog"><div style="display:flex;align-items:center;gap:8px"><h3 style="font-size:16px">$'+a.size.toLocaleString()+' '+title+esc(phaseLabel)+'</h3><span class="badge '+ch.status+'">'+ch.status+'</span></div>'+
 	  '<div class="eq" id="chEq">'+money(M.eq)+'</div>'+
 	  (isDirect?'<div class="prow"><span>Evaluation target</span><b>None · staff approval required</b></div>':'<div class="prow"><span>Profit target ('+ch.profitPct+'%)</span><b>'+pp.toFixed(2)+'%</b></div><div class="pbar"><i id="chP1" style="width:'+(ch.profitPct>0?Math.min(100,pp/ch.profitPct*100):0)+'%"></i></div>')+
@@ -3159,7 +3157,7 @@ function plansHTML(){
  '<div class="pp" style="line-height:1.8">'+esc(targetText)+'<br>Daily loss: '+(t.dailyLossPct>0?t.dailyLossPct+'%':'Off')+' · '+(t.trailingDD?'Trailing ':'')+'Max drawdown: '+t.maxDDPct+'%<br>Min. trading days: '+(t.minDays||0)+' · Leverage: 1:'+t.lev+'<br>Profit share: '+esc(splitText)+' · Payout cadence: '+(t.payoutCadenceDays?t.payoutCadenceDays+' days':'per staff policy')+'</div></div>'+
  '<div style="margin:8px 14px 0"><button class="btn" id="rqGo">'+(t.programMode==='instant'?'Request simulated funding':'Request challenge review')+'</button>'+
  (DB.settings.paymentOn?'<button class="btn grn" style="margin-top:8px" id="rqWallet" disabled title="Wallet migration pending">Wallet payment temporarily disabled — server migration pending</button>':'')+
- '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">Simulation only: balances and payouts are virtual. Requests await ADMIN/FINANCE approval; no live broker or external payment processor is connected. '+esc(DB.settings.paymentInfo||'')+'</div></div>'}
+ '<div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.7">Staff review required. '+esc(DB.settings.paymentInfo||'')+'</div></div>'}
 function bindReq(){
  $$('[data-program]').forEach(function(p){p.onclick=function(){programSel=p.getAttribute('data-program');var options=selectedProgramTemplates();planSel=options.length?options[0].id:null;renderProp()}});
  $$('[data-plan]').forEach(function(p){p.onclick=function(){planSel=p.getAttribute('data-plan');renderProp()}});
@@ -3193,7 +3191,7 @@ function downloadCert(a){try{
  x.lineWidth=2;x.strokeRect(58,58,1284,874);
  x.fillStyle='#4D8DFF';x.fillRect(652,105,96,96);
  x.fillStyle='#04122E';x.font='800 58px sans-serif';x.textAlign='center';x.fillText('P',700,175);
- x.fillStyle='#E8ECF6';x.font='700 64px sans-serif';x.fillText('Plutus',700,280);
+ x.fillStyle='#E8ECF6';x.font='700 64px sans-serif';x.fillText('PLUTUS',700,280);
  x.fillStyle='#E3B34C';x.font='600 26px sans-serif';x.fillText('CERTIFICATE OF CHALLENGE PASSED',700,340);
  x.fillStyle='#8792AB';x.font='24px sans-serif';x.fillText('This certifies that',700,430);
  x.fillStyle='#E8ECF6';x.font='700 54px sans-serif';x.fillText(u?u.name:'Trader',700,495);
@@ -3205,7 +3203,7 @@ function downloadCert(a){try{
  x.fillText('Certificate ID: PF-'+a.login,700,700);
  x.fillStyle='#8792AB';x.font='20px sans-serif';
  x.fillText('Issued '+new Date().toLocaleDateString('en',{year:'numeric',month:'long',day:'numeric'}),700,740);
- var link=document.createElement('a');link.download='Plutus-certificate-'+a.login+'.png';link.href=c.toDataURL('image/png');link.click()}catch(e){showErr(e)}}
+ var link=document.createElement('a');link.download='PLUTUS-certificate-'+a.login+'.png';link.href=c.toDataURL('image/png');link.click()}catch(e){showErr(e)}}
 
 /* BROKER */
 function renderBroker(){var el=$('#v-broker'),u=user(),a=myAcc();
@@ -3229,7 +3227,7 @@ function renderBroker(){var el=$('#v-broker'),u=user(),a=myAcc();
  '<div style="display:flex;gap:8px;margin:10px 14px">'+
  '<button class="btn sm grn" style="flex:1" id="newPaper">+ New practice profile</button>'+
  (a?'<button class="btn sm ghost" style="flex:1" onclick="navGo(\'trade\')">Trade screen →</button>':'')+'</div>';
- html+='<div class="demo-hint" style="margin:0 14px 10px"><b>Simulation only.</b> Biquote prices and variable spreads. Orders and balances stay simulated; no live broker is connected.</div>';
+
  if(a){var M=accMetrics(a);
   html+='<div class="pad" style="padding-top:0"><div class="kgrid c3">'+
   '<div class="kc"><small>BALANCE</small><span class="v mono">'+money(a.balance)+'</span></div>'+
@@ -3261,7 +3259,7 @@ function bindAccBtns(){
  var np=$('#newPaper');
  if(np)np.onclick=function(){
   var profiles=DB.templates.filter(function(t){return t.programId==='broker_sim'});
-  modal('<h4>New practice account</h4><p style="font-size:11.5px;color:var(--mut);margin-bottom:10px">Practice profiles only. Biquote supplies the simulated prices and variable Bid/Ask spread.</p>'+
+  modal('<h4>New practice account</h4><p style="font-size:11.5px;color:var(--mut);margin-bottom:10px">Practice profile using Biquote prices and variable Bid/Ask spreads.</p>'+
   '<div class="fld"><label>SIMULATION PROFILE</label><select id="npSz">'+profiles.map(function(t){return'<option value="'+t.id+'">'+esc(t.name)+' · $'+t.size.toLocaleString()+' · 1:'+t.lev+' · '+money(commissionPerLotFor(t))+'/lot</option>'}).join('')+'</select></div>'+
   '<div class="mrow-btns"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn grn" id="npGo">Create</button></div>');
   $('#npGo').onclick=function(){
@@ -3307,14 +3305,14 @@ function renderProfile(){var el=$('#v-profile'),u=user(),a=myAcc();
  '<button class="btn sm ghost" style="flex:1" id="thBtn">Theme: '+(DB.settings.theme==='light'?'Light':'Dark')+'</button>'+
  '<select id="langSel" style="flex:1;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:9px;font-size:12.5px">'+
  Object.keys(LANGS).map(function(k){return'<option value="'+k+'" '+(DB.settings.lang===k?'selected':'')+'>'+LANGS[k]+'</option>'}).join('')+'</select></div>'+
- 
+
  '<div class="pad" style="padding-top:14px"><button class="btn red" id="outBtn">Log out</button></div>';
  $('#pfNotifs').onclick=notifsModal;
  $('#pfHist').onclick=function(){navGo('hist')};
  var kc=$('#kycGo');if(kc)kc.onclick=kycModal;
  $('#refCopy').onclick=function(){copyText(refLink)};
  $('#refShare').onclick=function(){
-  if(navigator.share){navigator.share({title:'Plutus',text:'Join me — referral '+u.refCode,url:refLink}).catch(function(){})}
+  if(navigator.share){navigator.share({title:'PLUTUS',text:'Join me — referral '+u.refCode,url:refLink}).catch(function(){})}
   else copyText(refLink)};
  $('#thBtn').onclick=function(){DB.settings.theme=DB.settings.theme==='light'?'light':'dark';save();applyTheme();renderProfile()};
  $('#langSel').onchange=function(){DB.settings.lang=this.value;save();applyLang();renderBNav();renderProfile();toast('Language: '+LANGS[this.value],'up')};
@@ -3902,4 +3900,4 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 }
 </script>
 </body>
-</html> 
+</html>
