@@ -19,11 +19,19 @@ describe("embedded application scripts", () => {
     });
   });
 
-  it("keeps auth preflight callable and offers server-side paper trading only", () => {
+  it("keeps auth usable and removes signup-screen disclosures", () => {
     expect(page).toContain("var landingHtml=PORTAL_ADMIN?");
     expect(page).toContain("function pre(){return CLOUD.ok?cloudPull():Promise.resolve()}");
     expect(page).not.toMatch(/\bvar pre=/);
-    expect(page).toContain('id="demoBtn">Sign in for paper trading');
+    expect(page).toContain('id="demoBtn">Open platform');
+    expect(page).not.toContain("Account activation is reviewed by staff.");
+    expect(page).not.toContain("SERVER-SIDE PAPER TRADING");
+    expect(page).not.toContain("Sign in for paper trading");
+    expect(page).toContain("if(!r.data.user||!r.data.session)");
+    expect(page).toContain(
+      "Wait '+wait[1]+' seconds before requesting another confirmation email.",
+    );
+    expect(page).toContain("function runAuthButton(button,request,onSuccess)");
     expect(page).toContain("SIMULATED BALANCE");
     expect(page).not.toContain("Paper trading runs on the server; sign in.");
     expect(page).not.toContain('<footer class="lp-foot">');
