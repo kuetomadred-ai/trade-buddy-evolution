@@ -1006,9 +1006,11 @@ function queuePendingEmails(){
   });
  })},Promise.resolve()).then(function(){return CLOUD.sb.from('pf_users_data').upsert({user_id:me.id,blob:userBlob(),updated_at:new Date().toISOString()})}).catch(function(e){CLOUD.lastError=e;return null})
 }
-function cloudLoadSdk(cb){if(window.supabase)return cb(true);
- var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
- s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
+function cloudLoadSdk(cb){if(window.supabase&&window.supabase.createClient)return cb(true);
+ function loadFallback(){var s2=document.createElement('script');s2.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+  s2.onload=function(){cb(!!(window.supabase&&window.supabase.createClient))};s2.onerror=function(){cb(false)};document.head.appendChild(s2)}
+ var s=document.createElement('script');s.src='./vendor/supabase.js';
+ s.onload=function(){if(window.supabase&&window.supabase.createClient)cb(true);else loadFallback()};s.onerror=loadFallback;document.head.appendChild(s)}
 function cloudInit(){
  if(!DB.settings.sbUrl||!DB.settings.sbKey)return Promise.reject(new Error('Cloud database is not configured'));
  return new Promise(function(resolve,reject){cloudLoadSdk(function(ok){if(!ok){reject(new Error('Cloud SDK unavailable'));return}
