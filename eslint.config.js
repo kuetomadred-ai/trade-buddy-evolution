@@ -7,7 +7,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["dist", ".output", ".vinxi", "android/**", "ios/**"],
+    ignores: ["dist", ".output", ".vinxi", "android/**", "ios/**", "public/plotos/vendor/**"],
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],

@@ -19,6 +19,23 @@ describe("embedded application scripts", () => {
     });
   });
 
+  it("loads the local Supabase SDK before using the CDN fallback", () => {
+    const vendor = readFileSync(
+      path.join(process.cwd(), "public/plotos/vendor/supabase.js"),
+      "utf8",
+    );
+    expect(vendor).toContain("createClient");
+    expect(page).toContain("s.src='./vendor/supabase.js'");
+    expect(page).toContain(
+      "s2.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js'",
+    );
+  });
+
+  it("initializes cloud auth at boot without demo-mode bypass", () => {
+    expect(page).toContain("cloudInit().then(function(){return seed()})");
+    expect(page).not.toContain("PREVIEW_DEMO");
+  });
+
   it("keeps auth usable and removes signup-screen disclosures", () => {
     expect(page).toContain("var landingHtml=PORTAL_ADMIN?");
     expect(page).toContain("function pre(){return CLOUD.ok?cloudPull():Promise.resolve()}");
