@@ -1,4 +1,4 @@
-package com.plutus.trading;
+package com.plotos.trading;
 
 import com.getcapacitor.BridgeActivity;
 

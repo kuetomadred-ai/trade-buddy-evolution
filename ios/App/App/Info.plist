@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>PLUTUS</string>
+        <string>PLOTOS FUND</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -16,10 +16,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.plutus.trading</string>
+			<string>com.plotos.trading</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.plutus.trading</string>
+				<string>com.plotos.trading</string>
 			</array>
 		</dict>
 	</array>
