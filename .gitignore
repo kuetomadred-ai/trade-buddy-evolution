@@ -15,19 +15,13 @@ dist-ssr
 .tanstack/**
 .nitro
 *.local
+.env
+.env.*
+!.env.example
 
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
-
-# Capacitor native build output and machine-local files
-android/.gradle/
-android/local.properties
-android/app/build/
-ios/Pods/
-ios/App/Build/
-ios/App/DerivedData/
-ios/App/App.xcworkspace/xcuserdata/
 
 # Editor directories and files
 .vscode/*

@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792596731730,
+      "tag": "0000_plutus_engine_and_challenge_rules",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792650778058,
+      "tag": "0001_profiles_and_engine_tick_risk",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793881876864,
+      "tag": "0002_demo_loss_limit_reset",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793881924806,
+      "tag": "0003_candle_reconciliation",
+      "breakpoints": true
+    }
+  ]
+}
