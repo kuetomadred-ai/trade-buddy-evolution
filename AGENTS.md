@@ -14,3 +14,5 @@
 - The current Cloud Drizzle migration set is authoritative for the engine; historical Supabase SQL is reference-only, preventing duplicate schema paths.
 - Route terminal engine calls through same-origin `/api/public/engine/*` handlers that verify bearer identity; ordinary reads use the caller's RLS client and privileged RPC writes derive user identity server-side, so static clients never require a separate privileged server.
 - Run quote monitoring through the managed cron-authenticated callback, never through browser timers as the independent source of risk enforcement.
+- Keep gold-range controls in dedicated static terminal modules; persist through the owner-checked engine range RPC, never browser storage or direct table writes, to preserve server-authoritative bot settings.
+- Existing-bot changes stay in reviewed pending SQL until its schema is accessible; never create a substitute robot or silently activate another account.
