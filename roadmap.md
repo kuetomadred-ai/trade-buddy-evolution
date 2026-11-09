@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Integrate draggable XAUUSD M1 manual ranges and authenticated existing-bot range storage.
+- [ ] Prepare compatible existing-bot bucket exhaustion/dynamic sizing with $1,000 cycle stop and 60-second hold; apply only with access to the existing robot database.
+- [ ] Restore standard MT5 execution without hidden bonus and verify regression tests.
+
 - [x] Fix /index preview entry and open charts/prices directly in a safe demo; mobile/desktop charts, quotes, and timeframe switching verified; 50 tests pass.
 
 - [x] Match video: position action strip, SL/TP draft dragging, explicit modification sheet (mobile demo flow verified)

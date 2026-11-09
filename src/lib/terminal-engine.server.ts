@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { orderSchema } from "./terminal-contract";
 import { verifyDemoToken } from "./demo-token.server";
+import { botRangeSchema } from "./bot-range-contract";
 
 export async function handleTerminalRequest(request: Request, path: string) {
   const headers = { "Cache-Control": "no-store" };
@@ -36,6 +37,31 @@ export async function handleTerminalRequest(request: Request, path: string) {
     userId = identity.user.id;
   }
   try {
+    const botRead = path.match(/^v1\/accounts\/([A-Za-z0-9_-]{1,80})\/bot-range$/);
+    if ((request.method === "GET" && botRead) || (request.method === "POST" && path === "update-bot-range")) {
+      const input = request.method === "GET"
+        ? { accountId: botRead?.[1], symbol: new URL(request.url).searchParams.get("symbol") }
+        : botRangeSchema.parse(await readRangeBody(request));
+      const accountId = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/).parse(input.accountId);
+      z.literal("XAUUSD").parse(input.symbol);
+      const { data: account, error: ownerError } = await client.from("pf_engine_accounts")
+        .select("id,user_id").eq("id", accountId).eq("user_id", userId).maybeSingle();
+      if (ownerError) throw ownerError;
+      if (!account) return reply({ error: "Account not found" }, 404);
+      // Only the account owner can access the privileged range RPC. It repeats
+      // ownership under an account lock, and never creates or activates a bot.
+      const write = request.method === "POST" ? botRangeSchema.parse(input) : null;
+      const { data, error } = await supabaseAdmin.rpc("pf_engine_bot_range", {
+        p_user_id: userId, p_account_id: accountId, p_symbol: "XAUUSD",
+        p_high: write?.range_high ?? null, p_low: write?.range_low ?? null,
+      });
+      if (error) {
+        if (error.code === "P0002") return reply({ error: "الروبوت غير موجود في قاعدة الحساب الحالية" }, 404);
+        if (error.code === "42501") return reply({ error: "Access denied" }, 403);
+        return reply({ error: "حفظ نطاق الروبوت غير متاح؛ يلزم ربط قاعدة الروبوت وتطبيق تحديثها" }, 503);
+      }
+      return reply(data);
+    }
     if (request.method === "GET" && path === "v1/accounts") {
       const { data, error } = await client
         .from("pf_engine_accounts")
@@ -215,4 +241,11 @@ export async function handleTerminalRequest(request: Request, path: string) {
       return reply({ error: "Invalid request" }, 400);
     return reply({ error: "Trading state unavailable" }, 503);
   }
+}
+
+async function readRangeBody(request: Request): Promise<unknown> {
+  if (Number(request.headers.get("content-length") ?? 0) > 2048) throw new SyntaxError("Body too large");
+  const body = await request.text();
+  if (body.length > 2048) throw new SyntaxError("Body too large");
+  return JSON.parse(body);
 }

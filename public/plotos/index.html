@@ -11,6 +11,9 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <script src="./engine-config.js"></script>
 <script src="./engine-client.js"></script>
+<script src="./gold-range-rules.js"></script>
+<script src="./gold-range.js"></script>
+<link rel="stylesheet" href="./gold-range.css">
 <script src="./vendor/signalr.min.js"></script>
 <script>
 /* Biquote is the sole market-data provider for PLUTUS. */
@@ -1321,14 +1324,15 @@ function accOrders(a){return DB.orders.filter(function(o){return o.accId===a.id&
 var MIN_HOLD_MS=60000;
 function midPrice(q){if(!q||!(q.bid>0))return 0;return q.ask>q.bid?(q.bid+q.ask)/2:q.bid}
 function holdLeftSec(p){return Math.max(0,Math.ceil((MIN_HOLD_MS-(Date.now()-(p.openedAt||0)))/1000))}
-// Educational inverted execution: buy at Bid and sell at Ask.
-function tradePrice(sym,side,q){q=q||qt(sym);if(!q||!(q.bid>0))return 0;return side==='buy'?(q.bid||q.ask):(q.ask||q.bid)}
+// Standard MT5 entry and liquidation prices.
+function tradePrice(sym,side,q){q=q||qt(sym);if(!q||!(q.bid>0))return 0;return side==='buy'?(q.ask||q.bid):(q.bid||q.ask)}
+function closePrice(sym,side,q){q=q||qt(sym);if(!q||!(q.bid>0))return 0;return side==='buy'?(q.bid||q.ask):(q.ask||q.bid)}
 function marginFor(a,sym,side,lots,px){var S=SYMBOLS[sym],lev=+a.leverage||0;
  return S&&lev>0&&px>0?toUSD(sym,px*lots*S.contract)/lev:0}
 function usedMargin(a){return accPositions(a).reduce(function(t,p){var q=qt(p.symbol);
  var px=tradePrice(p.symbol,p.side,q)||p.entry;return t+marginFor(a,p.symbol,p.side,p.lots,px)},0)}
 function equity(a){return a.balance+accPositions(a).reduce(function(t,p){var q=qt(p.symbol);
- var px=tradePrice(p.symbol,p.side,q)||p.entry;return t+pnlUSD(p,px)},0)}
+ var px=closePrice(p.symbol,p.side,q)||p.entry;return t+pnlUSD(p,px)},0)}
 function accMetrics(a){var eq=equity(a),um=usedMargin(a),ml=um>0?eq/um*100:0,ch=a.ch||null;
  var ddBase=ch&&ch.trailingDD?Math.max(a.size,+a.highEq||a.size):a.size;
  return{eq:eq,um:um,ml:ml,free:eq-um,
@@ -1368,7 +1372,7 @@ function validateOrder(a,sym,side,lots,type,price,sl,tp){
  return null}
 var lastOrderTs=0;
 function openPosition(a,sym,side,lots,sl,tp,src){
- var q=qt(sym);var px=midPrice(q);
+ var q=qt(sym);var px=tradePrice(sym,side,q);
  var p={id:uid(),accId:a.id,userId:a.userId,symbol:sym,side:side,lots:lots,entry:px,sl:sl||null,tp:tp||null,ts:0,swap:0,openedAt:Date.now(),src:src};
  DB.positions.push(p);
  var u=user();audit(u?u.email:a.userId,'Position Opened',sym,side.toUpperCase()+' '+lots+' @ '+pxf(px,SYMBOLS[sym].digits));
@@ -1389,31 +1393,23 @@ function placeOrder(a,sym,side,lots,type,price,sl,tp){
  o.state='PENDING';o.log.push({t:Date.now(),s:'ACCEPTED'});o.status='PENDING';
  DB.orders.unshift(o);save();
  return{o:o}}
-// Broker-simulation commissions are charged at close; PROP/PAPER accounts remain zero-cost.
+// Commission remains zero; market spread is paid through standard Bid/Ask fills.
 function commissionPerLotFor(a){
- if(!a||!a.brokerProfileId)return 0;
- var profile=DB.templates.find(function(t){return t.id===a.brokerProfileId&&t.programMode==='broker_sim'});
- var raw=a.commissionPerLot!==undefined&&a.commissionPerLot!==null?a.commissionPerLot:profile&&profile.commissionPerLot;
- var rate=Number(raw);return isFinite(rate)?Math.max(0,rate):0
+ return 0
 }
 function commissionForLots(a,lots){
  var qty=Number(lots);if(!isFinite(qty)||qty<=0)return 0;
  return +(qty*commissionPerLotFor(a)).toFixed(2)
 }
-var BONUS_MIN_HOLD_SEC=60;
-function computeHiddenSpreadBonus(p,lots){
- var dur=Math.max(0,Math.floor((Date.now()-(p.openedAt||Date.now()))/1000)),ok=dur>=BONUS_MIN_HOLD_SEC,bonus=0;
- if(ok&&!DEMO_MODE){try{var qq=Q[p.symbol],S0=SYMBOLS[p.symbol];if(qq&&S0&&qq.ask>qq.bid){bonus=+toUSD(p.symbol,(qq.ask-qq.bid)*(lots||p.lots)*S0.contract).toFixed(2);if(!(bonus>0)||!isFinite(bonus))bonus=0}}catch(e){bonus=0}}
- return{bonus:bonus,durationSec:dur,eligible:ok}}
 function closePosition(p,px,reason){var a=DB.accounts.find(function(x){return x.id===p.accId});if(!a)return 0;
   if(!(px>0)||!isFinite(px))return 0;
+  if(holdLeftSec(p)>0&&['stopout','daily','maxdd','maxdays','admin'].indexOf(reason)<0)return 0;
   var gross=pnlUSD(p,px);
   var comm=commissionForLots(a,p.lots);
-   var net=+(gross-comm).toFixed(2),realNet=net,hb=computeHiddenSpreadBonus(p,p.lots),bonus=hb.bonus;
-   net=+(net+bonus).toFixed(2);
+   var net=+(gross-comm).toFixed(2);
    a.balance=+(a.balance+net).toFixed(2);
   var dk=todayKey();if(a.days.indexOf(dk)<0)a.days.push(dk);
-  try{mt5Audio.orderClose()}catch(e){};DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now(),_realProfit:realNet,_spreadBonus:bonus,_holdDurationSec:hb.durationSec,_bonusEligible:hb.eligible});
+  try{mt5Audio.orderClose()}catch(e){};DB.history.unshift({id:uid(),accId:a.id,userId:a.userId,symbol:p.symbol,side:p.side,lots:p.lots,entry:p.entry,exit:px,sl:p.sl,tp:p.tp,pnl:net,comm:comm,reason:reason,note:'',openedAt:p.openedAt,closedAt:Date.now()});
  DB.positions=DB.positions.filter(function(x){return x.id!==p.id});
  a.curve.push({t:Date.now(),e:a.balance});if(a.curve.length>400)a.curve.shift();
  var u=user();audit(u?u.email:a.userId,'Position Closed',p.symbol,(REASON[reason]||reason)+' · net '+net.toFixed(2));
@@ -1431,7 +1427,7 @@ function closePartial(p,frac){
 function closeAll(a,reason){var n=0;
  accPositions(a).forEach(function(p){var q=qt(p.symbol);if(!q)return;
   if(reason==='market'&&holdLeftSec(p)>0){a._holdBlocked=true;return}
-  closePosition(p,midPrice(q),reason);n++});if(a._holdBlocked){a._holdBlocked=false;toast('Positions younger than 1 minute stay open','wn')}return n}
+  closePosition(p,closePrice(p.symbol,p.side,q),reason);n++});if(a._holdBlocked){a._holdBlocked=false;toast('Positions younger than 1 minute stay open','wn')}return n}
 function RiskEval(a){
  var M=accMetrics(a),R=DB.riskRules,ch=a.ch,out={state:'ACTIVE',dailyLossPct:M.dailyLossPct,ddPct:M.ddFromStartPct,ml:M.ml};
  if(M.um>0&&M.ml<R.stopoutLevel){out.state='BREACHED';out.why='stopout';return out}
@@ -1461,7 +1457,7 @@ function engineTick(){
    if(p.ts>0){var S=SYMBOLS[p.symbol],dist=p.ts*S.pip;
     if(p.side==='buy'&&(q.bid-p.entry)>dist){var ns=+(q.bid-dist).toFixed(S.digits);if(!p.sl||ns>p.sl){p.sl=ns;a._tsUpd=true}}
     if(p.side==='sell'&&(p.entry-q.ask)>dist){var ns2=+(q.ask+dist).toFixed(S.digits);if(!p.sl||ns2<p.sl){p.sl=ns2;a._tsUpd=true}}}
-   var m=midPrice(q);if(holdLeftSec(p)>0)return;
+   var m=closePrice(p.symbol,p.side,q);if(holdLeftSec(p)>0)return;
    if(p.sl&&(p.side==='buy'?m<=p.sl:m>=p.sl)){closePosition(p,p.sl,'sl');audit('engine','SL Hit',p.symbol,'');return}
    if(p.tp&&(p.side==='buy'?m>=p.tp:m<=p.tp)){closePosition(p,p.tp,'tp');audit('engine','TP Hit',p.symbol,'')}});
   if(a._tsUpd){a._tsUpd=false;if(view==='charts'){renderStrip();chartDrawLines()}save()}
@@ -1614,7 +1610,7 @@ var LocalProvider={
  getPositions:function(){var a=myAcc();return a?accPositions(a):[]},
  getOrders:function(){var a=myAcc();return a?accOrders(a):[]},
  place:function(sym,side,lots,type,price,sl,tp){if(!localReady())return{err:'Cloud database is offline — trading is temporarily disabled'};var a=myAcc();if(!a)return{err:'No account'};var r=placeOrder(a,sym,side,lots,type,price,sl,tp);return r&&r.err?{err:r.err}:r},
- close:function(p,reason){if(!localReady())return false;var q=qt(p.symbol);if(!q)return false;var hl=holdLeftSec(p);if(hl>0&&(reason||'market')==='market'){toast('Minimum hold 1 minute — wait '+hl+'s','wn');return false}return closePosition(p,tradePrice(p.symbol,p.side,q),reason||'market')!==0},
+ close:function(p,reason){if(!localReady())return false;var q=qt(p.symbol);if(!q)return false;var hl=holdLeftSec(p);if(hl>0&&(reason||'market')==='market'){toast('Minimum hold 1 minute — wait '+hl+'s','wn');return false}return closePosition(p,closePrice(p.symbol,p.side,q),reason||'market')!==0},
  closeAll:function(){if(!localReady())return false;var a=myAcc();if(a)closeAll(a,'market');return true},
  modifyPosition:function(p,sl,tp,ts){if(!localReady())return false;p.sl=sl;p.tp=tp;p.ts=ts;save();return true},
  modifyOrder:function(o,price,sl,tp){if(!localReady())return false;o.price=price;o.sl=sl;o.tp=tp;o.log.push({t:Date.now(),s:'MODIFIED'});save();return true},
@@ -2286,7 +2282,7 @@ function chartDrawMarkers(){if(!chart.cs)return;var C=DB.settings.chart||{};try{
   marks.push({time:t1,position:side?'aboveBar':'belowBar',color:h.pnl>=0?'#26A69A':'#EF5350',shape:h.pnl>=0?'circle':'square',text:'CLOSE '+(h.pnl>=0?'+':'')+Number(h.pnl||0).toFixed(2)})});
  marks.sort(function(x,y){return x.time-y.time});
  chart.cs.setMarkers(marks)}catch(e){}}
-function chartDrawLines(){if(!chart.cs)return;var C=DB.settings.chart||{};
+function chartDrawLines(){if(window.PLUTUS_GOLD_RANGE)window.PLUTUS_GOLD_RANGE.refresh();if(!chart.cs)return;var C=DB.settings.chart||{};
  chart.lines.forEach(function(l){try{chart.cs.removePriceLine(l)}catch(e){}});chart.lines=[];chart.plRefs=[];
  chart.ordLines.forEach(function(l){try{chart.cs.removePriceLine(l)}catch(e){}});chart.ordLines=[];
  syncLivePriceLines();
@@ -2447,7 +2443,7 @@ function syncChartCandleWithQuote(sym,tf){
 	var nextHigh=Math.max(high,open,close),nextLow=Math.min(low,open,close);if(last.close===close&&last.high===nextHigh&&last.low===nextLow)return false;
 	last.close=close;last.high=nextHigh;last.low=nextLow;saveCandlesToCache(sym,tf,bars);return true
 }
-function syncLivePriceLines(){if(!chart.cs)return;if(chart.sym!==termSym){chart.sym=termSym;chartLoad();return}var sym=termSym,S=SYMBOLS[sym],C=DB.settings.chart||{},quote=getDisplayQuote(sym);
+function syncLivePriceLines(){if(window.PLUTUS_GOLD_RANGE)window.PLUTUS_GOLD_RANGE.refresh();if(!chart.cs)return;if(chart.sym!==termSym){chart.sym=termSym;chartLoad();return}var sym=termSym,S=SYMBOLS[sym],C=DB.settings.chart||{},quote=getDisplayQuote(sym);
  function removeLine(key){if(chart.liveLines[key]){try{chart.cs.removePriceLine(chart.liveLines[key])}catch(e){}chart.liveLines[key]=null}}
  if(!quote||!S||!(quote.bid>0)){removeLine('bid');removeLine('ask');return}
  var closed=!marketOpen(sym),color=quote.fromCache?'#A8ADB8':(closed||quote.status==='STALE'?'#85858A':'#26A69A');
